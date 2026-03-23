@@ -1,0 +1,545 @@
+/* ============================================
+   daftarSiswa.css — Daftar Siswa Binaan Dosen
+   ============================================ */
+
+/* ── CSS Variables ── */
+:root {
+    --color-primary:    #7c3aed;
+    --color-primary-lt: #ede9fe;
+    --color-blue:       #3b82f6;
+    --color-blue-lt:    #dbeafe;
+    --color-green:      #22c55e;
+    --color-green-lt:   #dcfce7;
+    --color-orange:     #f97316;
+    --color-orange-lt:  #ffedd5;
+    --color-red:        #ef4444;
+    --color-red-lt:     #fee2e2;
+
+    --text-dark:   #1e1b4b;
+    --text-medium: #4b5563;
+    --text-muted:  #9ca3af;
+
+    --bg-page:   #f5f3ff;
+    --bg-white:  #ffffff;
+    --border:    #e5e7eb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+    --shadow-md: 0 6px 24px rgba(124,58,237,.13);
+    --radius:    14px;
+    --radius-sm: 8px;
+    --transition: .2s ease;
+}
+
+/* ==========================================
+   PAGE BASE
+   ========================================== */
+body.dosen-page {
+    background: var(--bg-page);
+    color: var(--text-medium);
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+}
+
+.mt-4 { margin-top: 1rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+.p-0  { padding: 0 !important; }
+
+/* ==========================================
+   PAGE HEADER
+   ========================================== */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.header-content { flex: 1; }
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .3rem;
+}
+
+.page-title .text-primary { color: var(--color-primary) !important; }
+
+.page-subtitle {
+    font-size: .875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ── Search Box ── */
+.header-actions { display: flex; align-items: center; }
+
+.search-box { display: flex; align-items: center; }
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .35rem .35rem .35rem .85rem;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    position: relative;
+}
+
+.search-form:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+}
+
+.search-icon {
+    color: var(--text-muted);
+    font-size: .85rem;
+    flex-shrink: 0;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    font-size: .875rem;
+    color: var(--text-dark);
+    background: transparent;
+    min-width: 240px;
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.btn-clear-search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-red-lt);
+    color: var(--color-red);
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: .78rem;
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+.btn-clear-search:hover { background: #fca5a5; }
+
+.btn-search {
+    padding: .4rem 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity var(--transition);
+}
+.btn-search:hover { opacity: .88; }
+
+/* ==========================================
+   CONTENT CARD
+   ========================================== */
+.content-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* ==========================================
+   TABLE
+   ========================================== */
+.custom-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .875rem;
+}
+
+.custom-table thead tr {
+    background: linear-gradient(135deg, #f8f5ff 0%, #ede9fe 100%);
+    border-bottom: 2px solid #ddd6fe;
+}
+
+.custom-table thead th {
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-primary);
+    white-space: nowrap;
+    text-align: left;
+}
+
+.custom-table thead th.text-center { text-align: center; }
+
+.custom-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+}
+
+.custom-table tbody tr:last-child { border-bottom: none; }
+
+.custom-table tbody tr:hover { background: #faf9ff; }
+
+.custom-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: var(--text-medium);
+}
+
+/* ── Row Number ── */
+.custom-table tbody td:first-child {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* ── User Info Cell (Avatar + Name) ── */
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+}
+
+/* Small avatars */
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid var(--color-blue-lt);
+}
+
+.avatar-sm-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.bg-blue-light {
+    background: var(--color-blue-lt);
+    color: var(--color-blue);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.fw-bold   { font-weight: 700; }
+.fw-semibold { font-weight: 600; }
+.text-dark { color: var(--text-dark) !important; }
+.text-muted { color: var(--text-muted) !important; }
+.small { font-size: .78rem !important; }
+
+/* ── Badge Role (Jurusan) ── */
+.badge-role {
+    display: inline-block;
+    padding: .18rem .6rem;
+    border-radius: 99px;
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    width: fit-content;
+}
+
+.bg-purple-light { background: var(--color-primary-lt); }
+.text-purple { color: var(--color-primary); }
+
+/* ── Flex helpers ── */
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.gap-1 { gap: .25rem; }
+
+/* ── Date Range (Periode Magang) ── */
+.date-range {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .82rem;
+    color: var(--text-medium);
+}
+
+.date-item i { font-size: .8rem; flex-shrink: 0; }
+.text-success { color: var(--color-green) !important; }
+.text-danger  { color: var(--color-red)   !important; }
+
+/* ── Contact Info ── */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .82rem;
+    color: var(--color-green);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity var(--transition);
+}
+.contact-link:hover { opacity: .75; text-decoration: underline; }
+
+.contact-email {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .78rem;
+    color: var(--text-muted);
+    word-break: break-all;
+}
+.text-primary { color: var(--color-blue) !important; }
+
+/* ── Action Buttons ── */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.justify-content-center { justify-content: center; }
+
+.btn-action-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .85rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--transition), transform var(--transition);
+}
+.btn-action-icon:hover { opacity: .85; transform: translateY(-1px); }
+
+.btn-view {
+    background: var(--color-blue-lt);
+    color: var(--color-blue);
+}
+.btn-view:hover { background: #bfdbfe; }
+
+/* ── Empty State ── */
+.empty-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+.empty-icon {
+    font-size: 3rem;
+    color: #c4b5fd;
+    display: block;
+    margin-bottom: .75rem;
+}
+.empty-state h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: .35rem;
+}
+
+.text-center { text-align: center !important; }
+.py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+
+/* ── Pagination ── */
+.pagination-wrapper {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ==========================================
+   MODAL — Detail Profil Siswa
+   ========================================== */
+.custom-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 10, 40, .55);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+.custom-modal-overlay.show { display: flex; }
+
+.custom-modal {
+    background: var(--bg-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn .25s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(-14px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0)     scale(1);   }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg-white);
+    z-index: 1;
+}
+
+.modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.modal-close {
+    background: var(--bg-page);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: .9rem;
+    transition: background var(--transition), color var(--transition);
+}
+.modal-close:hover { background: var(--color-red-lt); color: var(--color-red); }
+
+.modal-body { padding: 1.75rem 1.5rem; }
+
+/* ── Profile Preview inside Modal ── */
+.profile-preview {}
+
+.profile-header { text-align: center; }
+
+/* Large avatar in modal */
+.avatar-lg {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--color-blue);
+    background: var(--color-blue-lt);
+    border: 3px solid #bfdbfe;
+}
+
+.mx-auto  { margin-left: auto; margin-right: auto; }
+.mb-3     { margin-bottom: .75rem !important; }
+.mb-4     { margin-bottom: 1rem   !important; }
+.mb-1     { margin-bottom: .25rem !important; }
+.mb-0     { margin-bottom: 0      !important; }
+.mt-4     { margin-top: 1rem      !important; }
+.fw-bold  { font-weight: 700; }
+
+.modal-body h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* ── Profile Info Grid ── */
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    background: var(--bg-page);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+}
+
+.info-group {}
+
+.info-group label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-muted);
+    margin-bottom: .25rem;
+}
+
+.info-group p {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+/* ── Info note ── */
+.modal-body .text-muted.small {
+    font-size: .8rem;
+}
+
+/* ── fa-info-circle helper ── */
+.me-1 { margin-right: .25rem; }
+.me-2 { margin-right: .5rem; }
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 768px) {
+    .page-header       { flex-direction: column; }
+    .search-form       { width: 100%; }
+    .search-input      { min-width: 0; flex: 1; }
+
+    .custom-table thead th,
+    .custom-table tbody td { padding: .75rem .9rem; font-size: .8rem; }
+
+    .user-info-cell    { gap: .6rem; }
+    .avatar-sm, .avatar-sm-placeholder { width: 34px; height: 34px; font-size: .85rem; }
+
+    .profile-info-grid { grid-template-columns: 1fr; }
+
+    .custom-modal      { max-width: 100%; }
+}

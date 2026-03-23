@@ -1,0 +1,222 @@
+/* =========================================
+   REGISTER PAGE - MONITORING SISWA MAGANG
+   Modern • Responsive • Glass Effect
+========================================= */
+
+body.register-page {
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* =============================
+   BACKGROUND BLUR EFFECT
+============================= */
+
+body.register-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+        url("/images/unsri.jpg") no-repeat center center / cover;
+    filter: blur(1px);
+    transform: scale(1.08);
+    z-index: -2;
+}
+
+body.register-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(99,102,241,0.25), transparent 50%);
+    z-index: -1;
+}
+
+/* =============================
+   CARD STYLE (GLASS LOOK)
+============================= */
+
+.register-page .card {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.92);
+}
+
+/* =============================
+   CARD HEADER
+============================= */
+
+.register-page .card-header {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    padding: 1.5rem;
+}
+
+.register-page .card-header h4 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.register-page .card-header small {
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* =============================
+   CARD BODY
+============================= */
+
+.register-page .card-body {
+    padding: 2rem;
+}
+
+/* =============================
+   FORM LABEL
+============================= */
+
+.register-page .form-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+/* =============================
+   INPUT & SELECT
+============================= */
+
+.register-page .form-control,
+.register-page .form-select {
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+.register-page .form-control:focus,
+.register-page .form-select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.25);
+}
+
+/* =============================
+   ROLE FORM BOX
+============================= */
+
+.register-page .role-form {
+    border-radius: 14px;
+    background: #f8fafc;
+    padding: 1.3rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+/* =============================
+   BUTTON STYLE
+============================= */
+
+.register-page .btn-primary {
+    border-radius: 12px;
+    padding: 0.65rem 1.5rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.register-page .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+}
+
+/* =============================
+   LINK STYLE
+============================= */
+
+.register-page a {
+    font-size: 0.85rem;
+    text-decoration: none;
+    color: #4f46e5;
+    transition: 0.2s ease;
+}
+
+.register-page a:hover {
+    text-decoration: underline;
+}
+
+/* =============================
+   ALERT
+============================= */
+
+.register-page .alert {
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+/* =============================
+   RESPONSIVE MOBILE
+============================= */
+
+@media (max-width: 992px) {
+
+    .register-page .card-body {
+        padding: 1.6rem;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    body.register-page::before {
+        filter: blur(2px);
+        transform: scale(1.04);
+    }
+
+    .register-page .card-header {
+        padding: 1.2rem;
+        text-align: center;
+    }
+
+    .register-page .card-header h4 {
+        font-size: 1.1rem;
+    }
+
+    .register-page .card-body {
+        padding: 1.4rem;
+    }
+
+    .register-page .btn-primary {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .register-page .d-flex {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .register-page .d-flex a {
+        margin-bottom: 0.6rem;
+        text-align: center;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .register-page .card {
+        border-radius: 14px;
+    }
+
+    .register-page .form-control,
+    .register-page .form-select {
+        font-size: 0.85rem;
+    }
+
+}

@@ -1,0 +1,583 @@
+:root {
+    --primary: #0d6efd;
+    --primary-light: rgba(13, 110, 253, 0.08);
+    --bg-page: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --shadow-sm: 0 4px 10px rgba(0,0,0,0.03);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* Page Wrapper - Perbaikan overflow mobile */
+.page-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(1rem, 4vw, 2rem) 1rem;
+    overflow-x: hidden; /* Cegah konten melebihi lebar layar */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.page-title {
+    font-size: clamp(1.2rem, 3.5vw, 2.25rem);
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+    word-break: break-word; /* Pecah kata panjang agar tidak overflow */
+}
+
+.page-subtitle {
+    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Tabs Navigation - Fixed to fits all screens without scroll */
+.tabs-wrapper {
+    margin-bottom: 2rem;
+    padding-bottom: 5px;
+}
+
+.tabs-nav {
+    display: flex; /* Use flex instead of inline-flex */
+    background: rgba(15, 23, 42, 0.04);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px;
+    border-radius: 18px;
+    gap: 4px;
+    width: 100%; /* Ensure it takes full width */
+}
+
+.tab-button {
+    flex: 1; /* Each button takes equal space */
+    border: none;
+    background: transparent;
+    padding: 10px 8px; /* Reduced side padding for mobile */
+    border-radius: 14px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column; /* Stack icon and text on small screens */
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-muted);
+    font-size: 0.75rem; /* Smaller font for mobile */
+    text-align: center;
+}
+
+@media (min-width: 576px) {
+    .tab-button {
+        flex-direction: row;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        gap: 8px;
+    }
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(13, 110, 253, 0.05);
+    color: var(--primary);
+}
+
+.tab-button.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+/* Tab Content Visibility */
+.tab-content > .tab-pane {
+    display: none !important;
+}
+
+.tab-content > .active {
+    display: block !important;
+}
+
+/* Layout Grid - Responsif Fleksibel */
+.laporan-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 992px) {
+    .laporan-grid.feedback-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Kartu - Modern & Responsif */
+.ui-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+    border: 1px solid rgba(0,0,0,0.03);
+    position: relative;
+    width: 100%;
+    max-width: 100%; /* Pastikan tidak melebihi parent */
+    box-sizing: border-box;
+    overflow: hidden; /* Cegah konten dalam card overflow */
+}
+
+.ui-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+/* Grade Badge - Refined for Mobile */
+.grade-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+.grade-badge {
+    min-width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+.grade-a { background: #dcfce7; color: #166534; }
+.grade-b { background: #fef9c3; color: #854d0e; }
+.grade-c { background: #ffedd5; color: #9a3412; }
+
+/* Score Indicators */
+.score-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.score-item {
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+}
+
+.score-label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.score-value {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+/* Feedback Comment Box */
+.comment-box {
+    padding: 1rem;
+    background: #f1f5f9;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+    font-style: italic;
+    border-left: 4px solid var(--primary);
+}
+
+/* Upload Zone - Touch-Friendly */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-md);
+    padding: 2.5rem 1rem;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.upload-zone i {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Indikator File Status */
+.file-status-bar {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    gap: 0.75rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden; /* Cegah nama file panjang overflow */
+}
+
+/* Pastikan teks di dalam flex tidak mendorong layout */
+.file-status-bar > div {
+    min-width: 0; /* Kunci: izinkan flex child menyusut di bawah ukuran konten */
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-status-bar h6,
+.file-status-bar small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.status-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.status-approved { background: #10b981; }
+.status-pending { background: #f59e0b; }
+.status-rejected { background: #ef4444; }
+
+/* Rekap Grid - Fluid on Mobile */
+.rekap-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 576px) {
+    .rekap-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.rekap-box {
+    padding: 1rem 0.5rem;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.rekap-hadir { background: #ecfdf5; color: #059669; }
+.rekap-izin { background: #eff6ff; color: #2563eb; }
+.rekap-sakit { background: #fffbeb; color: #d97706; }
+.rekap-alpa { background: #fef2f2; color: #dc2626; }
+
+.rekap-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    display: block;
+}
+
+.rekap-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* Tombol Unduh Premium - Perbaikan Overflow */
+.btn-download-premium {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, var(--primary), #005ce6);
+    color: #ffffff;
+    border-radius: 16px;
+    text-decoration: none !important;
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.15);
+    border: none;
+    width: 100%;
+    max-width: 100%; /* Jangan melebihi parent */
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.btn-download-premium > div:last-child {
+    min-width: 0; /* Izinkan teks menyesuaikan dan tidak overflow */
+    flex: 1;
+    overflow: hidden;
+}
+
+.btn-download-premium h6 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.btn-download-premium small {
+    display: block;
+    opacity: 0.85;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-download-premium:hover {
+    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.25);
+}
+
+.icon-box-white {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ui-card {
+    animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Upload Submit button */
+.btn-upload-submit {
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    padding: 1rem;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.btn-upload-submit:hover {
+    background: #005ce6;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+}
+
+/* UI Alert Refined */
+.ui-alert {
+    padding: 0.875rem 1.125rem;
+    border-radius: 14px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1px solid;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.ui-alert-success { background: #f0fdf4; color: #166534; border-color: #dcfce7; }
+.ui-alert-info { background: #f0f9ff; color: #075985; border-color: #e0f2fe; }
+
+/* Penyesuaian Responsif Mobile */
+@media (max-width: 576px) {
+    .page-wrapper {
+        padding: 1rem 0.875rem;
+    }
+
+    .ui-card {
+        border-radius: 20px;
+    }
+
+    .tabs-nav {
+        border-radius: 16px;
+    }
+
+    .tab-button {
+        padding: 8px 4px;
+        font-size: 0.7rem;
+    }
+
+    .rekap-value {
+        font-size: 1.25rem;
+    }
+
+    .btn-download-premium h6 {
+        font-size: 0.85rem;
+    }
+
+    .btn-download-premium small {
+        font-size: 0.72rem;
+    }
+}
+
+/* Assessment Specific Styles */
+.assessment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.assessment-item {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 18px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.assessment-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.05);
+    transform: translateX(4px);
+}
+
+.assessment-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex: 1;
+}
+
+.assessment-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.assessment-details h6 {
+    margin: 0 0 4px 0;
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.assessment-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.assessment-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-right: 2rem;
+}
+
+.meta-item {
+    text-align: center;
+}
+
+.meta-label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.meta-value {
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.btn-unduh-sm {
+    padding: 0.6rem 1.2rem;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    white-space: nowrap;
+}
+
+.btn-unduh-sm:hover {
+    background: #005ce6;
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+    transform: translateY(-2px);
+}
+
+.bg-purple-light { background: #f5f3ff; }
+.text-purple { color: #7c3aed; }
+
+/* Responsive Assessment */
+@media (max-width: 768px) {
+    .assessment-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+    }
+
+    .assessment-meta {
+        margin: 0;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 1rem;
+    }
+
+    .btn-unduh-sm {
+        justify-content: center;
+    }
+}

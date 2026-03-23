@@ -1,0 +1,422 @@
+/* ============================================
+   laporanSiswa.css — Laporan & Rekap Siswa Dosen
+   ============================================ */
+
+/* ── CSS Variables ── */
+:root {
+    --color-primary:    #7c3aed;
+    --color-primary-lt: #ede9fe;
+    --color-blue:       #3b82f6;
+    --color-blue-lt:    #dbeafe;
+    --color-green:      #22c55e;
+    --color-green-lt:   #dcfce7;
+    --color-red:        #ef4444;
+    --color-red-lt:     #fee2e2;
+    --color-info:       #06b6d4;
+    --color-info-lt:    #cffafe;
+
+    --text-dark:   #1e1b4b;
+    --text-medium: #4b5563;
+    --text-muted:  #9ca3af;
+
+    --bg-page:   #f5f3ff;
+    --bg-white:  #ffffff;
+    --border:    #e5e7eb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+    --shadow-md: 0 6px 24px rgba(124,58,237,.13);
+    --radius:    14px;
+    --radius-sm: 8px;
+    --transition: .2s ease;
+}
+
+/* ==========================================
+   PAGE BASE
+   ========================================== */
+body.dosen-page {
+    background: var(--bg-page);
+    color: var(--text-medium);
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+}
+
+.mt-4 { margin-top: 1rem    !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+.mb-4 { margin-bottom: 1rem !important; }
+.p-0  { padding: 0          !important; }
+
+/* ==========================================
+   PAGE HEADER
+   ========================================== */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.header-content { flex: 1; }
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .3rem;
+}
+
+.text-danger { color: var(--color-red) !important; }
+.me-2        { margin-right: .5rem; }
+
+.page-subtitle {
+    font-size: .875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ── Search Form ── */
+.header-actions { display: flex; align-items: center; }
+
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .35rem .35rem .35rem .85rem;
+    box-shadow: var(--shadow-sm);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.search-form:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+}
+
+.search-icon {
+    color: var(--text-muted);
+    font-size: .85rem;
+    flex-shrink: 0;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    font-size: .875rem;
+    color: var(--text-dark);
+    background: transparent;
+    min-width: 220px;
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+.btn-clear-search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-red-lt);
+    color: var(--color-red);
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: .78rem;
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+.btn-clear-search:hover { background: #fca5a5; }
+
+.btn-search {
+    padding: .4rem 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity var(--transition);
+}
+.btn-search:hover { opacity: .88; }
+
+/* ==========================================
+   ALERT
+   ========================================== */
+.custom-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-sm);
+    border-left: 4px solid transparent;
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.custom-alert.alert-danger-soft {
+    background: var(--color-red-lt);
+    border-left-color: var(--color-red);
+    color: #b91c1c;
+}
+.custom-alert.alert-danger-soft .alert-icon { color: var(--color-red); }
+
+.alert-icon    { font-size: 1.1rem; padding-top: .1rem; flex-shrink: 0; }
+.alert-content { flex: 1; }
+
+/* ==========================================
+   CONTENT CARD
+   ========================================== */
+.content-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+/* ==========================================
+   TABLE
+   ========================================== */
+.custom-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .875rem;
+}
+
+.custom-table thead tr {
+    background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+    border-bottom: 2px solid #fecaca;
+}
+
+.custom-table thead th {
+    padding: 1rem 1.25rem;
+    font-weight: 700;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--color-red);
+    white-space: nowrap;
+    text-align: left;
+}
+.custom-table thead th.text-center { text-align: center; }
+
+.custom-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+}
+.custom-table tbody tr:last-child { border-bottom: none; }
+.custom-table tbody tr:hover { background: #fff8f8; }
+
+.custom-table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: var(--text-medium);
+}
+
+.custom-table tbody td:first-child {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* ── User Info Cell ── */
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+}
+
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #fecaca;
+}
+
+.avatar-sm-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.bg-danger-light { background: var(--color-red-lt); }
+.text-danger-color { color: var(--color-red); }
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.fw-bold    { font-weight: 700; }
+.text-dark  { color: var(--text-dark)   !important; }
+.text-muted { color: var(--text-muted)  !important; }
+.small      { font-size: .78rem         !important; }
+
+/* ── Stat Badge (rekap kehadiran) ── */
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .85rem;
+    border-radius: var(--radius-sm);
+    font-size: .82rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.bg-success-light {
+    background: var(--color-green-lt);
+}
+
+.text-success { color: var(--color-green) !important; }
+
+/* ── Logbook Progress ── */
+.d-flex       { display: flex; }
+.flex-column  { flex-direction: column; }
+.gap-1        { gap: .25rem; }
+
+.progress-simple {
+    height: 7px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: .3rem;
+    width: 100%;
+    max-width: 160px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .8s ease;
+    min-width: 4px;
+}
+
+.bg-info { background: var(--color-info); }
+
+/* ── Action Buttons ── */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.justify-content-center { justify-content: center; }
+.gap-2 { gap: .5rem; }
+
+/* Primary print button */
+.btn-action-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1.1rem;
+    background: linear-gradient(135deg, var(--color-red) 0%, #dc2626 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+    box-shadow: 0 2px 8px rgba(239,68,68,.3);
+}
+.btn-action-primary:hover {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(239,68,68,.35);
+    color: #fff;
+}
+.btn-action-primary:active { transform: translateY(0); }
+
+/* Secondary icon button (Excel, etc.) */
+.btn-action-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .85rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--transition), transform var(--transition);
+}
+.btn-action-icon:hover { opacity: .85; transform: translateY(-1px); }
+
+.btn-export {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* ── Empty State ── */
+.empty-state {
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #fca5a5;
+    display: block;
+    margin-bottom: .75rem;
+}
+
+.empty-state h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: .35rem;
+}
+
+.text-center { text-align: center !important; }
+.py-5 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+
+/* ── Pagination ── */
+.pagination-wrapper {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 768px) {
+    .page-header    { flex-direction: column; }
+    .search-form    { width: 100%; }
+    .search-input   { min-width: 0; flex: 1; }
+
+    .custom-table thead th,
+    .custom-table tbody td { padding: .75rem .9rem; font-size: .8rem; }
+
+    .avatar-sm,
+    .avatar-sm-placeholder { width: 34px; height: 34px; font-size: .85rem; }
+
+    .progress-simple { max-width: 100%; }
+
+    .btn-action-primary { padding: .45rem .85rem; font-size: .78rem; }
+}

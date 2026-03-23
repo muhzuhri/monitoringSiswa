@@ -1,0 +1,700 @@
+/* ============================================
+   VERIFIKASI GURU — Design System Custom
+   ============================================ */
+
+:root {
+    --primary: #4f46e5;
+    --primary-light: rgba(79, 70, 229, 0.1);
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-hover: 0 12px 28px rgba(0,0,0,0.09);
+}
+
+/* ── Tata Letak Halaman ── */
+.page-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: clamp(1rem, 4vw, 2rem) 1rem;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* ── Header ── */
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: clamp(1.2rem, 3vw, 1.75rem);
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 0.25rem;
+}
+
+.page-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ── Badge Pending ── */
+.pending-badge {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.625rem 1.25rem;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.pending-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+}
+
+.pending-count {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+}
+
+/* ── Search Bar ── */
+.search-section .input-group {
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--border);
+}
+
+.search-section .form-control {
+    border: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+.search-section .form-control:focus {
+    box-shadow: none;
+}
+
+.search-section .input-group-text {
+    background: transparent;
+    border: none;
+    padding-left: 1.25rem;
+}
+
+.search-section .btn-primary {
+    background: var(--primary);
+    border: none;
+    font-weight: 700;
+}
+
+.search-section .btn-outline-secondary {
+    border: none;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* ── Alert ── */
+.ui-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.ui-alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+/* ── Kartu Dasar ── */
+.ui-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ═══════════════════════════════════════════
+   DETAIL VIEW
+═══════════════════════════════════════════ */
+.detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+}
+
+/* ── Header Berkas ── */
+.file-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.file-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.file-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 4px;
+    word-break: break-word;
+}
+
+.file-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1.25rem;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-download:hover { opacity: 0.88; }
+
+/* ── Preview Placeholder ── */
+.report-preview-container {
+    background: #f8fafc;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    margin: 1.25rem;
+    padding: 2.5rem 1.5rem;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.file-icon {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.preview-title {
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.5rem;
+}
+
+.preview-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+    max-width: 380px;
+}
+
+.btn-preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1.25rem;
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-preview:hover { background: var(--primary); color: #fff; }
+
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 1.25rem;
+    opacity: 0.7;
+}
+
+/* ── Form Verifikasi ── */
+.verify-form {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* ── Radio Keputusan ── */
+.decision-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.decision-radio {
+    display: none;
+}
+
+.decision-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.decision-btn i { font-size: 1.2rem; }
+
+.decision-approve { border-color: #86efac; }
+.decision-reject  { border-color: #fca5a5; }
+
+.decision-radio:checked + .decision-approve {
+    background: rgba(25, 135, 84, 0.08);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.decision-radio:checked + .decision-reject {
+    background: rgba(220, 53, 69, 0.08);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* ── Textarea ── */
+.form-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0.875rem;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    background: #ffffff;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-verify {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 2rem;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-verify:hover { opacity: 0.88; transform: translateY(-1px); }
+
+
+
+/* ═══════════════════════════════════════════
+   LIST VIEW — Tab Navigation
+═══════════════════════════════════════════ */
+.tabs-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.tabs-nav {
+    display: flex;
+    background: rgba(15, 23, 42, 0.04);
+    padding: 6px;
+    border-radius: 18px;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tab-button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 8px;
+    border-radius: 14px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+@media (min-width: 576px) {
+    .tab-button {
+        flex-direction: row;
+        padding: 10px 16px;
+        font-size: 0.875rem;
+        gap: 8px;
+    }
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+/* Visibilitas Tab  */
+.tab-content > .tab-pane { display: none; }
+.tab-content > .tab-pane.show.active { display: block; }
+
+/* ── Grid Laporan Pending ── */
+.laporan-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 640px) { .laporan-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 992px) { .laporan-grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* ── Kartu Laporan ── */
+.laporan-card {
+    padding: 1.25rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.laporan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.laporan-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.laporan-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.laporan-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 2px;
+    word-break: break-word;
+}
+
+.laporan-perusahaan {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Preview File Box ── */
+.file-preview-box {
+    background: #f8fafc;
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    margin: 0.25rem 0;
+}
+
+.file-preview-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.file-preview-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    overflow: hidden;
+}
+
+.file-pdf-icon {
+    font-size: 1.5rem;
+    color: #ef4444;
+    flex-shrink: 0;
+}
+
+.file-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Tombol Periksa ── */
+
+.btn-periksa {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.25);
+    box-sizing: border-box;
+    transition: opacity 0.2s;
+    margin-top: auto;
+}
+
+.btn-periksa:hover { opacity: 0.88; }
+
+/* ── Badge ── */
+.badge-versi {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    display: inline-block;
+}
+
+/* ── Tabel Riwayat ── */
+.table-wrapper { overflow-x: auto; }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.data-table thead tr { background: #f8fafc; }
+
+.data-table th {
+    padding: 0.75rem 1rem;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: var(--text-main);
+}
+
+.data-table tbody tr:hover { background: #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.th-padded { padding-left: 1.5rem !important; }
+.th-end    { text-align: right; padding-right: 1.5rem !important; }
+
+.td-siswa-name { font-weight: 700; font-size: 0.875rem; margin-bottom: 2px; }
+.td-siswa-nisn { font-size: 0.75rem; color: var(--text-muted); }
+.td-date       { font-size: 0.82rem; }
+
+/* ── Status Badge ── */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-ok  { background: rgba(25,135,84,0.1); color: var(--success); }
+.status-bad { background: rgba(220,53,69,0.1); color: var(--danger); }
+
+/* ── Tombol Detail ── */
+.btn-detail {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    background: #f1f5f9;
+    color: var(--text-main);
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-detail:hover { background: #e2e8f0; }
+
+.empty-row {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+
+.table-pagination {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ── State Kosong ── */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--text-muted);
+    opacity: 0.2;
+    display: block;
+    margin-bottom: 1.25rem;
+}
+
+.empty-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 0 0 0.5rem;
+}
+
+.empty-desc {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ── Animasi ── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ui-card, .laporan-card { animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ── Responsif Mobile ── */
+@media (max-width: 576px) {
+    .page-wrapper  { padding: 1rem 0.875rem; }
+    .page-header   { flex-direction: column; }
+    .decision-group { flex-direction: column; }
+    .btn-verify    { width: 100%; justify-content: center; }
+    .form-actions  { justify-content: stretch; }
+    .file-header   { flex-direction: column; align-items: flex-start; }
+}

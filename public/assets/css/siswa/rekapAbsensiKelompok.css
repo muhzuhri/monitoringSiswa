@@ -1,0 +1,139 @@
+@page {
+    margin: 1cm;
+    size: landscape;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.2;
+    color: #333;
+    font-size: 10px;
+}
+
+.container {
+    width: 100%;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.header h3 {
+    margin: 5px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.info-section {
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.info-left {
+    float: left;
+    width: 40%;
+}
+
+.info-right {
+    float: right;
+    width: 40%;
+    text-align: right;
+}
+
+.rekap-bulan-title {
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-align: left;
+    font-size: 11px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* Allow columns to size based on content */
+}
+
+.data-table th,
+.data-table td {
+    border: 1px solid #000;
+    padding: 2px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 8px;
+}
+
+.data-table td.name-cell {
+    text-align: left;
+    white-space: nowrap; /* Prevent name from wrapping to next line */
+    padding: 4px 6px;
+    font-size: 9px;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.clr-both {
+    clear: both;
+}
+
+.day-cell {
+    font-size: 8px;
+}
+
+.status-h {
+    background-color: #ffffff;
+}
+
+/* Hadir */
+.status-t {
+    background-color: #ffffff;
+}
+
+/* Terlambat -> Hadir (White) */
+.status-i {
+    background-color: #ffffff;
+}
+
+/* Izin (White) */
+.status-s {
+    background-color: #ffffff;
+}
+
+/* Sakit (White) */
+.status-a {
+    background-color: #ffffff;
+}
+
+/* Alpa (White) */
+.status-holiday {
+    background-color: #ffff00;
+}
+
+/* Weekend/Holiday (Yellow) */
+.footer {
+    margin-top: 30px;
+    position: relative;
+}
+
+.footer-content {
+    float: right;
+    width: 250px;
+    text-align: center;
+}
+
+.page-break {
+    page-break-after: always;
+}

@@ -1,0 +1,468 @@
+.container{
+    margin-bottom: 3px;
+    margin-top: 4px;
+
+}
+
+/* ======================================
+   HERO SECTION - MOBILE FIRST
+====================================== */
+
+.hero-section {
+    background: linear-gradient(135deg, #4e73df, #1cc88a);
+    border-radius: 14px;
+    padding: 20px;
+    color: #ffffff;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+/* Container layout - default mobile (stacked) */
+.hero-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Left section */
+.hero-left {
+    text-align: center;
+}
+
+/* Right section */
+.hero-right {
+    text-align: center;
+}
+
+/* ======================================
+   TEXT
+====================================== */
+
+.hero-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.hero-company {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+/* ======================================
+   STATUS CARD
+====================================== */
+
+.status-card {
+    background: #ffffff;
+    color: #333;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* INI YANG MEMBUAT CENTER */
+}
+
+.status-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 0px 10px;
+}
+
+.status-badge {
+    background: #28a745;
+    color: #fff;
+    padding: 6px 14px 6px 14px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+
+}
+
+/* ======================================
+   TABLET (>= 768px)
+====================================== */
+
+@media (min-width: 768px) {
+
+    .hero-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .hero-left {
+        text-align: left;
+    }
+
+    .hero-right {
+        text-align: right;
+    }
+
+    .hero-title {
+        font-size: 1.7rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* ======================================
+   DESKTOP (>= 1200px)
+====================================== */
+
+@media (min-width: 1200px) {
+
+    .hero-section {
+        padding: 30px 40px;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+}
+
+/* ===============================
+   DASHBOARD LAYOUT
+================================= */
+
+.dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard-main {
+    width: 100%;
+}
+
+/* ===============================
+   CARD
+================================= */
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+.dashboard-card2 {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* ===============================
+   HEADER
+================================= */
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.card-percentage {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #4e73df;
+}
+
+/* ===============================
+   PROGRESS
+================================= */
+
+.progress-wrapper {
+    width: 100%;
+    height: 10px;
+    background: #e9ecef;
+    border-radius: 50px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.progress-bar-custom {
+    height: 100%;
+    background: linear-gradient(90deg, #4e73df, #1cc88a);
+    border-radius: 50px;
+    transition: width 0.4s ease;
+}
+
+/* ===============================
+   FOOTER
+================================= */
+
+.card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* ===============================
+   TABLET & DESKTOP
+================================= */
+
+@media (min-width: 768px) {
+
+    .dashboard-layout {
+        flex-direction: row;
+    }
+
+    .dashboard-main {
+        flex: 2;
+    }
+
+    .card-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-footer {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* ===================================
+   STATS WRAPPER - MOBILE FIRST
+=================================== */
+
+.stats-wrapper {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 kolom dulu untuk mobile */
+    gap: 16px;
+    /* margin-bottom: 24px; */
+    margin-top: 10px;
+}
+
+/* ===================================
+   CARD BASE
+=================================== */
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+
+/* ===================================
+   ICON
+=================================== */
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: rgba(0,0,0,0.05);
+}
+
+/* ===================================
+   INFO
+=================================== */
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.stat-info span {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* ===================================
+   COLOR VARIANTS
+=================================== */
+
+.stat-blue {
+    background: #eef4ff;
+}
+
+.stat-green {
+    background: #e9f9f1;
+}
+
+.stat-purple {
+    background: #f3e9ff;
+}
+
+/* ===================================
+   TABLET (>=768px)
+=================================== */
+
+@media (min-width: 768px) {
+    .stats-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ===============================
+   SIDEBAR WRAPPER
+================================= */
+
+.sidebar-wrapper {
+    width: 100%;
+}
+
+/* ===============================
+   CARD BASE
+================================= */
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+/* ===============================
+   STATUS TITLE
+================================= */
+
+.status-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #6c757d;
+    margin-bottom: 14px;
+}
+
+/* ===============================
+   STATUS CONTENT
+================================= */
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.status-indicator {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+/* SUCCESS STYLE */
+.status-success {
+    border-left: 5px solid #28a745;
+}
+
+.status-success .status-indicator {
+    background: #28a745;
+}
+
+/* WARNING STYLE */
+.status-warning {
+    border-left: 5px solid #ffc107;
+}
+
+.status-warning .status-indicator {
+    background: #ffc107;
+}
+
+/* TEXT */
+.status-text h6 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.status-text span {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* ===============================
+   BUTTON
+================================= */
+
+.status-button {
+    display: block;
+    text-align: center;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.status-button.success {
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.status-button.success:hover {
+    background: #28a745;
+    color: #fff;
+}
+
+.status-button.warning {
+    border: 1px solid #ffc107;
+    color: #ffc107;
+}
+
+.status-button.warning:hover {
+    background: #ffc107;
+    color: #000;
+}
+
+/* ===============================
+   TABLET & DESKTOP
+================================= */
+
+@media (min-width: 992px) {
+    .sidebar-wrapper {
+        max-width: 350px;
+    }
+}
