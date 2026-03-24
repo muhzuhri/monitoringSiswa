@@ -39,9 +39,9 @@
                     <div class="hero-right">
                         <div class="status-card">
                             <small class="status-label">Status Magang</small>
-                            <span class="status-badge">
-                                <i class="fas fa-check-circle"></i>
-                                AKTIF
+                            <span class="status-badge {{ $user->status === 'selesai' ? 'status-finished' : '' }}">
+                                <i class="fas {{ $user->status === 'selesai' ? 'fa-flag-checkered' : 'fa-check-circle' }}"></i>
+                                {{ strtoupper($user->status) }}
                             </span>
                         </div>
                     </div>

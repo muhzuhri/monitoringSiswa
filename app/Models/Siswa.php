@@ -36,6 +36,8 @@ class Siswa extends Authenticatable implements HasRole
         'tipe_magang',
         'nisn_ketua',
         'id_tahun_ajaran',
+        'tgl_mulai_magang',
+        'tgl_selesai_magang',
     ];
 
     public function ketua()
@@ -73,7 +75,17 @@ class Siswa extends Authenticatable implements HasRole
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'tgl_mulai_magang' => 'date',
+            'tgl_selesai_magang' => 'date',
         ];
+    }
+
+    public function getStatusAttribute($value)
+    {
+        if ($this->tgl_selesai_magang && \Carbon\Carbon::now()->greaterThan($this->tgl_selesai_magang)) {
+            return 'selesai';
+        }
+        return $value;
     }
 
     public function getAuthIdentifierName(): string

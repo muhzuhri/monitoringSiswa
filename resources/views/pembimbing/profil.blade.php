@@ -8,7 +8,7 @@
 @endpush
 
 @section('body')
-    <div class="dashboard-container mt-4 mb-5">
+    <div class="dashboard-container mt-4">
         <div class="page-header">
             <div class="header-content">
                 <h2 class="page-title"><i class="fas fa-user-circle text-primary me-2"></i>Pengaturan Profil</h2>
@@ -49,11 +49,9 @@
                     <p class="text-muted small mb-3">{{ $pembimbing->email }}</p>
                     <div class="badge bg-purple-light text-purple mb-3">Pembimbing</div>
                     <div class="sidebar-stats mt-3 pt-3 border-top">
-                        <div class="row text-center">
-                            <div class="col-12">
-                                <span class="d-block fw-bold text-dark">{{ $pembimbing->instansi ?? '-' }}</span>
-                                <span class="text-muted small">Instansi</span>
-                            </div>
+                        <div class="col-12">
+                            <span class="d-block fw-bold text-dark">{{ $pembimbing->instansi ?? '-' }}</span>
+                            <span class="text-muted small">Instansi</span>
                         </div>
                     </div>
                 </div>
@@ -83,21 +81,21 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Nama Lengkap</label>
-                                        <input type="text" name="name" class="form-control custom-input"
+                                        <input type="text" name="name" class="custom-input"
                                             value="{{ old('name', $pembimbing->name) }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Email Utama</label>
-                                        <input type="email" name="email" class="form-control custom-input"
+                                        <input type="email" name="email" class="custom-input"
                                             value="{{ old('email', $pembimbing->email) }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mt-3">
                                     <div class="form-group">
                                         <label class="form-label">Nomor WhatsApp</label>
-                                        <input type="text" name="no_telp" class="form-control custom-input"
+                                        <input type="text" name="no_telp" class="custom-input"
                                             value="{{ old('no_telp', $pembimbing->no_telp) }}" placeholder="e.g 08123456789">
                                     </div>
                                 </div>
@@ -115,14 +113,14 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Jabatan / Pangkat</label>
-                                        <input type="text" name="jabatan" class="form-control custom-input"
+                                        <input type="text" name="jabatan" class="custom-input"
                                             value="{{ old('jabatan', $pembimbing->jabatan) }}" placeholder="e.g Lektor Kepala">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Instansi / Unit Kerja</label>
-                                        <input type="text" name="instansi" class="form-control custom-input"
+                                        <input type="text" name="instansi" class="custom-input"
                                             value="{{ old('instansi', $pembimbing->instansi) }}"
                                             placeholder="e.g Politeknik Negeri Sriwijaya">
                                     </div>
@@ -142,7 +140,7 @@
                                     <div class="form-group">
                                         <label class="form-label">Password Baru <span
                                                 class="text-muted small fw-normal">(Opsional)</span></label>
-                                        <input type="password" name="password" class="form-control custom-input"
+                                        <input type="password" name="password" class="custom-input"
                                             placeholder="Minimal 8 karakter">
                                     </div>
                                 </div>
@@ -150,7 +148,7 @@
                                     <div class="form-group">
                                         <label class="form-label">Konfirmasi Password Baru</label>
                                         <input type="password" name="password_confirmation"
-                                            class="form-control custom-input" placeholder="Ulangi password baru">
+                                            class="custom-input" placeholder="Ulangi password baru">
                                     </div>
                                 </div>
                             </div>

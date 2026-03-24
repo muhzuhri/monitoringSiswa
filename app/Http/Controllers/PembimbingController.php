@@ -36,16 +36,19 @@ class PembimbingController extends Controller
             });
         }
 
-        $siswas = $query->with([
+        $allSiswas = $query->with([
             'guru',
             'tahunAjaran',
             'absensis' => function ($q) use ($today) {
                 $q->whereDate('tanggal', $today);
+            },
+            'penilaians' => function ($q) {
+                $q->where('pemberi_nilai', 'Dosen Pembimbing');
             }
         ])->orderBy('nama', 'asc')->get();
 
         // Hitung progress untuk setiap siswa bimbingan
-        foreach ($siswas as $siswa) {
+        foreach ($allSiswas as $siswa) {
             if ($siswa->tgl_mulai_magang && $siswa->tgl_selesai_magang) {
                 $start = Carbon::parse($siswa->tgl_mulai_magang);
                 $end = Carbon::parse($siswa->tgl_selesai_magang);
@@ -60,7 +63,53 @@ class PembimbingController extends Controller
             $siswa->absen_hari_ini = $siswa->absensis->first();
         }
 
-        return view('pembimbing.daftarSiswa', compact('pembimbing', 'siswas', 'search'));
+        // Separate into Active/Bimbingan and History based on internship status
+        // status accessor in Siswa model handles tgl_selesai_magang automatically
+        $siswasActive = $allSiswas->filter(function ($s) {
+            return $s->status !== 'selesai';
+        });
+
+        $siswasHistory = $allSiswas->filter(function ($s) {
+            return $s->status === 'selesai';
+        });
+
+        return view('pembimbing.daftarSiswa', compact('pembimbing', 'siswasActive', 'siswasHistory', 'search'));
+    }
+
+    /**
+     * Mencetak jurnal kegiatan mingguan siswa binaan (menggunakan template siswa)
+     */
+    public function cetakJurnalSiswa($nisn)
+    {
+        $pembimbing = Auth::user();
+        $user = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $pembimbing->id_pembimbing)
+            ->with(['pembimbing', 'logbooks' => function($q) {
+                $q->orderBy('tanggal', 'asc');
+            }])->firstOrFail();
+
+        $logbooks = $user->logbooks;
+        $fileName = "Jurnal_Kegiatan_{$user->nisn}_" . date('d_M_Y') . ".pdf";
+
+        $pdf = Pdf::loadView('siswa.printJurnal', compact('user', 'logbooks'));
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Mencetak rekap absensi individu siswa binaan (menggunakan template siswa)
+     */
+    public function cetakAbsensiSiswa($nisn)
+    {
+        $pembimbing = Auth::user();
+        $user = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $pembimbing->id_pembimbing)
+            ->with('absensis')->firstOrFail();
+
+        $absensis = $user->absensis()->orderBy('tanggal', 'asc')->get();
+        $fileName = "Rekap_Absensi_{$user->nisn}_" . date('d_M_Y') . ".pdf";
+
+        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', compact('user', 'absensis'));
+        return $pdf->download($fileName);
     }
 
     /**

@@ -181,7 +181,25 @@ class GuruController extends Controller
             $siswa->absen_hari_ini = $siswa->absensis->first();
         }
 
-        return view('guru.daftarSiswa', compact('user', 'siswas', 'search', 'npsn', 'groupedSiswas', 'groupedAvailable', 'availableSiswas'));
+        // 3. Riwayat Siswa Binaan (yang statusnya sudah selesai)
+        $riwayatSiswas = $user->siswas()
+            ->where(function($q) {
+                $q->where('status', 'selesai')
+                  ->orWhere('tgl_selesai_magang', '<', now());
+            })
+            ->orderBy('tgl_selesai_magang', 'desc')
+            ->get();
+
+        return view('guru.daftarSiswa', compact(
+            'user', 
+            'siswas', 
+            'search', 
+            'npsn', 
+            'groupedSiswas', 
+            'groupedAvailable', 
+            'availableSiswas', 
+            'riwayatSiswas'
+        ));
     }
 
     /**
@@ -508,5 +526,51 @@ class GuruController extends Controller
         $pdf = Pdf::loadView('guru.printPenilaian', compact('user', 'siswa', 'penilaian'));
 
         return $pdf->download("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
+    }
+
+    /**
+     * Menampilkan halaman profil guru.
+     */
+    public function profil()
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        return view('guru.profil', compact('user'));
+    }
+
+    /**
+     * Memperbarui profil guru.
+     */
+    public function updateProfil(Request $request)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:guru,email,' . $user->id_guru . ',id_guru',
+            'no_hp' => 'nullable|string|max:15',
+            'jabatan' => 'nullable|string|max:100',
+            'sekolah' => 'nullable|string|max:255',
+            'npsn' => 'nullable|string|max:10',
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $data = [
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'no_hp' => $request->no_hp,
+            'jabatan' => $request->jabatan,
+            'sekolah' => $request->sekolah,
+            'npsn' => $request->npsn,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return back()->with('success', 'Profil Anda berhasil diperbarui.');
     }
 }

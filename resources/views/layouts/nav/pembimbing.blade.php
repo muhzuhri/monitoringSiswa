@@ -7,7 +7,6 @@
     <title>@yield('title', config('app.name'))</title>
 
     {{-- CSS utama --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/navbar/navbar.css') }}">
 
@@ -33,11 +32,11 @@
                 </div>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" id="navbarToggler">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-collapse" id="navbarNav">
                 <ul class="nav-list ms-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('pembimbing.pembimbing') ? 'active' : '' }}"
@@ -73,9 +72,20 @@
     @yield('body')
 
     {{-- JS utama --}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggler = document.getElementById('navbarToggler');
+            const collapse = document.getElementById('navbarNav');
+
+            if (toggler && collapse) {
+                toggler.addEventListener('click', function() {
+                    collapse.classList.toggle('show');
+                });
+            }
+        });
+    </script>
     @stack('scripts')
 
 </body>
 
-</html>
+</html>

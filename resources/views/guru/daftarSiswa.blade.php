@@ -1,12 +1,9 @@
 @extends('layouts.nav.guru')
 
 @section('title', 'Daftar Siswa Bimbingan - SIM Magang')
-@section('body-class', 'dashboard-page guru-page')
+@section('body-class', 'guru-page')
 
 @push('styles')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/guru/daftarSiswa.css') }}">
 @endpush
 
@@ -20,10 +17,12 @@
                 <p class="page-subtitle">Kelola dan pantau seluruh siswa magang di bawah bimbingan Anda.</p>
             </div>
             <div class="search-wrapper">
-                <form action="{{ route('guru.siswa') }}" method="GET" class="search-form">
-                    <span class="search-icon"><i class="fas fa-search"></i></span>
-                    <input type="text" name="search" value="{{ $search }}" class="search-input"
-                        placeholder="Cari Nama, NISN, atau Perusahaan...">
+                <form id="headerSearchForm" class="search-form">
+                    <span class="search-icon">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="headerSearchInput" value="{{ $search }}" class="search-input"
+                        placeholder="Cari Nama, NISN, atau Perusahaan..." autocomplete="off">
                 </form>
             </div>
         </div>
@@ -40,6 +39,11 @@
                     type="button" role="tab">
                     <i class="fas fa-search-plus"></i>
                     <span>Cari Siswa ({{ $availableSiswas->count() }})</span>
+                </button>
+                <button class="tab-button" id="history-tab" data-bs-toggle="pill" data-bs-target="#riwayat-history"
+                    type="button" role="tab">
+                    <i class="fas fa-history"></i>
+                    <span>Riwayat Siswa ({{ $riwayatSiswas->count() }})</span>
                 </button>
             </div>
         </div>
@@ -66,6 +70,17 @@
                                         @endif
                                     </h6>
                                     <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
+                                    <div class="mt-2">
+                                        @if($g['leader']->status === 'selesai')
+                                            <span class="badge bg-secondary text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
+                                                <i class="fas fa-flag-checkered me-1"></i> SELESAI
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
+                                                <i class="fas fa-check-circle me-1"></i> AKTIF
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="status-wrapper">
                                     @php
@@ -112,22 +127,22 @@
                     @empty
                         <div class="empty-state">Belum ada siswa bimbingan.</div>
                     @endforelse
+                    <div id="noResultsBimbingan" class="empty-state" style="display: none; width: 100%;">Tidak ada siswa bimbingan yang cocok dengan pencarian.</div>
                 </div>
             </div>
 
             {{-- Tab Cari Siswa --}}
             <div class="tab-pane fade" id="search-students" role="tabpanel">
                 <div class="filter-section shadow-sm">
-                    <form action="{{ route('guru.siswa') }}" method="GET" class="row align-items-end g-3">
+                    <form action="{{ route('guru.siswa') }}" method="GET" class="row align-items-end g-3" id="npsnSearchForm">
                         <input type="hidden" name="search" value="{{ $search }}">
                         <div class="col-md-7">
                             <label class="filter-label"><i class="fas fa-filter me-2 text-primary"></i> Filter Berdasarkan NPSN Sekolah</label>
                             <div class="d-flex">
                                 <div class="input-group-modern flex-grow-1">
                                     <span class="input-group-text-modern"><i class="fas fa-school"></i></span>
-                                    <input type="text" name="npsn" value="{{ $npsn }}" class="form-control form-control-modern"
-                                        placeholder="Masukkan NPSN Sekolah (Contoh: 10203040)...">
-                                    <button class="btn btn-filter px-4" type="submit">Cari Siswa</button>
+                                    <input type="text" name="npsn" id="npsnInput" value="{{ $npsn }}" class="form-control form-control-modern"
+                                        placeholder="Masukkan NPSN Sekolah (Contoh: 10203040)..." autocomplete="off">
                                 </div>
                                 @if($npsn)
                                     <a href="{{ route('guru.siswa', ['search' => $search]) }}"
@@ -207,6 +222,73 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Tab Riwayat Siswa --}}
+            <div class="tab-pane fade" id="riwayat-history" role="tabpanel">
+                <div class="ui-card">
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">No</th>
+                                    <th>Identitas Siswa</th>
+                                    <th>Sekolah / Perusahaan</th>
+                                    <th>Periode Magang</th>
+                                    <th class="text-end pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayatTableBody">
+                                @forelse($riwayatSiswas as $index => $siswa)
+                                    <tr class="history-row">
+                                        <td class="ps-4 text-muted small">{{ $index + 1 }}</td>
+                                        <td>
+                                            <div class="td-siswa-name fw-bold text-dark">{{ $siswa->nama }}</div>
+                                            <div class="td-siswa-nisn small text-muted"><i class="fas fa-id-card-alt me-1 opacity-50"></i> {{ $siswa->nisn }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="badge-school bg-light text-dark px-2 py-1 rounded small" style="border: 1px solid #eee; font-size: 0.75rem;"><i class="fas fa-university me-1 text-primary"></i> {{ $siswa->sekolah }}</span>
+                                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="small text-muted" style="line-height: 1.4;">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <i class="fas fa-calendar-alt me-2 text-primary opacity-75" style="width: 14px;"></i>
+                                                    <span style="font-size: 0.75rem;">{{ $siswa->tgl_mulai_magang ? \Carbon\Carbon::parse($siswa->tgl_mulai_magang)->translatedFormat('d M Y') : '-' }}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-flag-checkered me-2 text-primary opacity-75" style="width: 14px;"></i>
+                                                    <span style="font-size: 0.75rem;">{{ $siswa->tgl_selesai_magang ? \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->translatedFormat('d M Y') : '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a href="{{ route('guru.logbook', $siswa->nisn) }}" class="btn-small" title="Lihat Logbook" 
+                                                   style="background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 10px; border-radius: 8px;">
+                                                    <i class="fas fa-book-open"></i>
+                                                </a>
+                                                <a href="{{ route('guru.absensi', $siswa->nisn) }}" class="btn-small" title="Lihat Absensi"
+                                                   style="background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 10px; border-radius: 8px;">
+                                                    <i class="fas fa-calendar-check"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="empty-row text-center p-5">
+                                            <i class="fas fa-history fa-5x mb-3 text-muted opacity-25"></i>
+                                            <p class="text-muted">Belum ada riwayat siswa binaan yang selesai.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div> {{-- End of page-wrapper --}}
@@ -223,8 +305,19 @@
                     <div class="px-4 py-3">
                         <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i> Klik Logbook atau Absensi untuk melihat detail masing-masing siswa.</p>
                     </div>
-                    <div class="modal-member-grid" id="modalGroupBody">
-                        {{-- Cards via JS --}}
+                    <div class="table-responsive px-4 pb-4">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Identitas Siswa</th>
+                                    <th class="text-center">Status Hari Ini</th>
+                                    <th class="text-end">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalGroupBody">
+                                {{-- Rows via JS --}}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 pe-4">
@@ -273,6 +366,92 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Live Search Logic (Header)
+            const headerSearchInput = document.getElementById('headerSearchInput');
+            const studentCards = document.querySelectorAll('#bimbingan .student-card');
+            const noResultsBimbingan = document.getElementById('noResultsBimbingan');
+            const headerSearchForm = document.getElementById('headerSearchForm');
+
+            if (headerSearchInput) {
+                headerSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    
+                    // Filter Bimbingan Cards
+                    let hasMatchBimbingan = false;
+                    studentCards.forEach(card => {
+                        const name = card.querySelector('.student-name').innerText.toLowerCase();
+                        const nisn = card.querySelector('.student-nisn').innerText.toLowerCase();
+                        const infoValues = Array.from(card.querySelectorAll('.info-value')).map(el => el.innerText.toLowerCase());
+                        
+                        const isMatch = name.includes(searchTerm) || 
+                                        nisn.includes(searchTerm) || 
+                                        infoValues.some(val => val.includes(searchTerm));
+
+                        if (isMatch) {
+                            card.style.display = 'block';
+                            hasMatchBimbingan = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    if (noResultsBimbingan) {
+                        noResultsBimbingan.style.display = (hasMatchBimbingan || searchTerm === '') ? 'none' : 'block';
+                    }
+
+                    // Filter History Rows
+                    const historyRows = document.querySelectorAll('#riwayat-history .history-row');
+                    historyRows.forEach(row => {
+                        const name = row.querySelector('.td-siswa-name').innerText.toLowerCase();
+                        const nisn = row.querySelector('.td-siswa-nisn').innerText.toLowerCase();
+                        const school = row.querySelector('.badge-school').innerText.toLowerCase();
+                        const company = row.querySelector('.text-muted').innerText.toLowerCase();
+
+                        const isMatch = name.includes(searchTerm) || 
+                                        nisn.includes(searchTerm) || 
+                                        school.includes(searchTerm) ||
+                                        company.includes(searchTerm);
+
+                        row.style.display = isMatch ? 'table-row' : 'none';
+                    });
+                });
+
+                headerSearchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                });
+            }
+
+            // Debounced NPSN Search
+            const npsnInput = document.getElementById('npsnInput');
+            const npsnSearchForm = document.getElementById('npsnSearchForm');
+            let npsnTimeout = null;
+
+            if (npsnInput && npsnSearchForm) {
+                npsnInput.addEventListener('input', function() {
+                    clearTimeout(npsnTimeout);
+                    npsnTimeout = setTimeout(() => {
+                        npsnSearchForm.submit();
+                    }, 500);
+                });
+                
+                // Keep focus if NPSN is searched
+                if ("{{ $npsn }}") {
+                    // Activate search tab if NPSN was searched
+                    const searchTabBtn = document.getElementById('search-tab');
+                    if (searchTabBtn) {
+                        const tab = new bootstrap.Tab(searchTabBtn);
+                        tab.show();
+                        
+                        setTimeout(() => {
+                            npsnInput.focus();
+                            const val = npsnInput.value;
+                            npsnInput.value = '';
+                            npsnInput.value = val;
+                        }, 200);
+                    }
+                }
+            }
+
             const modalElement = document.getElementById('groupMembersModal');
             const modal = new bootstrap.Modal(modalElement);
             const modalName = document.getElementById('modalGroupName');
@@ -301,26 +480,27 @@
                     const initial = member.nama.charAt(0).toUpperCase();
 
                     const card = `
-                        <div class="member-mini-card" style="animation: fadeInUp 0.4s ease forwards; animation-delay: ${index * 0.1}s; opacity: 0;">
-                            <div class="member-card-header">
-                                <div class="member-main-info">
-                                    <div class="member-mini-avatar">${initial}</div>
-                                    <div class="member-info">
-                                        <div class="member-name">${member.nama}</div>
-                                        <div class="member-nisn">NISN: ${member.nisn}</div>
-                                    </div>
+                        <tr>
+                            <td>
+                                <div class="td-siswa-name fw-bold">${member.nama}</div>
+                                <div class="td-siswa-nisn small text-muted">NISN: ${member.nisn}</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="status-badge ${statusClass}" style="padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">
+                                    ${statusText}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="${logbookUrl}" class="btn-small" title="Logbook" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
+                                        <i class="fas fa-book"></i>
+                                    </a>
+                                    <a href="${absensiUrl}" class="btn-small" title="Absensi" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </a>
                                 </div>
-                                <div class="status-badge ${statusClass}">${statusText}</div>
-                            </div>
-                            <div class="member-card-actions">
-                                <a href="${logbookUrl}" class="btn-action btn-logbook">
-                                    <i class="fas fa-book"></i> Logbook
-                                </a>
-                                <a href="${absensiUrl}" class="btn-action btn-absensi">
-                                    <i class="fas fa-calendar-check"></i> Absensi
-                                </a>
-                            </div>
-                        </div>
+                            </td>
+                        </tr>
                     `;
                     modalBody.innerHTML += card;
                 });
@@ -331,4 +511,4 @@
         });
     </script>
 @endpush
-@endsection
+@endsection

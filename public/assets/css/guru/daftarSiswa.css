@@ -16,7 +16,7 @@
     --text-main: #0f172a;
     --text-muted: #64748b;
     --border: #f1f5f9;
-    --bg-main: #f8fafc;
+    --bg-color: #efefef;
     --radius-lg: 24px;
     --radius-md: 16px;
     --radius-sm: 12px;
@@ -26,6 +26,11 @@
     --font-heading: 'Outfit', sans-serif;
 }
 
+body{
+    background: var(--bg-color);
+    color: var(--text-medium);
+    min-height: 100vh;
+}
 
 /* ── Tata Letak Halaman ── */
 .page-wrapper {
@@ -82,7 +87,7 @@
     align-items: center;
     background: #ffffff;
     border: 1.5px solid var(--border);
-    border-radius: 50px;
+    border-radius: 15px;
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -464,8 +469,8 @@
 }
 
 .tab-button.active {
-    background: #ffffff;
-    color: var(--primary);
+    background: var(--primary);
+    color: #ffffff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 

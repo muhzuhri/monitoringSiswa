@@ -16,9 +16,21 @@
                 <h3 class="page-title">Verifikasi Laporan Akhir</h3>
                 <p class="page-subtitle">Tinjau dan proses verifikasi laporan akhir magang siswa bimbingan Anda.</p>
             </div>
-            <div class="pending-badge">
+            <!-- <div class="pending-badge">
                 <span class="pending-label">PENDING VERIFIKASI</span>
                 <span class="pending-count">{{ isset($laporanPending) ? $laporanPending->count() : 0 }}</span>
+            </div> -->
+            {{-- Search Bar --}}
+            <div class="search-section">
+            <form id="searchForm" class="search-form">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0 ps-0" 
+                        placeholder="Cari nama siswa atau NISN..." value="{{ $search ?? '' }}" autocomplete="off">
+                </div>
+            </form>
             </div>
         </div>
 
@@ -104,22 +116,7 @@
                  MODE LIST: Daftar semua laporan pending & riwayat
             ============================================================ --}}
         @else
-            {{-- Search Bar --}}
-            <div class="search-section mb-4">
-                <form action="{{ route('guru.verifikasi') }}" method="GET" class="search-form">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0" 
-                            placeholder="Cari nama siswa atau NISN..." value="{{ $search ?? '' }}">
-                        <button type="submit" class="btn btn-primary px-4">Cari</button>
-                        @if($search)
-                            <a href="{{ route('guru.verifikasi') }}" class="btn btn-outline-secondary">Reset</a>
-                        @endif
-                    </div>
-                </form>
-            </div>
+            
 
             {{-- Tab Navigasi --}}
             <div class="tabs-wrapper">
@@ -170,6 +167,11 @@
                                 <p class="empty-desc">Tidak ada laporan baru yang perlu diperiksa saat ini.</p>
                             </div>
                         @endforelse
+                        <div id="noResultsPending" class="empty-state" style="display: none; width: 100%;">
+                            <i class="fas fa-search empty-icon"></i>
+                            <h4 class="empty-title">Tidak ada hasil</h4>
+                            <p class="empty-desc">Tidak ada laporan pending yang cocok dengan pencarian.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -207,9 +209,14 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="empty-row">Belum ada riwayat verifikasi.</td>
+                                            <td colspan="5" class="empty-row text-center">Belum ada riwayat verifikasi.</td>
                                         </tr>
                                     @endforelse
+                                    <tr id="noResultsHistory" style="display: none;">
+                                        <td colspan="5" class="empty-row text-center text-muted">
+                                            Tidak ada riwayat yang cocok dengan pencarian.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -225,4 +232,57 @@
         @endif
 
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Live Search Logic
+            const searchInput = document.getElementById('searchInput');
+            const searchForm = document.getElementById('searchForm');
+            const pendingCards = document.querySelectorAll('#pending .laporan-card');
+            const historyRows = document.querySelectorAll('#history table tbody tr:not(#noResultsHistory)');
+            const noResultsPending = document.getElementById('noResultsPending');
+            const noResultsHistory = document.getElementById('noResultsHistory');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    
+                    // Filter Pending Cards
+                    let pendingMatchFound = false;
+                    pendingCards.forEach(card => {
+                        const text = card.innerText.toLowerCase();
+                        const isMatch = text.includes(searchTerm);
+                        card.style.display = isMatch ? 'flex' : 'none';
+                        if (isMatch) pendingMatchFound = true;
+                    });
+                    if (noResultsPending) {
+                        const isReallyEmpty = document.querySelector('#pending .laporan-grid').children.length === 1 && noResultsPending;
+                        noResultsPending.style.display = (pendingMatchFound || searchTerm === '') ? 'none' : 'block';
+                    }
+
+                    // Filter History Table
+                    let historyMatchFound = false;
+                    historyRows.forEach(row => {
+                        if (row.querySelector('.td-siswa-name') === null) return; // Skip empty state row
+                        
+                        const text = row.innerText.toLowerCase();
+                        const isMatch = text.includes(searchTerm);
+                        row.style.display = isMatch ? '' : 'none';
+                        if (isMatch) historyMatchFound = true;
+                    });
+                    if (noResultsHistory) {
+                        noResultsHistory.style.display = (historyMatchFound || searchTerm === '') ? 'none' : 'table-row';
+                    }
+                });
+
+                if (searchForm) {
+                    searchForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                    });
+                }
+            }
+        });
+    </script>
+    @endpush
 @endsection

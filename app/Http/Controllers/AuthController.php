@@ -57,6 +57,8 @@ class AuthController extends Controller
             'jenis_kelamin' => ['nullable', 'in:L,P'],
             'tipe_magang' => ['nullable', 'in:individu,kelompok'],
             'nisn_ketua' => ['nullable', 'string', 'max:20'],
+            'tgl_mulai_magang' => ['nullable', 'date'],
+            'tgl_selesai_magang' => ['nullable', 'date', 'after_or_equal:tgl_mulai_magang'],
 
             // Fields for Guru
             'id_guru' => ['nullable', 'string', 'max:50', 'unique:guru,id_guru'],
@@ -79,6 +81,8 @@ class AuthController extends Controller
                 'jenis_kelamin' => ['required', 'in:L,P'],
                 'tipe_magang' => ['required', 'in:individu,kelompok'],
                 'nisn_ketua' => ['required_if:tipe_magang,kelompok', 'nullable', 'string', 'max:20'],
+                'tgl_mulai_magang' => ['required', 'date'],
+                'tgl_selesai_magang' => ['required', 'date', 'after_or_equal:tgl_mulai_magang'],
             ]);
         } elseif ($role === 'guru') {
             $request->validate([
@@ -118,6 +122,9 @@ class AuthController extends Controller
                 'nisn_ketua' => $request->input('tipe_magang') === 'individu'
                     ? $request->input('nisn')
                     : $request->input('nisn_ketua'),
+                'tgl_mulai_magang' => $request->input('tgl_mulai_magang'),
+                'tgl_selesai_magang' => $request->input('tgl_selesai_magang'),
+                'status' => 'aktif',
             ])),
             'guru' => Guru::create(array_merge($common, [
                 'id_guru' => $request->input('id_guru'),

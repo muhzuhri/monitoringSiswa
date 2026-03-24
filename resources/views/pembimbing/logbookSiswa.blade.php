@@ -1,124 +1,136 @@
 @extends('layouts.nav.pembimbing')
 
 @section('title', 'Logbook ' . $siswa->nama . ' - SIM Magang')
-@section('body-class', 'dashboard-page pembimbing-page')
+@section('body-class', 'dosen-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/guru/absensiSiswa.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/dosen/style-dosen.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/dosen/absensiKegiatan.css') }}">
 @endpush
 
 @section('body')
-    <div class="page-wrapper">
+    <div class="dashboard-container mt-4 mb-5">
         {{-- Header --}}
         <div class="page-header">
-            <div class="header-text">
-                <nav class="breadcrumb-nav" aria-label="breadcrumb">
+            <div class="header-content">
+                <nav class="breadcrumb-container mb-2" aria-label="breadcrumb">
                     <a href="{{ route('pembimbing.siswa') }}" class="breadcrumb-link">Daftar Siswa</a>
                     <span class="breadcrumb-sep">/</span>
                     <span class="breadcrumb-current">Logbook Siswa</span>
                 </nav>
-                <h4 class="page-title">Logbook: {{ $siswa->nama }}</h4>
+                <h2 class="page-title"><i class="fas fa-book-open text-primary me-2"></i>Logbook: {{ $siswa->nama }}</h2>
                 <p class="page-subtitle">{{ $siswa->perusahaan }} &nbsp;|&nbsp; NISN: {{ $siswa->nisn }}</p>
             </div>
 
-            <div class="filter-wrapper d-flex align-items-center flex-wrap gap-2 mt-3 mt-md-0">
-                <span class="text-muted small fw-bold me-2">FILTER STATUS:</span>
-                <a href="{{ route('pembimbing.logbook', $siswa->nisn) }}" 
-                   class="btn btn-sm {{ !$status ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill px-3">Semua</a>
-                <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'pending']) }}" 
-                   class="btn btn-sm {{ $status == 'pending' ? 'btn-warning' : 'btn-outline-warning' }} rounded-pill px-3">Pending</a>
-                <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'verified']) }}" 
-                   class="btn btn-sm {{ $status == 'verified' ? 'btn-success' : 'btn-outline-success' }} rounded-pill px-3">Approved</a>
-                <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'rejected']) }}" 
-                   class="btn btn-sm {{ $status == 'rejected' ? 'btn-danger' : 'btn-outline-danger' }} rounded-pill px-3">Rejected</a>
-
-                @if($logbooks->where('status', 'pending')->count() > 0)
-                    <form action="{{ route('pembimbing.logbook.validasi-semua', $siswa->nisn) }}" method="POST" class="ms-md-auto" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui SEMUA logbook pending untuk siswa ini?')">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
-                            <i class="fas fa-check-double me-1"></i> Setujui Semua
-                        </button>
-                    </form>
-                @endif
+            <div class="header-actions">
+                <div class="filter-group gap-2">
+                    <span class="text-muted small fw-bold me-2">FILTER STATUS:</span>
+                    <a href="{{ route('pembimbing.logbook', $siswa->nisn) }}" 
+                       class="btn-filter-submit {{ !$status ? '' : 'btn-outline' }}" style="{{ !$status ? '' : 'background:transparent; color:var(--color-primary); border:1px solid var(--color-primary);' }}">Semua</a>
+                    <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'pending']) }}" 
+                       class="btn-filter-submit {{ $status == 'pending' ? '' : 'btn-outline' }}" style="{{ $status == 'pending' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);' }}">Pending</a>
+                    <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'verified']) }}" 
+                       class="btn-filter-submit {{ $status == 'verified' ? '' : 'btn-outline' }}" style="{{ $status == 'verified' ? 'background:var(--color-green);' : 'background:transparent; color:var(--color-green); border:1px solid var(--color-green);' }}">Approved</a>
+                    
+                    @if($logbooks->where('status', 'pending')->count() > 0)
+                        <form action="{{ route('pembimbing.logbook.validasi-semua', $siswa->nisn) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui SEMUA logbook pending untuk siswa ini?')">
+                            @csrf
+                            <button type="submit" class="btn-filter-submit" style="background: var(--color-green);">
+                                <i class="fas fa-check-double me-1"></i> Setujui Semua
+                            </button>
+                        </form>
+                    @endif
+                </div>
             </div>
         </div>
 
         @if(session('success'))
-            <div class="alert alert-success border-0 shadow-sm mb-4 d-flex align-items-center" style="border-radius: 12px;">
-                <i class="fas fa-check-circle me-3 fs-4"></i>
-                <div>{{ session('success') }}</div>
+            <div class="custom-alert alert-success-soft mb-4">
+                <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="alert-content">{{ session('success') }}</div>
             </div>
         @endif
 
         {{-- Tabel Logbook --}}
-        <div class="ui-card">
-            <div class="card-head">
-                <h6 class="card-title">Daftar Kegiatan Siswa</h6>
+        <div class="content-card">
+            <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);">
+                <h4 class="card-title"><i class="fas fa-list-alt text-primary me-2"></i>Daftar Kegiatan Siswa</h4>
             </div>
-            <div class="table-wrapper">
-                <table class="data-table">
+            <div class="custom-table-wrapper">
+                <table class="custom-table">
                     <thead>
                         <tr>
-                            <th style="width: 200px;">Tanggal</th>
-                            <th>Kegiatan / Pekerjaan</th>
-                            <th style="width: 120px;">Bukti</th>
-                            <th style="width: 150px;">Status</th>
-                            <th style="width: 150px;">Verifikasi</th>
+                            <th width="20%">Tanggal</th>
+                            <th width="40%">Kegiatan / Pekerjaan</th>
+                            <th width="15%">Bukti</th>
+                            <th width="10%">Status</th>
+                            <th width="15%" class="text-center">Verifikasi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($logbooks as $log)
                             <tr>
-                                <td class="td-date">
-                                    {{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('l, d F Y') }}
+                                <td>
+                                    <div class="date-badge">
+                                        <span class="day">{{ \Carbon\Carbon::parse($log->tanggal)->format('d') }}</span>
+                                        <div class="month-year">
+                                            <span class="month">{{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('M') }}</span>
+                                            <span class="year">{{ \Carbon\Carbon::parse($log->tanggal)->format('Y') }}</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark mb-1">{{ Str::limit($log->kegiatan, 100) }}</div>
-                                    @if($log->catatan_pembimbing)
-                                        <div class="small p-2 rounded {{ $log->status == 'rejected' ? 'bg-danger-light text-danger' : 'bg-success-light text-success' }}" style="border-left: 3px solid currentColor;">
-                                            <i class="fas fa-comment-dots me-1"></i> {{ $log->catatan_pembimbing }}
-                                        </div>
-                                    @endif
+                                    <div class="activity-excerpt">
+                                        <div class="fw-bold text-dark mb-1">{{ $log->kegiatan }}</div>
+                                        @if($log->catatan_pembimbing)
+                                            <div class="note-bubble mt-2 {{ $log->status == 'rejected' ? 'alert-danger-soft' : '' }}" style="padding: 0.5rem 0.75rem; font-size: 0.8rem; {{ $log->status == 'rejected' ? 'background:var(--color-red-lt); border-left:3px solid var(--color-red);' : 'background:var(--color-green-lt); border-left:3px solid var(--color-green);' }}">
+                                                <i class="fas fa-comment-dots me-1"></i> {{ $log->catatan_pembimbing }}
+                                            </div>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     @if($log->foto)
-                                        <a href="{{ asset('storage/' . $log->foto) }}" target="_blank" class="photo-group">
-                                            <img src="{{ asset('storage/' . $log->foto) }}" class="photo-thumbnail" alt="Bukti">
+                                        <a href="{{ asset('storage/' . $log->foto) }}" target="_blank" class="attachment-badge">
+                                            <i class="fas fa-image"></i> Lihat Bukti
                                         </a>
                                     @else
-                                        <span class="text-muted small">No Photo</span>
+                                        <span class="text-muted small">—</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if($log->status == 'verified')
-                                        <span class="status-badge status-hadir">Approved</span>
+                                        <span class="status-badge status-approved">Approved</span>
                                     @elseif($log->status == 'rejected')
-                                        <span class="status-badge status-alpa">Rejected</span>
+                                        <span class="status-badge status-rejected">Rejected</span>
                                     @else
-                                        <span class="status-badge status-izin">Pending</span>
+                                        <span class="status-badge status-pending">Pending</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     @if($log->status == 'verified')
-                                        <span class="badge bg-success-light text-success fw-bold px-3 py-2 rounded-pill shadow-sm" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalVerifikasi{{ $log->id_kegiatan }}">
+                                        <span class="status-badge status-approved cursor-pointer btn-open-modal" data-modal="modalLog{{ $log->id_kegiatan }}">
                                             <i class="fas fa-check-circle"></i> Verified
                                         </span>
                                     @elseif($log->status == 'rejected')
-                                        <span class="badge bg-danger-light text-danger fw-bold px-3 py-2 rounded-pill shadow-sm" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalVerifikasi{{ $log->id_kegiatan }}">
+                                        <span class="status-badge status-rejected cursor-pointer btn-open-modal" data-modal="modalLog{{ $log->id_kegiatan }}">
                                             <i class="fas fa-times-circle"></i> Rejected
                                         </span>
                                     @else
-                                        <button class="btn btn-sm btn-outline-warning fw-bold px-3 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#modalVerifikasi{{ $log->id_kegiatan }}">
-                                            <i class="fas fa-clock me-1"></i> Verifikasi
+                                        <button class="btn-action-icon btn-review btn-open-modal" data-modal="modalLog{{ $log->id_kegiatan }}">
+                                            <i class="fas fa-clock"></i> Verifikasi
                                         </button>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="empty-row text-center py-5">
-                                    <i class="fas fa-book-open fs-1 text-muted opacity-25 mb-3"></i>
-                                    <div class="text-muted">Belum ada catatan kegiatan yang sesuai.</div>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open empty-icon"></i>
+                                        <h4>Belum Ada Kegiatan</h4>
+                                        <p class="text-muted">Siswa belum mengisi logbook atau tidak ada data yang sesuai.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -126,61 +138,104 @@
                 </table>
             </div>
             @if($logbooks->hasPages())
-                <div class="table-pagination">
+                <div class="pagination-wrapper">
                     {{ $logbooks->links() }}
                 </div>
             @endif
         </div>
 
-        {{-- Modals Section --}}
+        {{-- Section Modal --}}
         @foreach($logbooks as $log)
-            <!-- Modal Verifikasi -->
-            <div class="modal fade" id="modalVerifikasi{{ $log->id_kegiatan }}" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content shadow-lg border-0" style="border-radius: 20px;">
-                        <div class="modal-header border-0 pb-0 pe-4 pt-4">
-                            <h5 class="fw-bold"><i class="fas fa-clipboard-check text-primary me-2"></i> Verifikasi Logbook</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form action="{{ route('pembimbing.logbook.validasi', $log->id_kegiatan) }}" method="POST">
-                            @csrf
-                            <div class="modal-body p-4">
-                                <div class="mb-4 p-3 bg-light rounded-4">
-                                    <div class="small text-muted mb-1">Kegiatan Siswa:</div>
-                                    <div class="fw-bold text-dark">{{ $log->kegiatan }}</div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold text-dark mb-3">Keputusan Verifikasi</label>
-                                    <div class="row g-3">
-                                        <div class="col-6">
-                                            <input type="radio" class="btn-check" name="status" id="approve{{ $log->id_kegiatan }}" value="verified" {{ $log->status == 'verified' ? 'checked' : '' }} required>
-                                            <label class="btn btn-outline-success w-100 py-3 rounded-4 fw-bold" for="approve{{ $log->id_kegiatan }}">
-                                                <i class="fas fa-check-circle me-1"></i> SETUJUI
-                                            </label>
-                                        </div>
-                                        <div class="col-6">
-                                            <input type="radio" class="btn-check" name="status" id="reject{{ $log->id_kegiatan }}" value="rejected" {{ $log->status == 'rejected' ? 'checked' : '' }}>
-                                            <label class="btn btn-outline-danger w-100 py-3 rounded-4 fw-bold" for="reject{{ $log->id_kegiatan }}">
-                                                <i class="fas fa-times-circle me-1"></i> TOLAK
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-0">
-                                    <label class="form-label fw-bold text-dark mb-2">Catatan / Feedback (Opsional)</label>
-                                    <textarea name="catatan_pembimbing" class="form-control bg-light border-0 p-3" rows="3" placeholder="Contoh: Deskripsi sudah bagus, lanjutkan." style="border-radius: 12px; resize: none;">{{ $log->catatan_pembimbing }}</textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer border-0 p-4 pt-0">
-                                <button type="button" class="btn btn-light px-4 rounded-pill fw-bold" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">Simpan Verifikasi</button>
-                            </div>
-                        </form>
+            <div class="custom-modal-overlay" id="modalLog{{ $log->id_kegiatan }}">
+                <div class="custom-modal modal-sm">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-clipboard-check text-primary"></i> Verifikasi Logbook</h5>
+                        <button type="button" class="modal-close btn-close-modal" data-modal="modalLog{{ $log->id_kegiatan }}">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
+                    <form action="{{ route('pembimbing.logbook.validasi', $log->id_kegiatan) }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="detail-section mb-4">
+                                <label class="detail-label">Kegiatan Siswa</label>
+                                <div class="detail-content">
+                                    {{ $log->kegiatan }}
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                <label class="detail-label">Keputusan Verifikasi</label>
+                                <div class="validation-radios">
+                                    <label class="radio-card btn-radio-approved">
+                                        <input type="radio" name="status" value="verified" {{ $log->status == 'verified' ? 'checked' : '' }} required>
+                                        <div class="radio-content">
+                                            <i class="fas fa-check-circle"></i> SETUJUI
+                                        </div>
+                                    </label>
+                                    <label class="radio-card btn-radio-rejected">
+                                        <input type="radio" name="status" value="rejected" {{ $log->status == 'rejected' ? 'checked' : '' }}>
+                                        <div class="radio-content">
+                                            <i class="fas fa-times-circle"></i> TOLAK
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Catatan / Feedback (Opsional)</label>
+                                <textarea name="catatan_pembimbing" class="custom-textarea" rows="3" placeholder="Contoh: Deskripsi sudah bagus.">{{ $log->catatan_pembimbing }}</textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-cancel btn-close-modal" data-modal="modalLog{{ $log->id_kegiatan }}">Batal</button>
+                            <button type="submit" class="btn-submit">Simpan Verifikasi</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         @endforeach
     </div>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal Logic
+            const openBtns = document.querySelectorAll('.btn-open-modal');
+            const closeBtns = document.querySelectorAll('.btn-close-modal');
+            const overlays = document.querySelectorAll('.custom-modal-overlay');
+
+            openBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal');
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.add('show');
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            });
+
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal');
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        modal.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+
+            overlays.forEach(overlay => {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+        });
+    </script>
+@endpush
 @endsection

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateRoleForms();
     }
 
-    const magangTypeSelect = document.getElementById('magang_type');
+    const magangTypeSelect = document.getElementById('tipe_magang');
     const groupLeaderSection = document.getElementById('group-leader-section');
     if (magangTypeSelect && groupLeaderSection) {
         magangTypeSelect.addEventListener('change', function() {

@@ -203,19 +203,19 @@
                     </div>
                     <div class="card-body">
                         <div class="quick-actions-grid">
-                            <a href="#" class="quick-action-btn">
+                            <a href="{{ route('pembimbing.siswa') }}" class="quick-action-btn">
                                 <i class="fas fa-user-graduate"></i>
                                 <span>Daftar Siswa</span>
                             </a>
-                            <a href="#" class="quick-action-btn">
+                            <a href="{{ route('pembimbing.siswa') }}" class="quick-action-btn">
                                 <i class="fas fa-calendar-check"></i>
                                 <span>Validasi Absen</span>
                             </a>
-                            <a href="#" class="quick-action-btn">
+                            <a href="{{ route('pembimbing.siswa') }}" class="quick-action-btn">
                                 <i class="fas fa-book"></i>
                                 <span>Review Logbook</span>
                             </a>
-                            <a href="#" class="quick-action-btn">
+                            <a href="{{ route('pembimbing.laporan') }}" class="quick-action-btn">
                                 <i class="fas fa-file-pdf"></i>
                                 <span>Cetak Laporan</span>
                             </a>

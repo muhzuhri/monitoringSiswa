@@ -128,6 +128,17 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Mulai Magang</label>
+                                        <input type="date" name="tgl_mulai_magang" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tanggal Selesai Magang</label>
+                                        <input type="date" name="tgl_selesai_magang" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">NPSN Sekolah</label>
                                         <input type="text" name="npsn_siswa" class="form-control"
                                             placeholder="Masukkan NPSN Sekolah">

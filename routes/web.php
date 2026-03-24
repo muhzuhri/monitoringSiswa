@@ -66,6 +66,10 @@ Route::middleware('auth')->group(function () {
     // Claim Siswa (Teacher side)
     Route::post('/guru/siswa/{nisn}/claim', [GuruController::class, 'claimSiswa'])->name('guru.siswa.claim');
 
+    // Profil Guru
+    Route::get('/guru/profil', [GuruController::class, 'profil'])->name('guru.profil');
+    Route::post('/guru/profil', [GuruController::class, 'updateProfil'])->name('guru.profil.update');
+
     Route::get('/pembimbing/pembimbing', [AuthController::class, 'pembimbing'])->name('pembimbing.pembimbing');
     Route::get('/pembimbing/siswa', [PembimbingController::class, 'daftarSiswa'])->name('pembimbing.siswa');
     Route::get('/pembimbing/siswa/{nisn}/absensi', [PembimbingController::class, 'absensiSiswa'])->name('pembimbing.absensi');
@@ -78,6 +82,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembimbing/absensi/siswa/{nisn}/validasi-semua', [PembimbingController::class, 'validasiSemuaAbsensi'])->name('pembimbing.absensi.validasi-semua');
     Route::get('/pembimbing/evaluasi', [PembimbingController::class, 'evaluasiSiswa'])->name('pembimbing.evaluasi');
     Route::post('/pembimbing/evaluasi', [PembimbingController::class, 'storeEvaluasi'])->name('pembimbing.evaluasi.store');
+    
+    // Reporting
+    Route::get('/pembimbing/siswa/{nisn}/cetak-jurnal', [PembimbingController::class, 'cetakJurnalSiswa'])->name('pembimbing.siswa.cetakJurnal');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-absensi', [PembimbingController::class, 'cetakAbsensiSiswa'])->name('pembimbing.siswa.cetakAbsensi');
+    
     Route::get('/pembimbing/laporan', [PembimbingController::class, 'laporanSiswa'])->name('pembimbing.laporan');
     Route::get('/pembimbing/laporan/{nisn}/cetak', [PembimbingController::class, 'cetakLaporanSiswa'])->name('pembimbing.laporan.cetak');
     Route::get('/pembimbing/profil', [PembimbingController::class, 'profil'])->name('pembimbing.profil');

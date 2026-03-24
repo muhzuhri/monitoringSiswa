@@ -19,7 +19,7 @@
                     <span class="breadcrumb-current">Rekap Absensi</span>
                 </nav>
                 <h4 class="page-title">Rekap Absensi: {{ $siswa->nama }}</h4>
-                <p class="page-subtitle">{{ $siswa->perusahaan }} &nbsp;|&nbsp; NISN: {{ $siswa->nisn }}</p>
+                <p class="page-subtitle"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }} &nbsp;|&nbsp; <i class="fas fa-id-card me-1"></i> NISN: {{ $siswa->nisn }}</p>
             </div>
             <a href="{{ route('guru.absensi.export', $siswa->nisn) }}" class="btn-export">
                 <i class="fas fa-file-pdf"></i> Export PDF
@@ -55,11 +55,11 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Tanggal</th>
-                            <th>Status</th>
-                            <th>Jam Masuk</th>
-                            <th>Jam Pulang</th>
-                            <th>Bukti Foto</th>
+                            <th><i class="fas fa-calendar-day me-1"></i> Hari, Tanggal</th>
+                            <th><i class="fas fa-info-circle me-1"></i> Status</th>
+                            <th class="text-center"><i class="fas fa-clock me-1"></i> Masuk</th>
+                            <th class="text-center"><i class="fas fa-clock me-1"></i> Pulang</th>
+                            <th class="text-end pe-4"><i class="fas fa-camera me-1"></i> Bukti</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,26 +79,26 @@
                                         <span class="status-badge status-alpa">Alpa</span>
                                     @endif
                                 </td>
-                                <td class="td-jam">
+                                <td class="text-center td-jam">
                                     {{ $a->jam_masuk ? \Carbon\Carbon::parse($a->jam_masuk)->format('H:i') : '-' }}
                                 </td>
-                                <td class="td-jam">
+                                <td class="text-center td-jam">
                                     {{ $a->jam_pulang ? \Carbon\Carbon::parse($a->jam_pulang)->format('H:i') : '-' }}
                                 </td>
-                                <td>
-                                    <div class="photo-group">
+                                <td class="text-end pe-4">
+                                    <div class="photo-group justify-content-end">
                                         @if($a->foto_masuk)
-                                            <a href="{{ asset('storage/' . $a->foto_masuk) }}" target="_blank" title="Foto Masuk">
-                                                <img src="{{ asset('storage/' . $a->foto_masuk) }}" class="photo-thumbnail" alt="Foto Masuk">
+                                            <a href="{{ asset('storage/' . $a->foto_masuk) }}" target="_blank" title="Foto Masuk" class="photo-link">
+                                                <img src="{{ asset('storage/' . $a->foto_masuk) }}" class="photo-thumbnail rounded" style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #eee;" alt="M">
                                             </a>
                                         @endif
                                         @if($a->foto_pulang)
-                                            <a href="{{ asset('storage/' . $a->foto_pulang) }}" target="_blank" title="Foto Pulang">
-                                                <img src="{{ asset('storage/' . $a->foto_pulang) }}" class="photo-thumbnail" alt="Foto Pulang">
+                                            <a href="{{ asset('storage/' . $a->foto_pulang) }}" target="_blank" title="Foto Pulang" class="photo-link">
+                                                <img src="{{ asset('storage/' . $a->foto_pulang) }}" class="photo-thumbnail rounded" style="width: 32px; height: 32px; object-fit: cover; border: 1px solid #eee;" alt="P">
                                             </a>
                                         @endif
                                         @if(!$a->foto_masuk && !$a->foto_pulang)
-                                            <span class="no-photo">—</span>
+                                            <span class="no-photo opacity-50 small">—</span>
                                         @endif
                                     </div>
                                 </td>

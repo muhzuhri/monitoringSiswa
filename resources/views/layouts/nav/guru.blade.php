@@ -51,6 +51,9 @@
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('guru.penilaian*') ? 'active' : '' }}" href="{{ route('guru.penilaian') }}">Penilaian</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('guru.profil*') ? 'active' : '' }}" href="{{ route('guru.profil') }}">Profil</a>
+                    </li>
                 </ul>
                 <form action="{{ route('logout') }}" method="post" class="ms-2">
                     @csrf

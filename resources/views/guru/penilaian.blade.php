@@ -14,6 +14,18 @@
                 <h3 class="page-title">Penilaian Akhir Magang</h3>
                 <p class="page-subtitle">Kelola dan berikan nilai akhir untuk siswa bimbingan Anda.</p>
             </div>
+            {{-- Search Bar --}}
+            <div class="search-section">
+            <form id="searchForm" class="search-form">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control border-start-0 ps-0" 
+                        placeholder="Cari nama siswa atau NISN..." value="{{ $search ?? '' }}" autocomplete="off">
+                </div>
+            </form>
+            </div>
             @if(isset($siswa))
                 <a href="{{ route('guru.penilaian') }}" class="btn-action btn-back">
                     <i class="fas fa-arrow-left"></i> Kembali ke Daftar
@@ -29,22 +41,7 @@
         @endif
 
         @if(isset($siswasPending) && isset($siswasDone))
-            {{-- Search Bar --}}
-            <div class="search-section mb-4">
-                <form action="{{ route('guru.penilaian') }}" method="GET" class="search-form">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0" 
-                            placeholder="Cari nama siswa atau NISN..." value="{{ $search ?? '' }}">
-                        <button type="submit" class="btn btn-primary px-4">Cari</button>
-                        @if($search)
-                            <a href="{{ route('guru.penilaian') }}" class="btn btn-outline-secondary">Reset</a>
-                        @endif
-                    </div>
-                </form>
-            </div>
+            
 
             {{-- Tab Navigasi --}}
             <div class="tabs-wrapper mb-4">
@@ -98,6 +95,11 @@
                                             </td>
                                         </tr>
                                     @endforelse
+                                    <tr id="noResultsPending" style="display: none;">
+                                        <td colspan="5" class="empty-state text-center py-4 text-muted">
+                                            Tidak ada siswa yang cocok dengan pencarian di tab ini.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -147,6 +149,11 @@
                                             </td>
                                         </tr>
                                     @endforelse
+                                    <tr id="noResultsHistory" style="display: none;">
+                                        <td colspan="5" class="empty-state text-center py-4 text-muted">
+                                            Tidak ada data yang cocok dengan pencarian di tab ini.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -218,4 +225,58 @@
             </div>
         @endif
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Live Search Logic
+            const searchInput = document.getElementById('searchInput');
+            const searchForm = document.getElementById('searchForm');
+            const pendingRows = document.querySelectorAll('#pending table tbody tr:not(#noResultsPending)');
+            const historyRows = document.querySelectorAll('#history table tbody tr:not(#noResultsHistory)');
+            const noResultsPending = document.getElementById('noResultsPending');
+            const noResultsHistory = document.getElementById('noResultsHistory');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    
+                    // Filter Pending Table
+                    let pendingMatchFound = false;
+                    pendingRows.forEach(row => {
+                        if (row.querySelector('strong') === null) return; // Skip empty state row
+                        
+                        const text = row.innerText.toLowerCase();
+                        const isMatch = text.includes(searchTerm);
+                        row.style.display = isMatch ? '' : 'none';
+                        if (isMatch) pendingMatchFound = true;
+                    });
+                    if (noResultsPending) {
+                        noResultsPending.style.display = (pendingMatchFound || searchTerm === '') ? 'none' : 'table-row';
+                    }
+
+                    // Filter History Table
+                    let historyMatchFound = false;
+                    historyRows.forEach(row => {
+                        if (row.querySelector('strong') === null) return; // Skip empty state row
+                        
+                        const text = row.innerText.toLowerCase();
+                        const isMatch = text.includes(searchTerm);
+                        row.style.display = isMatch ? '' : 'none';
+                        if (isMatch) historyMatchFound = true;
+                    });
+                    if (noResultsHistory) {
+                        noResultsHistory.style.display = (historyMatchFound || searchTerm === '') ? 'none' : 'table-row';
+                    }
+                });
+
+                if (searchForm) {
+                    searchForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                    });
+                }
+            }
+        });
+    </script>
+    @endpush
 @endsection

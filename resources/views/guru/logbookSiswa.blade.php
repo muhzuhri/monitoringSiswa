@@ -44,111 +44,114 @@
         @endif
 
         <!-- Logbook List -->
-        <main class="logbook-grid">
-            @forelse($logbooks as $log)
-                <article class="logbook-card">
-                    <div class="card-content-grid">
-                        <!-- Info Section -->
-                        <div class="info-section">
-                            <header class="info-header">
-                                <div class="date-badge">
-                                    <i class="far fa-calendar-alt"></i> 
-                                    {{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('l, d F Y') }}
-                                </div>
-                                @if($log->status == 'verified')
-                                    <span class="status-badge status-approved">Disetujui</span>
-                                @elseif($log->status == 'rejected')
-                                    <span class="status-badge status-rejected">Ditolak</span>
-                                @else
-                                    <span class="status-badge status-pending">Menunggu Verifikasi</span>
-                                @endif
-                            </header>
-
-                            <h2 class="section-label">Kegiatan / Pekerjaan:</h2>
-                            <p class="kegiatan-text">{{ $log->kegiatan }}</p>
-
-                            @if($log->catatan_pembimbing)
-                                <div class="pembimbing-note {{ $log->status == 'rejected' ? 'note-danger' : 'note-success' }}">
-                                    <span class="note-label">CATATAN PEMBIMBING:</span>
-                                    <p class="note-text">"{{ $log->catatan_pembimbing }}"</p>
-                                </div>
-                            @endif
-
-                            <div class="action-footer">
-                                <button class="btn-action" data-bs-toggle="modal" data-bs-target="#modalVerifikasi{{ $log->id_kegiatan }}">
-                                    <i class="fas fa-clipboard-check"></i>
-                                    <span>Verifikasi</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Photo Section -->
-                        <aside class="photo-container">
-                            <span class="section-label">BUKTI KEGIATAN:</span>
-                            @if($log->foto)
-                                <a href="{{ asset('storage/' . $log->foto) }}" target="_blank" class="photo-wrapper">
-                                    <img src="{{ asset('storage/' . $log->foto) }}" class="logbook-photo" alt="Bukti Kegiatan">
-                                </a>
-                            @else
-                                <div class="photo-placeholder">
-                                    <i class="fas fa-image"></i>
-                                    <span>Tidak ada foto bukti</span>
-                                </div>
-                            @endif
-                        </aside>
-                    </div>
-                </article>
-
-                <!-- Modal Verifikasi -->
-                <div class="modal fade modal-overlay" id="modalVerifikasi{{ $log->id_kegiatan }}" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content modal-content-custom">
-                            <div class="modal-header modal-header-custom">
-                                <h5 class="modal-title-custom">Verifikasi Logbook</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form action="{{ route('guru.logbook.verifikasi', $log->id_kegiatan) }}" method="POST">
-                                @csrf
-                                <div class="modal-body modal-body-custom">
-                                    <p class="modal-kegiatan-summary"><strong>Kegiatan:</strong> {{ Str::limit($log->kegiatan, 100) }}</p>
-                                    
-                                    <div class="form-group-custom">
-                                        <label class="section-label">Keputusan Verifikasi</label>
-                                        <div class="decision-grid">
-                                            <input type="radio" class="btn-check" name="status" id="approve{{ $log->id_kegiatan }}" value="verified" {{ $log->status == 'verified' ? 'checked' : '' }} required>
-                                            <label class="decision-btn-custom decision-btn-success" for="approve{{ $log->id_kegiatan }}">
-                                                <i class="fas fa-check-circle"></i> SETUJUI
-                                            </label>
-
-                                            <input type="radio" class="btn-check" name="status" id="reject{{ $log->id_kegiatan }}" value="rejected" {{ $log->status == 'rejected' ? 'checked' : '' }}>
-                                            <label class="decision-btn-custom decision-btn-danger" for="reject{{ $log->id_kegiatan }}">
-                                                <i class="fas fa-times-circle"></i> TOLAK
-                                            </label>
+        <div class="ui-card mt-4">
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4" width="20%"><i class="far fa-calendar-alt me-1"></i> Tanggal</th>
+                            <th width="45%"><i class="fas fa-tasks me-1"></i> Kegiatan / Pekerjaan</th>
+                            <th width="15%" class="text-center"><i class="fas fa-info-circle me-1"></i> Status</th>
+                            <th width="20%" class="text-end pe-4"><i class="fas fa-tools me-1"></i> Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($logbooks as $log)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('l') }}</div>
+                                    <div class="small text-muted">{{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('d F Y') }}</div>
+                                </td>
+                                <td>
+                                    <div class="kegiatan-preview mb-1">{{ Str::limit($log->kegiatan, 150) }}</div>
+                                    @if($log->catatan_pembimbing)
+                                        <div class="catatan-badge small {{ $log->status == 'rejected' ? 'text-danger' : 'text-success' }}" style="font-style: italic;">
+                                            <i class="fas fa-comment-dots me-1"></i> "{{ Str::limit($log->catatan_pembimbing, 50) }}"
                                         </div>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($log->status == 'verified')
+                                        <span class="status-badge status-approved small">Verified</span>
+                                    @elseif($log->status == 'rejected')
+                                        <span class="status-badge status-rejected small">Rejected</span>
+                                    @else
+                                        <span class="status-badge status-pending small">Pending</span>
+                                    @endif
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        @if($log->foto)
+                                            <a href="{{ asset('storage/' . $log->foto) }}" target="_blank" class="btn-small p-0 overflow-hidden" style="width: 32px; height: 32px; border-radius: 6px;" title="Lihat Foto">
+                                                <img src="{{ asset('storage/' . $log->foto) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                            </a>
+                                        @endif
+                                        <button class="btn-small" data-bs-toggle="modal" data-bs-target="#modalVerifikasi{{ $log->id_kegiatan }}" 
+                                                style="padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; background: var(--primary-light); color: var(--primary-color); border: none;">
+                                            <i class="fas fa-clipboard-check"></i> Verifikasi
+                                        </button>
                                     </div>
+                                </td>
+                            </tr>
 
-                                    <div class="form-group-custom">
-                                        <label class="section-label">Catatan / Feedback (Opsional)</label>
-                                        <textarea name="catatan" class="custom-textarea" placeholder="Contoh: Deskripsi sudah bagus, lanjutkan.">{{ $log->catatan_pembimbing }}</textarea>
+                            <!-- Modal Verifikasi (Moved inside forelse for context) -->
+                            <div class="modal fade modal-overlay" id="modalVerifikasi{{ $log->id_kegiatan }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content modal-content-custom" style="border-radius: 20px; border: none; overflow: hidden;">
+                                        <div class="modal-header modal-header-custom" style="background: var(--primary-color); color: white; border: none;">
+                                            <h5 class="modal-title-custom" style="font-weight: 700;">Verifikasi Logbook</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form action="{{ route('guru.logbook.verifikasi', $log->id_kegiatan) }}" method="POST">
+                                            @csrf
+                                            <div class="modal-body modal-body-custom p-4">
+                                                <div class="bg-light p-3 rounded-4 mb-4" style="border-left: 4px solid var(--primary-color);">
+                                                    <label class="section-label small fw-bold text-muted mb-1 text-uppercase">Isi Kegiatan:</label>
+                                                    <p class="mb-0 small">{{ $log->kegiatan }}</p>
+                                                </div>
+                                                
+                                                <div class="form-group-custom mb-4">
+                                                    <label class="section-label small fw-bold text-muted mb-2 text-uppercase">Keputusan Verifikasi</label>
+                                                    <div class="decision-grid d-flex gap-2">
+                                                        <input type="radio" class="btn-check" name="status" id="approve{{ $log->id_kegiatan }}" value="verified" {{ $log->status == 'verified' ? 'checked' : '' }} required>
+                                                        <label class="btn btn-outline-success flex-grow-1 rounded-3 py-2" for="approve{{ $log->id_kegiatan }}">
+                                                            <i class="fas fa-check-circle me-1"></i> SETUJUI
+                                                        </label>
+            
+                                                        <input type="radio" class="btn-check" name="status" id="reject{{ $log->id_kegiatan }}" value="rejected" {{ $log->status == 'rejected' ? 'checked' : '' }}>
+                                                        <label class="btn btn-outline-danger flex-grow-1 rounded-3 py-2" for="reject{{ $log->id_kegiatan }}">
+                                                            <i class="fas fa-times-circle me-1"></i> TOLAK
+                                                        </label>
+                                                    </div>
+                                                </div>
+            
+                                                <div class="form-group-custom">
+                                                    <label class="section-label small fw-bold text-muted mb-2 text-uppercase">Catatan / Feedback</label>
+                                                    <textarea name="catatan" class="form-control rounded-3" style="min-height: 100px; font-size: 0.9rem;" placeholder="Berikan catatan perbaikan atau apresiasi...">{{ $log->catatan_pembimbing }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-0 p-4 pt-0">
+                                                <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-primary rounded-3 px-4 shadow-sm">Simpan Verifikasi</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="modal-footer modal-footer-custom">
-                                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Batal</button>
-                                    <button type="submit" class="btn-save">Simpan Verifikasi</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="empty-state">
-                    <div class="empty-icon-box">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <h2 class="empty-title">Belum ada Logbook</h2>
-                    <p class="empty-desc">Siswa belum mengunggah kegiatan untuk kategori yang dipilih.</p>
-                </div>
-            @endforelse
-        </main>
+                            </div>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="empty-state text-center p-5">
+                                    <div class="empty-icon-box mb-3 opacity-25">
+                                        <i class="fas fa-book-open fa-3x"></i>
+                                    </div>
+                                    <h2 class="empty-title h5">Belum ada Logbook</h2>
+                                    <p class="empty-desc text-muted small">Siswa belum mengunggah kegiatan untuk kategori ini.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 @endsection
