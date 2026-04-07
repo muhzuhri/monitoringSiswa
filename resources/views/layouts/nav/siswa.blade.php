@@ -48,6 +48,10 @@
                             href="{{ route('siswa.absensi') }}">Absensi & Kegiatan</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('siswa.pengajuan') ? 'active' : '' }}"
+                            href="{{ route('siswa.pengajuan') }}">Lupa Isi</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('siswa.laporan') ? 'active' : '' }}"
                             href="{{ route('siswa.laporan') }}">Laporan</a>
                     </li>

@@ -89,7 +89,11 @@
                                         <td class="actions-cell">
                                             <button class="btn-premium btn-assessment btn-open-modal" 
                                                 data-modal="evaluationModal"
-                                                onclick="setupEvaluationForm('{{ $siswa->nisn }}', '{{ addslashes($siswa->nama) }}', '{{ $siswa->jurusan }}', {{ json_encode($siswa->penilaians) }})">
+                                                data-nisn="{{ $siswa->nisn }}"
+                                                data-nama="{{ addslashes($siswa->nama) }}"
+                                                data-jurusan="{{ $siswa->jurusan }}"
+                                                data-penilaians="{{ json_encode($siswa->penilaians) }}"
+                                                onclick="setupEvaluationFormFromEl(this)">
                                                 <i class="fas fa-edit"></i> Input Nilai
                                             </button>
                                         </td>
@@ -154,7 +158,11 @@
                                             <div class="action-flex-group">
                                                 <button class="btn-premium btn-edit-history btn-open-modal" 
                                                     data-modal="evaluationModal"
-                                                    onclick="setupEvaluationForm('{{ $siswa->nisn }}', '{{ addslashes($siswa->nama) }}', '{{ $siswa->jurusan }}', {{ json_encode($siswa->penilaians) }})">
+                                                    data-nisn="{{ $siswa->nisn }}"
+                                                    data-nama="{{ addslashes($siswa->nama) }}"
+                                                    data-jurusan="{{ $siswa->jurusan }}"
+                                                    data-penilaians="{{ json_encode($siswa->penilaians) }}"
+                                                    onclick="setupEvaluationFormFromEl(this)">
                                                     <i class="fas fa-history"></i> Edit
                                                 </button>
                                                 <a href="{{ route('pembimbing.laporan.cetak', $siswa->nisn) }}" class="btn-premium btn-print">
@@ -258,11 +266,10 @@
                             <div class="cumulative-score-display" id="cumulativeScore">0.0</div>
                             <p class="date-text">(Rata-rata Sikap + Rata-rata Kompetensi) / 2</p>
                         </div>
-<!-- 
                         <div class="additional-info-section">
                             <div class="form-field-group">
                                 <label class="field-label">Kategori Penilaian</label>
-                                <select name="kategori" class="premium-select" required>
+                                <select name="kategori" id="formKategori" class="premium-select" required>
                                     <option value="">Pilih Kategori...</option>
                                     <option value="Evaluasi Bulan 1">Evaluasi Bulan 1</option>
                                     <option value="Evaluasi Bulan 2">Evaluasi Bulan 2</option>
@@ -273,14 +280,14 @@
                             <div class="textarea-layout-row">
                                 <div class="form-field-group">
                                     <label class="field-label">Komentar / Catatan</label>
-                                    <textarea name="komentar" class="premium-textarea" rows="3" placeholder="Sebutkan hal-baik..."></textarea>
+                                    <textarea name="komentar" id="formKomentar" class="premium-textarea" rows="3" placeholder="Sebutkan hal-baik..."></textarea>
                                 </div>
                                 <div class="form-field-group">
                                     <label class="field-label">Saran Pengembangan</label>
-                                    <textarea name="saran" class="premium-textarea" rows="3" placeholder="Sebutkan saran..."></textarea>
+                                    <textarea name="saran" id="formSaran" class="premium-textarea" rows="3" placeholder="Sebutkan saran..."></textarea>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
 
                         <div class="modal-action-footer">
                             <button type="button" class="btn-premium btn-edit-history btn-close-modal" data-modal="evaluationModal">Batal</button>
@@ -322,16 +329,21 @@
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const searchTerm = this.value.toLowerCase().trim();
-                    ['pending', 'history'].forEach(tab => {
-                        const rows = document.querySelectorAll(`#${tab} .assessment-table tbody tr:not(#noResults${tab.charAt(0).toUpperCase() + tab.slice(1)})`);
-                        const emptyRow = document.getElementById(`noResults${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+                    ['pending', 'history'].forEach(tabId => {
+                        const tabPane = document.getElementById(tabId);
+                        const rows = tabPane.querySelectorAll('.assessment-table tbody tr:not([id^="noResults"])');
+                        const noResultsRow = document.getElementById(`noResults${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
                         let found = false;
+
                         rows.forEach(row => {
                             const match = row.innerText.toLowerCase().includes(searchTerm);
                             row.style.display = match ? '' : 'none';
                             if (match) found = true;
                         });
-                        if (emptyRow) emptyRow.style.display = (found || searchTerm === '') ? 'none' : 'table-row';
+
+                        if (noResultsRow) {
+                            noResultsRow.style.display = (found || searchTerm === '') ? 'none' : 'table-row';
+                        }
                     });
                 });
             }
@@ -373,12 +385,48 @@
             });
         });
 
+        function setupEvaluationFormFromEl(el) {
+            setupEvaluationForm(
+                el.getAttribute('data-nisn'),
+                el.getAttribute('data-nama'),
+                el.getAttribute('data-jurusan'),
+                JSON.parse(el.getAttribute('data-penilaians'))
+            );
+        }
+
         function setupEvaluationForm(nisn, name, jurusan, penilaians) {
             document.getElementById('activeStudentName').textContent = name;
             document.getElementById('activeStudentNisn').textContent = nisn;
             document.getElementById('activeStudentJurusan').textContent = jurusan || '-';
             document.getElementById('formSiswaNisn').value = nisn;
+            
+            // Reset scores
             document.querySelectorAll('.score-num-field').forEach(input => input.value = '');
+            
+            // Default category and comments
+            document.getElementById('formKategori').value = '';
+            document.getElementById('formKomentar').value = '';
+            document.getElementById('formSaran').value = '';
+
+            // If editing, find the latest assessment by Supervisor
+            if (penilaians && penilaians.length > 0) {
+                const supervisorAssessments = penilaians.filter(p => p.pemberi_nilai === 'Dosen Pembimbing');
+                if (supervisorAssessments.length > 0) {
+                    const latest = supervisorAssessments[0]; // Assuming order by created_at desc
+                    document.getElementById('formKategori').value = latest.kategori || '';
+                    document.getElementById('formKomentar').value = latest.komentar || '';
+                    document.getElementById('formSaran').value = latest.saran || '';
+                    
+                    // Fill scores if details exist
+                    if (latest.penilaian_details) {
+                        latest.penilaian_details.forEach(detail => {
+                            const input = document.querySelector(`.score-num-field[data-id="${detail.id_kriteria}"]`);
+                            if (input) input.value = Math.round(detail.skor);
+                        });
+                    }
+                }
+            }
+
             calculateAverages();
             populateHistory(penilaians);
             switchModalTab('form');

@@ -68,17 +68,16 @@
         .signature-space {
             height: 80px;
         }
-
-        @php
-            function getHuruf($nilai) {
-                if ($nilai >= 90) return 'A';
-                if ($nilai >= 80) return 'B';
-                if ($nilai >= 60) return 'C';
-                if ($nilai >= 10) return 'D';
-                return 'E';
-            }
-        @endphp
     </style>
+    @php
+        function getHuruf($nilai) {
+            if ($nilai >= 90) return 'A';
+            if ($nilai >= 80) return 'B';
+            if ($nilai >= 60) return 'C';
+            if ($nilai >= 10) return 'D';
+            return 'E';
+        }
+    @endphp
 </head>
 <body>
     <div class="header">

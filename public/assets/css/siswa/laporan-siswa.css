@@ -581,3 +581,177 @@
         justify-content: center;
     }
 }
+
+/* ==========================================================================
+   Premium PDF Viewer Modal (Custom Semantic Styles)
+   ========================================================================== */
+
+/* Main Modal Container */
+.preview-pdf-modal .modal-content {
+    overflow: hidden !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border: none !important;
+    background-color: #525659 !important;
+    height: 85vh;
+    border-radius: 12px;
+}
+
+/* Modal Dialog Layout */
+.modal-pdf-viewer {
+    margin-top: 50px;
+    max-width: 95%; /* Better fit than modal-xl on some screens */
+    width: 1140px; /* Standard xl width */
+}
+
+/* Header Styling */
+.pdf-viewer-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.6rem 1.25rem !important;
+    background-color: #323639 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #444 !important;
+}
+
+.pdf-viewer-title {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.pdf-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-right: 12px;
+}
+
+.pdf-viewer-header .modal-title {
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0 !important;
+    letter-spacing: 0.3px;
+}
+
+/* Action Group */
+.pdf-viewer-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
+}
+
+.pdf-desktop-actions {
+    display: flex !important;
+    align-items: center !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 1rem;
+    margin-right: 1rem;
+}
+
+/* Action Buttons */
+.btn-pdf-action {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px;
+    padding: 6px 14px;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    text-decoration: none !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.btn-pdf-action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+}
+
+.btn-pdf-action i {
+    font-size: 0.85rem;
+    color: #0d6efd; /* Highlighted icons */
+}
+
+/* Mobile Specific Actions */
+.pdf-mobile-actions {
+    display: none !important;
+    gap: 0.5rem;
+}
+
+.btn-pdf-mobile-icon {
+    width: 34px;
+    height: 34px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff !important;
+    border-radius: 8px;
+    border: none;
+}
+
+/* Close Button Override - Ensure visibility on dark background */
+.pdf-viewer-header .btn-close {
+    filter: invert(1) brightness(2);
+    opacity: 0.7;
+    margin-left: 1rem;
+    padding: 0.5rem !important;
+    background-size: 12px;
+    transition: opacity 0.2s;
+}
+
+.pdf-viewer-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* Body & Iframe Content */
+.pdf-viewer-body {
+    padding: 0 !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important; /* Ensure iframe fills correctly */
+}
+
+#pdfIframe {
+    border: none !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==========================================================================
+   Responsive Handling for PDF Viewer
+   ========================================================================== */
+
+@media (max-width: 991.98px) {
+    .modal-pdf-viewer {
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .preview-pdf-modal .modal-content {
+        height: 100vh !important;
+        border-radius: 0 !important;
+    }
+
+    .pdf-desktop-actions {
+        display: none !important;
+    }
+
+    .pdf-mobile-actions {
+        display: flex !important;
+    }
+
+    .pdf-viewer-header {
+        padding: 0.5rem 1rem !important;
+    }
+}

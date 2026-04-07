@@ -322,37 +322,27 @@
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const searchTerm = this.value.toLowerCase().trim();
-                    
-                    // Filter Active Table
-                    let activeMatch = false;
-                    activeRows.forEach(row => {
-                        const text = row.innerText.toLowerCase();
-                        const isMatch = text.includes(searchTerm);
-                        row.style.display = isMatch ? 'table-row' : 'none';
-                        if (isMatch) activeMatch = true;
-                    });
-                    
-                    // Filter History Table
-                    let historyMatch = false;
-                    historyRows.forEach(row => {
-                        const text = row.innerText.toLowerCase();
-                        const isMatch = text.includes(searchTerm);
-                        row.style.display = isMatch ? 'table-row' : 'none';
-                        if (isMatch) historyMatch = true;
-                    });
+                    const tables = [
+                        { rows: activeRows, noResults: noResultsActive },
+                        { rows: historyRows, noResults: noResultsHistory }
+                    ];
 
-                    // Handle Empty States
-                    if (searchTerm === '') {
-                        noResultsActive.style.display = 'none';
-                        noResultsHistory.style.display = 'none';
-                        emptyRows.forEach(row => row.style.display = 'table-row');
-                        activeRows.forEach(row => row.style.display = 'table-row');
-                        historyRows.forEach(row => row.style.display = 'table-row');
-                    } else {
-                        emptyRows.forEach(row => row.style.display = 'none');
-                        noResultsActive.style.display = activeMatch ? 'none' : 'table-row';
-                        noResultsHistory.style.display = historyMatch ? 'none' : 'table-row';
-                    }
+                    tables.forEach(({ rows, noResults }) => {
+                        let hasMatch = false;
+                        rows.forEach(row => {
+                            const isMatch = row.innerText.toLowerCase().includes(searchTerm);
+                            row.style.display = isMatch ? 'table-row' : 'none';
+                            if (isMatch) hasMatch = true;
+                        });
+
+                        if (searchTerm === '') {
+                            noResults.style.display = 'none';
+                            emptyRows.forEach(row => row.style.display = 'table-row');
+                        } else {
+                            emptyRows.forEach(row => row.style.display = 'none');
+                            noResults.style.display = hasMatch ? 'none' : 'table-row';
+                        }
+                    });
                 });
 
                 document.getElementById('searchForm').addEventListener('submit', (e) => e.preventDefault());

@@ -215,7 +215,7 @@
                                 <i class="fas fa-book"></i>
                                 <span>Review Logbook</span>
                             </a>
-                            <a href="{{ route('pembimbing.laporan') }}" class="quick-action-btn">
+                            <a href="{{ route('pembimbing.siswa') }}" class="quick-action-btn">
                                 <i class="fas fa-file-pdf"></i>
                                 <span>Cetak Laporan</span>
                             </a>

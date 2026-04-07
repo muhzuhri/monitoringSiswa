@@ -34,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/siswa/absensi', [SiswaController::class, 'storeAbsensi'])->name('siswa.absensi.store');
     Route::post('/siswa/logbook', [SiswaController::class, 'storeLogbook'])->name('siswa.logbook.store');
 
+    // Pengajuan Lupa Absensi / Kegiatan
+    Route::get('/siswa/pengajuan', [SiswaController::class, 'pengajuan'])->name('siswa.pengajuan');
+    Route::post('/siswa/pengajuan', [SiswaController::class, 'storePengajuan'])->name('siswa.pengajuan.store');
+
     // Profil Siswa
     Route::get('/siswa/profil', [SiswaController::class, 'showProfile'])->name('siswa.profil');
     Route::put('/siswa/profil', [SiswaController::class, 'updateProfile'])->name('siswa.profil.update');
@@ -83,11 +87,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembimbing/evaluasi', [PembimbingController::class, 'evaluasiSiswa'])->name('pembimbing.evaluasi');
     Route::post('/pembimbing/evaluasi', [PembimbingController::class, 'storeEvaluasi'])->name('pembimbing.evaluasi.store');
     
+    // Pengajuan Siswa
+    Route::get('/pembimbing/pengajuan', [PembimbingController::class, 'pengajuanSiswa'])->name('pembimbing.pengajuan');
+    Route::post('/pembimbing/pengajuan/{id}', [PembimbingController::class, 'updatePengajuan'])->name('pembimbing.pengajuan.update');
+
     // Reporting
     Route::get('/pembimbing/siswa/{nisn}/cetak-jurnal', [PembimbingController::class, 'cetakJurnalSiswa'])->name('pembimbing.siswa.cetakJurnal');
     Route::get('/pembimbing/siswa/{nisn}/cetak-absensi', [PembimbingController::class, 'cetakAbsensiSiswa'])->name('pembimbing.siswa.cetakAbsensi');
     
-    Route::get('/pembimbing/laporan', [PembimbingController::class, 'laporanSiswa'])->name('pembimbing.laporan');
     Route::get('/pembimbing/laporan/{nisn}/cetak', [PembimbingController::class, 'cetakLaporanSiswa'])->name('pembimbing.laporan.cetak');
     Route::get('/pembimbing/profil', [PembimbingController::class, 'profil'])->name('pembimbing.profil');
     Route::post('/pembimbing/profil', [PembimbingController::class, 'updateProfil'])->name('pembimbing.profil.update');

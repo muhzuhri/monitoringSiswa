@@ -139,19 +139,7 @@ body.pembimbing-page {
 }
 .btn-clear-search:hover { background: #fca5a5; }
 
-.btn-search {
-    padding: .4rem 1rem;
-    background: var(--color-primary);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    font-size: .82rem;
-    font-weight: 600;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: opacity var(--transition);
-}
-.btn-search:hover { opacity: .88; }
+.btn-clear-search:hover { background: #fca5a5; }
 
 /* ==========================================
    TAB NAVIGATION
@@ -197,28 +185,6 @@ body.pembimbing-page {
 
 .tab-button.active i {
     opacity: 1;
-}
-
-/* ==========================================
-   STATUS BADGES
-   ========================================== */
-.badge-status {
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-}
-
-.status-pending {
-    background: var(--color-warning-lt);
-    color: #92400e;
-}
-
-.status-done {
-    background: var(--color-green-lt);
-    color: var(--color-green);
 }
 
 /* ── Progress Badge (used in Assessment) ── */
@@ -359,52 +325,6 @@ body.pembimbing-page {
 .flex-column { flex-direction: column; }
 .gap-1 { gap: .25rem; }
 
-/* ── Date Range (Periode Magang) ── */
-.date-range {
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-}
-
-.date-item {
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-    font-size: .82rem;
-    color: var(--text-medium);
-}
-
-.date-item i { font-size: .8rem; flex-shrink: 0; }
-.text-success { color: var(--color-green) !important; }
-.text-danger  { color: var(--color-red)   !important; }
-
-/* ── Contact Info ── */
-.contact-info {
-    display: flex;
-    flex-direction: column;
-    gap: .4rem;
-}
-
-.contact-link {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .82rem;
-    color: var(--color-green);
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity var(--transition);
-}
-.contact-link:hover { opacity: .75; text-decoration: underline; }
-
-.contact-email {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .78rem;
-    color: var(--text-muted);
-    word-break: break-all;
-}
 .text-primary { color: var(--color-blue) !important; }
 
 /* ── Action Buttons ── */

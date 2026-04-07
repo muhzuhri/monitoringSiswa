@@ -12,6 +12,7 @@ use App\Models\Penilaian;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\PengajuanSiswa;
 
 class PembimbingController extends Controller
 {
@@ -268,6 +269,87 @@ class PembimbingController extends Controller
     }
 
     /**
+     * Menampilkan daftar pengajuan (Lupa Absensi / Kegiatan) dari siswa binaan
+     */
+    public function pengajuanSiswa(Request $request)
+    {
+        $pembimbing = Auth::user();
+        $status = $request->input('status', 'pending');
+
+        $pengajuans = PengajuanSiswa::whereHas('siswa', function($q) use ($pembimbing) {
+                $q->where('id_pembimbing', $pembimbing->id_pembimbing);
+            })
+            ->with('siswa')
+            ->when($status, function($query, $status) {
+                if ($status !== 'semua') {
+                    return $query->where('status', $status);
+                }
+                return $query;
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('pembimbing.pengajuanSiswa', compact('pembimbing', 'pengajuans', 'status'));
+    }
+
+    /**
+     * Memproses approval/penolakan pengajuan
+     */
+    public function updatePengajuan(Request $request, $id)
+    {
+        $request->validate([
+            'action' => 'required|in:approve,reject'
+        ]);
+
+        $pembimbing = Auth::user();
+        $pengajuan = PengajuanSiswa::with('siswa')->findOrFail($id);
+
+        if ($pengajuan->siswa->id_pembimbing !== $pembimbing->id_pembimbing) {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
+
+        if ($request->action === 'approve') {
+            $pengajuan->status = 'valid';
+
+            // Auto insert based on type
+            if ($pengajuan->jenis === 'absensi') {
+                $statusHadir = 'hadir'; // default if no jam masuk to check
+                if ($pengajuan->jam_masuk && substr($pengajuan->jam_masuk, 0, 5) > '08:00') {
+                    $statusHadir = 'terlambat';
+                }
+
+                \App\Models\Absensi::create([
+                    'nisn' => $pengajuan->nisn,
+                    'tanggal' => $pengajuan->tanggal,
+                    'jam_masuk' => $pengajuan->jam_masuk,
+                    'jam_pulang' => $pengajuan->jam_pulang,
+                    'status' => $statusHadir,
+                    'verifikasi' => 'verified',
+                    'keterangan' => 'Validasi Lupa Absensi',
+                ]);
+            } else if ($pengajuan->jenis === 'kegiatan') {
+                Logbook::create([
+                    'nisn' => $pengajuan->nisn,
+                    'tanggal' => $pengajuan->tanggal,
+                    'kegiatan' => $pengajuan->deskripsi,
+                    'status' => 'verified',
+                    'catatan_pembimbing' => 'Validasi Lupa Kegiatan'
+                ]);
+            }
+
+            $message = 'Pengajuan berhasil disetujui dan data otomatis ditambahkan ke sistem.';
+
+        } else {
+            $pengajuan->status = 'ditolak';
+            $message = 'Pengajuan ditolak.';
+        }
+
+        $pengajuan->save();
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
      * Menampilkan daftar penilaian dan form evaluasi siswa
      */
     public function evaluasiSiswa(Request $request)
@@ -323,6 +405,7 @@ class PembimbingController extends Controller
             'scores.*' => 'required|numeric|min:0|max:100',
         ]);
 
+        /** @var \App\Models\Pembimbing $pembimbing */
         $pembimbing = Auth::user();
 
         // Verifikasi kepemilikan
@@ -361,37 +444,6 @@ class PembimbingController extends Controller
     }
 
     /**
-     * Menampilkan halaman rekap laporan siswa binaan
-     */
-    public function laporanSiswa(Request $request)
-    {
-        $pembimbing = Auth::user();
-
-        $query = Siswa::where('id_pembimbing', $pembimbing->id_pembimbing)
-            ->withCount([
-                'absensis as total_hadir' => function ($q) {
-                    $q->where('status', 'Hadir');
-                },
-                'logbooks as total_logbook',
-                'logbooks as disetujui_logbook' => function ($q) {
-                    $q->where('status', 'verified');
-                }
-            ]);
-
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%");
-            });
-        }
-
-        $siswas = $query->paginate(10);
-
-        return view('pembimbing.laporanSiswa', compact('pembimbing', 'siswas'));
-    }
-
-    /**
      * Mencetak laporan siswa (dummy action to simulate PDF/Excel download in real app)
      * To truly use PDF we would need Barryvdh/DomPDF which might not be installed, 
      * so we just trigger a browser print view or return a simple view.
@@ -426,6 +478,7 @@ class PembimbingController extends Controller
      */
     public function updateProfil(Request $request)
     {
+        /** @var \App\Models\Pembimbing $pembimbing */
         $pembimbing = Auth::user();
 
         $request->validate([

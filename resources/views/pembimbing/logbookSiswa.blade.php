@@ -26,11 +26,11 @@
                 <div class="filter-group gap-2">
                     <span class="text-muted small fw-bold me-2">FILTER STATUS:</span>
                     <a href="{{ route('pembimbing.logbook', $siswa->nisn) }}" 
-                       class="btn-filter-submit {{ !$status ? '' : 'btn-outline' }}" style="{{ !$status ? '' : 'background:transparent; color:var(--color-primary); border:1px solid var(--color-primary);' }}">Semua</a>
+                       class="btn-filter-submit {{ !$status ? '' : 'btn-outline' }}" @if($status) style="background:transparent; color:var(--color-primary); border:1px solid var(--color-primary);" @endif>Semua</a>
                     <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'pending']) }}" 
-                       class="btn-filter-submit {{ $status == 'pending' ? '' : 'btn-outline' }}" style="{{ $status == 'pending' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);' }}">Pending</a>
+                       class="btn-filter-submit {{ $status == 'pending' ? '' : 'btn-outline' }}" @if($status == 'pending') style="background:var(--color-warning);" @else style="background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);" @endif>Pending</a>
                     <a href="{{ route('pembimbing.logbook', ['nisn' => $siswa->nisn, 'status' => 'verified']) }}" 
-                       class="btn-filter-submit {{ $status == 'verified' ? '' : 'btn-outline' }}" style="{{ $status == 'verified' ? 'background:var(--color-green);' : 'background:transparent; color:var(--color-green); border:1px solid var(--color-green);' }}">Approved</a>
+                       class="btn-filter-submit {{ $status == 'verified' ? '' : 'btn-outline' }}" @if($status == 'verified') style="background:var(--color-green);" @else style="background:transparent; color:var(--color-green); border:1px solid var(--color-green);" @endif>Approved</a>
                     
                     @if($logbooks->where('status', 'pending')->count() > 0)
                         <form action="{{ route('pembimbing.logbook.validasi-semua', $siswa->nisn) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui SEMUA logbook pending untuk siswa ini?')">
@@ -83,7 +83,12 @@
                                     <div class="activity-excerpt">
                                         <div class="fw-bold text-dark mb-1">{{ $log->kegiatan }}</div>
                                         @if($log->catatan_pembimbing)
-                                            <div class="note-bubble mt-2 {{ $log->status == 'rejected' ? 'alert-danger-soft' : '' }}" style="padding: 0.5rem 0.75rem; font-size: 0.8rem; {{ $log->status == 'rejected' ? 'background:var(--color-red-lt); border-left:3px solid var(--color-red);' : 'background:var(--color-green-lt); border-left:3px solid var(--color-green);' }}">
+                                            <div class="note-bubble mt-2 {{ $log->status == 'rejected' ? 'alert-danger-soft' : '' }}" 
+                                                @if($log->status == 'rejected')
+                                                    style="padding: 0.5rem 0.75rem; font-size: 0.8rem; background:var(--color-red-lt); border-left:3px solid var(--color-red);"
+                                                @else
+                                                    style="padding: 0.5rem 0.75rem; font-size: 0.8rem; background:var(--color-green-lt); border-left:3px solid var(--color-green);"
+                                                @endif>
                                                 <i class="fas fa-comment-dots me-1"></i> {{ $log->catatan_pembimbing }}
                                             </div>
                                         @endif

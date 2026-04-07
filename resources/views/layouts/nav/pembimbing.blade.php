@@ -46,14 +46,14 @@
                         <a class="nav-link {{ Route::is('pembimbing.siswa') ? 'active' : '' }}"
                             href="{{ route('pembimbing.siswa') }}">Daftar Siswa</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('pembimbing.pengajuan') ? 'active' : '' }}"
+                            href="{{ route('pembimbing.pengajuan') }}">Persetujuan</a>
+                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('pembimbing.evaluasi') ? 'active' : '' }}"
                             href="{{ route('pembimbing.evaluasi') }}">Penilaian Siswa</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('pembimbing.laporan') ? 'active' : '' }}"
-                            href="{{ route('pembimbing.laporan') }}">Laporan</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('pembimbing.profil') ? 'active' : '' }}"

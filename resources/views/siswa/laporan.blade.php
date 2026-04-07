@@ -4,7 +4,7 @@
 @section('body-class', 'laporan-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/siswa/laporan-siswa.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/siswa/laporan-siswa.css') }}?v={{ time() }}">
 @endpush
 
 @section('body')
@@ -74,7 +74,7 @@
                                     <small class="page-subtitle">Status: <span
                                             style="text-transform: capitalize; font-weight: 700;">{{ $laporanAkhir->status }}</span></small>
                                 </div>
-                                <a href="{{ asset('storage/' . $laporanAkhir->file) }}" target="_blank" class="tab-button"
+                                <a href="javascript:void(0)" data-url="{{ asset('storage/' . $laporanAkhir->file) }}" class="tab-button btn-preview-pdf"
                                     style="padding: 8px 16px; font-size: 0.8rem; background: #f1f5f9;">
                                     Lihat File
                                 </a>
@@ -153,37 +153,37 @@
                         </div>
                     </div>
 
-                    <!-- Download Options -->
+                    <!-- Preview Options -->
                     <div class="ui-card">
-                        <h5 class="page-title" style="margin-bottom: 1.5rem;">Unduh Laporan Kegiatan</h5>
+                        <h5 class="page-title" style="margin-bottom: 1.5rem;">Lihat & Cetak Laporan Kegiatan</h5>
                         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                            <a href="{{ route('siswa.rekap.jurnal') }}" target="_blank" class="btn-download-premium" style="margin-bottom: 1rem;">
+                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.jurnal') }}" class="btn-download-premium btn-preview-pdf" style="margin-bottom: 1rem;">
                                 <div class="icon-box-white">
                                     <i class="fas fa-book"></i>
                                 </div>
                                 <div>
-                                    <h6>Unduh Jurnal Kegiatan Mingguan</h6>
-                                    <small>Hasilkan file jurnal kegiatan dengan kolom Pembimbing Lapangan.</small>
+                                    <h6>Lihat Jurnal Kegiatan Mingguan</h6>
+                                    <small>Lihat/Cetak file jurnal kegiatan dengan kolom Pembimbing Lapangan.</small>
                                 </div>
                             </a>
 
-                            <a href="{{ route('siswa.rekap.individu') }}" target="_blank" class="btn-download-premium" style="margin-bottom: 1rem;">
+                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.individu') }}" class="btn-download-premium btn-preview-pdf" style="margin-bottom: 1rem;">
                                 <div class="icon-box-white">
                                     <i class="fas fa-user-check"></i>
                                 </div>
                                 <div>
-                                    <h6>Unduh Rekap Absensi (Individu)</h6>
-                                    <small>Hasilkan rekap absensi pribadi (Tanggal, Presensi, Status).</small>
+                                    <h6>Lihat Rekap Absensi (Individu)</h6>
+                                    <small>Lihat/Cetak rekap absensi pribadi (Tanggal, Presensi, Status).</small>
                                 </div>
                             </a>
 
-                            <a href="{{ route('siswa.rekap.kelompok') }}" target="_blank" class="btn-download-premium">
+                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.kelompok') }}" class="btn-download-premium btn-preview-pdf">
                                 <div class="icon-box-white">
                                     <i class="fas fa-users"></i>
                                 </div>
                                 <div>
-                                    <h6>Unduh Rekap Absensi (Berkelompok)</h6>
-                                    <small>Hasilkan rekap absensi bulanan untuk seluruh anggota kelompok.</small>
+                                    <h6>Lihat Rekap Absensi (Berkelompok)</h6>
+                                    <small>Lihat/Cetak rekap absensi bulanan untuk seluruh anggota kelompok.</small>
                                 </div>
                             </a>
                         </div>
@@ -225,10 +225,10 @@
                                     </div>
 
                                     <div class="assessment-action">
-                                        <a href="{{ route('siswa.penilaian.cetak', ['id_penilaian' => $penilaian->id_penilaian]) }}" 
-                                           class="btn-unduh-sm">
-                                            <i class="fas fa-download"></i>
-                                            <span>Unduh PDF</span>
+                                        <a href="javascript:void(0)" data-url="{{ route('siswa.penilaian.cetak', ['id_penilaian' => $penilaian->id_penilaian]) }}" 
+                                           class="btn-unduh-sm btn-preview-pdf">
+                                            <i class="fas fa-eye"></i>
+                                            <span>Lihat PDF</span>
                                         </a>
                                     </div>
                                 </div>
@@ -248,3 +248,87 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <!-- Modal Preview PDF -->
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-labelledby="previewPdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-pdf-viewer">
+            <div class="modal-content">
+                <div class="modal-header pdf-viewer-header">
+                    <div class="pdf-viewer-title">
+                        <div class="pdf-icon-wrapper">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h6 class="modal-title" id="previewPdfModalLabel">Preview Laporan</h6>
+                    </div>
+                    
+                    <div class="pdf-viewer-actions">
+                        <div class="pdf-desktop-actions">
+                            <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File">
+                                <i class="fas fa-download"></i> <span>Unduh Laporan</span>
+                            </a>
+                            <button id="printPdfBtn" class="btn-pdf-action" title="Cetak File">
+                                <i class="fas fa-print"></i> <span>Cetak</span>
+                            </button>
+                        </div>
+                        
+                        <div class="pdf-mobile-actions">
+                             <a id="downloadPdfBtnMobile" href="#" class="btn-pdf-mobile-icon"><i class="fas fa-download"></i></a>
+                             <button id="printPdfBtnMobile" class="btn-pdf-mobile-icon"><i class="fas fa-print"></i></button>
+                        </div>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body pdf-viewer-body">
+                    <iframe id="pdfIframe" src="" width="100%" height="180%"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const previewButtons = document.querySelectorAll('.btn-preview-pdf');
+            const pdfModalElement = document.getElementById('previewPdfModal');
+            const pdfModal = new bootstrap.Modal(pdfModalElement);
+            const pdfIframe = document.getElementById('pdfIframe');
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            const downloadBtnMobile = document.getElementById('downloadPdfBtnMobile');
+            const printBtn = document.getElementById('printPdfBtn');
+            const printBtnMobile = document.getElementById('printPdfBtnMobile');
+
+            previewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                    if (url) {
+                        // Append view=FitH to zoom/fit the PDF width
+                        const previewUrl = url.includes('#') ? url : url + '#view=FitH';
+                        pdfIframe.src = previewUrl;
+                        
+                        // Set download URL (without PDF viewer parameters)
+                        const downloadUrl = url.includes('?') ? url + '&download=1' : url + '?download=1';
+                        downloadBtn.href = downloadUrl;
+                        downloadBtnMobile.href = downloadUrl;
+                        pdfModal.show();
+                    }
+                });
+            });
+
+            const triggerPrint = function() {
+                if (pdfIframe) {
+                    pdfIframe.contentWindow.focus();
+                    pdfIframe.contentWindow.print();
+                }
+            };
+
+            printBtn.addEventListener('click', triggerPrint);
+            printBtnMobile.addEventListener('click', triggerPrint);
+
+            // Clear iframe src when modal is closed to stop loading/playing
+            pdfModalElement.addEventListener('hidden.bs.modal', function() {
+                pdfIframe.src = '';
+            });
+        });
+    </script>
+@endpush
