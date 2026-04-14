@@ -108,6 +108,7 @@ class GuruController extends Controller
         $user = Auth::user();
         $search = $request->input('search');
         $npsn = $request->input('npsn');
+        $periodeId = $request->input('periode');
         $today = Carbon::now()->toDateString();
 
         // 1. Siswa Bimbingan (yang sudah dikoordinir guru ini)
@@ -121,6 +122,17 @@ class GuruController extends Controller
                     ->orWhere('sekolah', 'like', "%{$search}%");
             });
         }
+
+        // Tampilkan hanya siswa yang aktif (belum selesai)
+        $query->where(function($q) {
+            $q->where(function($sq) {
+                $sq->where('status', '!=', 'selesai')
+                   ->orWhereNull('status');
+            })->where(function($subQ) {
+                $subQ->where('tgl_selesai_magang', '>=', now())
+                     ->orWhereNull('tgl_selesai_magang');
+            });
+        });
 
         $siswas = $query->with([
             'absensis' => function ($q) use ($today) {
@@ -182,23 +194,44 @@ class GuruController extends Controller
         }
 
         // 3. Riwayat Siswa Binaan (yang statusnya sudah selesai)
-        $riwayatSiswas = $user->siswas()
+        $riwayatQuery = $user->siswas()
             ->where(function($q) {
                 $q->where('status', 'selesai')
                   ->orWhere('tgl_selesai_magang', '<', now());
-            })
-            ->orderBy('tgl_selesai_magang', 'desc')
-            ->get();
+            });
+
+        if ($periodeId) {
+            $riwayatQuery->where('id_tahun_ajaran', $periodeId);
+        }
+
+        $riwayatSiswas = $riwayatQuery->orderBy('tgl_selesai_magang', 'desc')->get();
+
+        $groupedRiwayat = $riwayatSiswas->groupBy('nisn_ketua')->map(function ($group) {
+            $leader = $group->where('nisn', $group->first()->nisn_ketua)->first() ?: $group->first();
+            return [
+                'leader' => $leader,
+                'members' => $group,
+                'is_group' => $group->count() > 1 || $leader->tipe_magang === 'kelompok',
+                'type' => ($group->count() > 1 || $leader->tipe_magang === 'kelompok') ? 'Kelompok' : 'Individu'
+            ];
+        });
+
+        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', function ($q) use ($user) {
+            $q->where('id_guru', $user->id_guru);
+        })->orderBy('tgl_mulai', 'desc')->get();
 
         return view('guru.daftarSiswa', compact(
             'user', 
             'siswas', 
             'search', 
             'npsn', 
+            'periodeId',
+            'periodeOptions',
             'groupedSiswas', 
             'groupedAvailable', 
             'availableSiswas', 
-            'riwayatSiswas'
+            'riwayatSiswas',
+            'groupedRiwayat'
         ));
     }
 
@@ -328,6 +361,7 @@ class GuruController extends Controller
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
         $search = $request->input('search');
+        $periodeId = $request->input('periode');
         $siswaNisns = $user->siswas->pluck('nisn')->toArray();
 
         // 1. Ambil laporan terbaru untuk setiap siswa yang berstatus pending
@@ -355,10 +389,20 @@ class GuruController extends Controller
                   ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
+        
+        if ($periodeId) {
+            $queryHistory->whereHas('siswa', function ($q) use ($periodeId) {
+                $q->where('id_tahun_ajaran', $periodeId);
+            });
+        }
 
         $historyLaporan = $queryHistory->orderBy('updated_at', 'desc')->paginate(10)->withQueryString();
 
-        return view('guru.verifikasi', compact('user', 'laporanPending', 'historyLaporan', 'search'));
+        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', function ($q) use ($user) {
+            $q->where('id_guru', $user->id_guru);
+        })->orderBy('tgl_mulai', 'desc')->get();
+
+        return view('guru.verifikasi', compact('user', 'laporanPending', 'historyLaporan', 'search', 'periodeId', 'periodeOptions'));
     }
 
     /**
@@ -417,6 +461,7 @@ class GuruController extends Controller
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
         $search = $request->input('search');
+        $periodeId = $request->input('periode');
 
         // Base query for teacher's students
         $query = $user->siswas()->with('penilaians');
@@ -436,11 +481,50 @@ class GuruController extends Controller
             return !$s->penilaians->where('pemberi_nilai', 'Guru Pembimbing')->first();
         });
 
-        $siswasDone = $allSiswas->filter(function ($s) {
-            return $s->penilaians->where('pemberi_nilai', 'Guru Pembimbing')->first();
+        $siswasDone = $allSiswas->filter(function ($s) use ($periodeId) {
+            $hasNilai = $s->penilaians->where('pemberi_nilai', 'Guru Pembimbing')->first();
+            if (!$hasNilai) return false;
+            if ($periodeId && (string)$s->id_tahun_ajaran !== (string)$periodeId) return false;
+            return true;
         });
 
-        return view('guru.penilaian', compact('user', 'siswasPending', 'siswasDone', 'search'));
+        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', function ($q) use ($user) {
+            $q->where('id_guru', $user->id_guru);
+        })->orderBy('tgl_mulai', 'desc')->get();
+
+        // 1. Fetch CURRENT custom criteria (strictly those assigned to this specific guru)
+        $kriteriaKustom = \App\Models\KriteriaPenilaian::where('id_guru', $user->id_guru)
+            ->orderBy('tipe')
+            ->orderBy('urutan')
+            ->get();
+
+        // 2. INITIALIZATION (Fall-back only):
+        if ($kriteriaKustom->count() === 0) {
+            $defaults = \App\Models\KriteriaPenilaian::whereNull('id_guru')
+                ->whereNull('id_pembimbing')
+                ->whereIn('tipe', ['guru_kepribadian', 'guru_kemampuan'])
+                ->get();
+
+            foreach ($defaults as $d) {
+                \App\Models\KriteriaPenilaian::create([
+                    'nama_kriteria' => $d->nama_kriteria,
+                    'tipe' => $d->tipe,
+                    'jurusan' => $d->jurusan,
+                    'urutan' => $d->urutan,
+                    'id_guru' => $user->id_guru,
+                ]);
+            }
+            
+            // Re-fetch after the one-time operation
+            $kriteriaKustom = \App\Models\KriteriaPenilaian::where('id_guru', $user->id_guru)
+                ->orderBy('tipe')
+                ->orderBy('urutan')
+                ->get();
+        }
+
+        $kriteria = $kriteriaKustom;
+
+        return view('guru.penilaian', compact('user', 'siswasPending', 'siswasDone', 'search', 'periodeId', 'periodeOptions', 'kriteria', 'kriteriaKustom'));
     }
 
     /**
@@ -459,6 +543,7 @@ class GuruController extends Controller
 
         // Ambil kriteria khusus guru
         $kriteria = \App\Models\KriteriaPenilaian::whereIn('tipe', ['guru_kepribadian', 'guru_kemampuan'])
+            ->where('id_guru', $user->id_guru)
             ->orderBy('tipe')
             ->orderBy('urutan')
             ->get();
@@ -572,5 +657,183 @@ class GuruController extends Controller
         $user->update($data);
 
         return back()->with('success', 'Profil Anda berhasil diperbarui.');
+    }
+
+    /**
+     * Download Jurnal Kegiatan Mingguan Siswa.
+     */
+    public function downloadJurnalMingguan(Request $request, $nisn)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $siswa = $user->siswas()->where('nisn', $nisn)->firstOrFail();
+
+        $logbooks = $siswa->logbooks()->orderBy('tanggal', 'asc')->get();
+        $siswa->load('pembimbing');
+
+        $fileName = "Jurnal_Mingguan_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
+        $pdf = Pdf::loadView('siswa.printJurnal', [
+            'user' => $siswa,
+            'logbooks' => $logbooks
+        ]);
+
+        if ($request->has('download')) {
+            return $pdf->download($fileName);
+        }
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Download Rekap Absensi (Individu) Siswa.
+     */
+    public function downloadRekapAbsensiIndividu(Request $request, $nisn)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $siswa = $user->siswas()->where('nisn', $nisn)->firstOrFail();
+
+        $absensis = $siswa->absensis()->orderBy('tanggal', 'asc')->get();
+
+        $fileName = "Rekap_Absensi_Individu_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
+        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', [
+            'user' => $siswa,
+            'absensis' => $absensis
+        ]);
+
+        if ($request->has('download')) {
+            return $pdf->download($fileName);
+        }
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Download Rekap Absensi (Kelompok) Siswa.
+     */
+    public function downloadRekapAbsensiKelompok(Request $request, $nisnKetua)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        
+        // Find leader and ensure they belong to this teacher
+        $leader = $user->siswas()->where('nisn', $nisnKetua)->firstOrFail();
+
+        // Start Magang from Tahun Ajaran
+        $startMagang = $leader->tahunAjaran ? \Carbon\Carbon::parse($leader->tahunAjaran->tgl_mulai) : \Carbon\Carbon::now()->startOfMonth();
+        
+        // Find range end based on latest activity in the group
+        $latestAbsen = \App\Models\Absensi::whereIn('nisn', function($query) use ($nisnKetua) {
+            $query->select('nisn')->from('siswa')
+                  ->where('nisn_ketua', $nisnKetua)
+                  ->orWhere('nisn', $nisnKetua);
+        })->max('tanggal');
+
+        $endRange = $latestAbsen ? \Carbon\Carbon::parse($latestAbsen) : \Carbon\Carbon::now();
+        if ($endRange->isPast() && $leader->tgl_selesai_magang) {
+             $endRange = \Carbon\Carbon::parse($leader->tgl_selesai_magang);
+        } else if ($endRange->isPast()) {
+            $endRange = \Carbon\Carbon::now();
+        }
+        
+        $months = [];
+        $current = $startMagang->copy()->startOfMonth();
+        
+        while ($current <= $endRange) {
+            $month = $current->month;
+            $year = $current->year;
+            
+            // Fetch all group members
+            $anggota = \App\Models\Siswa::where(function($q) use ($nisnKetua) {
+                $q->where('nisn_ketua', $nisnKetua)->orWhere('nisn', $nisnKetua);
+            })->with(['absensis' => function($q) use ($month, $year) {
+                $q->whereMonth('tanggal', $month)->whereYear('tanggal', $year);
+            }])->get();
+
+            $months[] = [
+                'month' => $month,
+                'year' => $year,
+                'anggota' => $anggota,
+                'daysInMonth' => $current->daysInMonth,
+                'monthName' => $current->translatedFormat('F')
+            ];
+            
+            $current->addMonth();
+        }
+
+        $fileName = "Rekap_Absensi_Kelompok_{$leader->nisn}_" . date('d_M_Y') . ".pdf";
+        $pdf = Pdf::loadView('siswa.rekapAbsensiKelompok', [
+            'user' => $leader,
+            'months' => $months
+        ]);
+        
+        if ($request->has('download')) {
+            return $pdf->download($fileName);
+        }
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Menyimpan kriteria penilaian baru.
+     */
+    public function storeKriteria(Request $request)
+    {
+        $request->validate([
+            'nama_kriteria' => 'required|string|max:255',
+            'tipe' => 'required|in:guru_kepribadian,guru_kemampuan',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+
+        \App\Models\KriteriaPenilaian::create([
+            'nama_kriteria' => $request->nama_kriteria,
+            'tipe' => $request->tipe,
+            'urutan' => $request->urutan ?? 0,
+            'id_guru' => $user->id_guru,
+        ]);
+
+        return redirect()->back()->with('success', 'Kriteria penilaian berhasil ditambahkan.');
+    }
+
+    /**
+     * Memperbarui kriteria penilaian.
+     */
+    public function updateKriteria(Request $request, $id)
+    {
+        $request->validate([
+            'nama_kriteria' => 'required|string|max:255',
+            'tipe' => 'required|in:guru_kepribadian,guru_kemampuan',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $kriteria = \App\Models\KriteriaPenilaian::where('id_kriteria', $id)
+            ->where('id_guru', $user->id_guru)
+            ->firstOrFail();
+
+        $kriteria->update([
+            'nama_kriteria' => $request->nama_kriteria,
+            'tipe' => $request->tipe,
+            'urutan' => $request->urutan ?? 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Kriteria penilaian berhasil diperbarui.');
+    }
+
+    /**
+     * Menghapus kriteria penilaian.
+     */
+    public function destroyKriteria($id)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $kriteria = \App\Models\KriteriaPenilaian::where('id_kriteria', $id)
+            ->where('id_guru', $user->id_guru)
+            ->firstOrFail();
+
+        $kriteria->delete();
+
+        return redirect()->back()->with('success', 'Kriteria penilaian berhasil dihapus.');
     }
 }

@@ -17,6 +17,8 @@ class KriteriaPenilaian extends Model
         'tipe',
         'jurusan',
         'urutan',
+        'id_pembimbing',
+        'id_guru',
     ];
 
     public function penilaianDetails()

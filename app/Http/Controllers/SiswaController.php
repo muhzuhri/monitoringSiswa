@@ -448,6 +448,31 @@ class SiswaController extends Controller
     }
 
     /**
+     * Preview / Download Laporan Akhir.
+     */
+    public function previewLaporanAkhir(Request $request)
+    {
+        /** @var \App\Models\Siswa $user */
+        $user = Auth::user();
+
+        $laporanAkhir = $user->laporanAkhir;
+        if (!$laporanAkhir) {
+            return abort(404, 'Laporan tidak ditemukan.');
+        }
+
+        $path = storage_path('app/public/' . $laporanAkhir->file);
+        if (!file_exists($path)) {
+            return abort(404, 'File laporan tidak ditemukan.');
+        }
+
+        if ($request->has('download')) {
+            return response()->download($path);
+        }
+
+        return response()->file($path);
+    }
+
+    /**
      * Download Jurnal Kegiatan Mingguan.
      */
     public function downloadJurnalMingguan(Request $request)
@@ -599,3 +624,5 @@ class SiswaController extends Controller
     }
 
 }
+
+

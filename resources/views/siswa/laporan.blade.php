@@ -74,7 +74,7 @@
                                     <small class="page-subtitle">Status: <span
                                             style="text-transform: capitalize; font-weight: 700;">{{ $laporanAkhir->status }}</span></small>
                                 </div>
-                                <a href="javascript:void(0)" data-url="{{ asset('storage/' . $laporanAkhir->file) }}" class="tab-button btn-preview-pdf"
+                                <a href="javascript:void(0)" data-url="{{ route('siswa.laporan.downloadAkhir') }}" class="tab-button btn-preview-pdf"
                                     style="padding: 8px 16px; font-size: 0.8rem; background: #f1f5f9;">
                                     Lihat File
                                 </a>
@@ -267,67 +267,136 @@
                             <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File">
                                 <i class="fas fa-download"></i> <span>Unduh Laporan</span>
                             </a>
-                            <button id="printPdfBtn" class="btn-pdf-action" title="Cetak File">
-                                <i class="fas fa-print"></i> <span>Cetak</span>
-                            </button>
                         </div>
                         
                         <div class="pdf-mobile-actions">
                              <a id="downloadPdfBtnMobile" href="#" class="btn-pdf-mobile-icon"><i class="fas fa-download"></i></a>
-                             <button id="printPdfBtnMobile" class="btn-pdf-mobile-icon"><i class="fas fa-print"></i></button>
                         </div>
 
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
                 <div class="modal-body pdf-viewer-body">
-                    <iframe id="pdfIframe" src="" width="100%" height="180%"></iframe>
+                    <div id="pdfCanvasContainer">
+                        <div id="pdfLoadingIndicator">
+                            <i class="fas fa-spinner fa-spin fa-2x"></i>
+                            <p>Memuat PDF...</p>
+                        </div>
+                        <div id="pdfErrorMsg" style="display:none;">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
+        // Konfigurasi PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let currentPdfUrl = '';
+
+        // Render semua halaman PDF ke dalam canvas menggunakan PDF.js
+        // Bekerja di semua browser termasuk mobile Chrome dan iOS Safari
+        async function renderPDF(url) {
+            const container = document.getElementById('pdfCanvasContainer');
+            const loadingEl = document.getElementById('pdfLoadingIndicator');
+            const errorEl = document.getElementById('pdfErrorMsg');
+
+            // Bersihkan canvas halaman sebelumnya
+            container.querySelectorAll('canvas').forEach(c => c.remove());
+            loadingEl.style.display = 'block';
+            errorEl.style.display = 'none';
+            container.scrollTop = 0;
+
+            try {
+                const pdfDoc = await pdfjsLib.getDocument(url).promise;
+                loadingEl.style.display = 'none';
+
+                const containerWidth = container.clientWidth - 24;
+                const outputScale = window.devicePixelRatio || 1; // Deteksi kepadatan piksel layar (HD/Retina)
+
+                // Render setiap halaman PDF ke canvas
+                for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                    const page = await pdfDoc.getPage(pageNum);
+                    
+                    // Hitung skala agar pas dengan lebar container
+                    const unscaledViewport = page.getViewport({ scale: 1 });
+                    const baseScale = containerWidth / unscaledViewport.width;
+                    
+                    // Gunakan skala yang lebih tinggi untuk render (agar tajam), tapi tampilkan sesuai ukuran layout
+                    const viewport = page.getViewport({ scale: baseScale * outputScale });
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    
+                    // Ukuran internal canvas (piksel fisik) - ditingkatkan untuk kualitas HD
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    // Ukuran tampilan CSS (piksel logis) - tetap sesuai layout
+                    canvas.style.width = (viewport.width / outputScale) + 'px';
+                    canvas.style.height = (viewport.height / outputScale) + 'px';
+
+                    container.appendChild(canvas);
+
+                    // Render dengan kualitas tinggi
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    await page.render(renderContext).promise;
+                }
+            } catch (err) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                console.error('PDF.js error:', err);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const previewButtons = document.querySelectorAll('.btn-preview-pdf');
             const pdfModalElement = document.getElementById('previewPdfModal');
             const pdfModal = new bootstrap.Modal(pdfModalElement);
-            const pdfIframe = document.getElementById('pdfIframe');
             const downloadBtn = document.getElementById('downloadPdfBtn');
             const downloadBtnMobile = document.getElementById('downloadPdfBtnMobile');
-            const printBtn = document.getElementById('printPdfBtn');
             const printBtnMobile = document.getElementById('printPdfBtnMobile');
 
             previewButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const url = this.getAttribute('data-url');
-                    if (url) {
-                        // Append view=FitH to zoom/fit the PDF width
-                        const previewUrl = url.includes('#') ? url : url + '#view=FitH';
-                        pdfIframe.src = previewUrl;
-                        
-                        // Set download URL (without PDF viewer parameters)
-                        const downloadUrl = url.includes('?') ? url + '&download=1' : url + '?download=1';
-                        downloadBtn.href = downloadUrl;
-                        downloadBtnMobile.href = downloadUrl;
-                        pdfModal.show();
-                    }
+                    if (!url) return;
+
+                    // Set link unduh
+                    const downloadUrl = url.includes('?') ? url + '&download=1' : url + '?download=1';
+                    if (downloadBtn) downloadBtn.href = downloadUrl;
+                    if (downloadBtnMobile) downloadBtnMobile.href = downloadUrl;
+
+                    currentPdfUrl = url;
+
+                    // Tampilkan modal dan render PDF (bekerja di desktop & mobile)
+                    pdfModal.show();
+                    renderPDF(url);
                 });
             });
 
-            const triggerPrint = function() {
-                if (pdfIframe) {
-                    pdfIframe.contentWindow.focus();
-                    pdfIframe.contentWindow.print();
-                }
+            // Cetak: buka di tab baru agar printer native device bisa digunakan
+            const doPrint = function() {
+                if (currentPdfUrl) window.open(currentPdfUrl, '_blank');
             };
+            if (printBtnMobile) printBtnMobile.addEventListener('click', doPrint);
 
-            printBtn.addEventListener('click', triggerPrint);
-            printBtnMobile.addEventListener('click', triggerPrint);
-
-            // Clear iframe src when modal is closed to stop loading/playing
+            // Bersihkan canvas saat modal ditutup
             pdfModalElement.addEventListener('hidden.bs.modal', function() {
-                pdfIframe.src = '';
+                const container = document.getElementById('pdfCanvasContainer');
+                container.querySelectorAll('canvas').forEach(c => c.remove());
+                document.getElementById('pdfLoadingIndicator').style.display = 'none';
+                document.getElementById('pdfErrorMsg').style.display = 'none';
+                currentPdfUrl = '';
             });
         });
     </script>

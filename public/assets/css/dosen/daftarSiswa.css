@@ -524,6 +524,119 @@ body.pembimbing-page {
 .me-2 { margin-right: .5rem; }
 
 /* ==========================================
+   HISTORY FILTER BAR
+   ========================================== */
+.history-filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+    padding: .85rem 1.25rem;
+    background: linear-gradient(135deg, #f8f5ff 0%, #ede9fe 100%);
+    border: 1px solid #ddd6fe;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: none;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+}
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237c3aed'/%3E%3C/svg%3E") no-repeat right .75rem center;
+    background-size: 10px;
+    border: 1.5px solid #c4b5fd;
+    border-radius: var(--radius-sm);
+    padding: .4rem 2rem .4rem .8rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    min-width: 200px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+}
+
+.btn-reset-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .4rem .85rem;
+    background: var(--color-red-lt);
+    color: var(--color-red);
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius-sm);
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background var(--transition), transform var(--transition);
+    flex-shrink: 0;
+}
+.btn-reset-filter:hover {
+    background: #fca5a5;
+    transform: translateY(-1px);
+}
+
+.filter-active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .3rem .75rem;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 700;
+    animation: fadeIn .25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(.92); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Periode Badge (dalam tabel) ── */
+.periode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .65rem;
+    background: var(--color-blue-lt);
+    color: var(--color-blue);
+    border-radius: 99px;
+    font-size: .72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.periode-badge-plain {
+    background: var(--color-orange-lt);
+    color: var(--color-orange);
+}
+
+/* ==========================================
    RESPONSIVE
    ========================================== */
 @media (max-width: 768px) {
@@ -540,4 +653,9 @@ body.pembimbing-page {
     .profile-info-grid { grid-template-columns: 1fr; }
 
     .custom-modal      { max-width: 100%; }
+
+    /* Filter bar responsive */
+    .history-filter-bar { flex-direction: column; align-items: flex-start; }
+    .filter-select      { min-width: 100%; }
 }
+

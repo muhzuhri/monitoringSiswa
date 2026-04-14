@@ -43,7 +43,7 @@
                 <button class="tab-button" id="history-tab" data-bs-toggle="pill" data-bs-target="#riwayat-history"
                     type="button" role="tab">
                     <i class="fas fa-history"></i>
-                    <span>Riwayat Siswa ({{ $riwayatSiswas->count() }})</span>
+                    <span>Riwayat Siswa ({{ $riwayatSiswas->count() }}{{ $periodeId ? ' &bull; filtered' : '' }})</span>
                 </button>
             </div>
         </div>
@@ -51,84 +51,155 @@
         <div class="tab-content" id="siswaTabContent">
             {{-- Tab Siswa Bimbingan --}}
             <div class="tab-pane fade show active" id="bimbingan" role="tabpanel">
-                <div class="siswa-grid">
-                    @forelse($groupedSiswas as $groupKey => $g)
-                        <div class="student-card {{ $g['is_group'] ? 'group-card' : '' }}">
-                            <div class="student-header">
-                                <div class="student-avatar">
-                                    @if($g['is_group'])
-                                        <i class="fas fa-layer-group"></i>
-                                    @else
-                                        {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
-                                    @endif
-                                </div>
-                                <div class="student-meta">
-                                    <h6 class="student-name">
-                                        {{ $g['leader']->nama }}
+                {{-- View Mode Toggle --}}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="view-mode-wrapper" style="background: rgba(15, 23, 42, 0.04); padding: 4px; border-radius: 12px; display: inline-flex; gap: 4px;">
+                        <button class="view-mode-btn active" data-view="grouped" data-target="bimbingan">
+                            <i class="fas fa-th-large me-1"></i> Perkelompok
+                        </button>
+                        <button class="view-mode-btn" data-view="flat" data-target="bimbingan">
+                            <i class="fas fa-list me-1"></i> Seluruh Siswa
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Grouped View (Cards) --}}
+                <div class="view-container" id="bimbingan-grouped-view">
+                    <div class="siswa-grid">
+                        @forelse($groupedSiswas as $groupKey => $g)
+                            <div class="student-card {{ $g['is_group'] ? 'group-card' : '' }}">
+                                <div class="student-header">
+                                    <div class="student-avatar">
                                         @if($g['is_group'])
-                                            <span class="badge bg-info-light text-info-dark ms-1" style="font-size: 0.65rem; border-radius: 50px;">{{ $g['members']->count() }} Anggota</span>
-                                        @endif
-                                    </h6>
-                                    <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
-                                    <div class="mt-2">
-                                        @if($g['leader']->status === 'selesai')
-                                            <span class="badge bg-secondary text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
-                                                <i class="fas fa-flag-checkered me-1"></i> SELESAI
-                                            </span>
+                                            <i class="fas fa-layer-group"></i>
                                         @else
-                                            <span class="badge bg-success text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
-                                                <i class="fas fa-check-circle me-1"></i> AKTIF
-                                            </span>
+                                            {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    <div class="student-meta">
+                                        <h6 class="student-name">
+                                            {{ $g['leader']->nama }}
+                                            @if($g['is_group'])
+                                                <span class="badge bg-info-light text-info-dark ms-1" style="font-size: 0.65rem; border-radius: 50px;">{{ $g['members']->count() }} Anggota</span>
+                                            @endif
+                                        </h6>
+                                        <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
+                                        <div class="mt-2 text-start">
+                                            @if($g['leader']->status === 'selesai')
+                                                <span class="badge bg-secondary text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
+                                                    <i class="fas fa-flag-checkered me-1"></i> SELESAI
+                                                </span>
+                                            @else
+                                                <span class="badge bg-success text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
+                                                    <i class="fas fa-check-circle me-1"></i> AKTIF
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="status-wrapper">
+                                        @php
+                                            $hadirAll = $g['members']->every(fn($m) => $m->absen_hari_ini);
+                                            $hadirCount = $g['members']->filter(fn($m) => $m->absen_hari_ini)->count();
+                                        @endphp
+                                        @if ($hadirAll)
+                                            <span class="status-badge status-hadir"><i class="fas fa-check-circle"></i> Hadir</span>
+                                        @elseif($hadirCount > 0)
+                                            <span class="status-badge status-warning"><i class="fas fa-user-clock"></i> {{ $hadirCount }}/{{ $g['members']->count() }}</span>
+                                        @else
+                                            <span class="status-badge status-absen"><i class="fas fa-times-circle"></i> Belum Absen</span>
                                         @endif
                                     </div>
                                 </div>
-                                <div class="status-wrapper">
-                                    @php
-                                        $hadirAll = $g['members']->every(fn($m) => $m->absen_hari_ini);
-                                        $hadirCount = $g['members']->filter(fn($m) => $m->absen_hari_ini)->count();
-                                    @endphp
-                                    @if ($hadirAll)
-                                        <span class="status-badge status-hadir"><i class="fas fa-check-circle"></i> Hadir</span>
-                                    @elseif($hadirCount > 0)
-                                        <span class="status-badge status-warning"><i class="fas fa-user-clock"></i> {{ $hadirCount }}/{{ $g['members']->count() }}</span>
-                                    @else
-                                        <span class="status-badge status-absen"><i class="fas fa-times-circle"></i> Belum Absen</span>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label class="info-label"><i class="fas fa-school me-1"></i> SEKOLAH</label>
+                                        <span class="info-value">{{ $g['leader']->sekolah }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label class="info-label"><i class="fas fa-building me-1"></i> PERUSAHAAN</label>
+                                        <span class="info-value">{{ $g['leader']->perusahaan }}</span>
+                                    </div>
+                                </div>
+                                <div class="action-grid">
+                                    @if($g['is_group'])
+                                        <button class="btn-action btn-detail-group btn-show-members" 
+                                                data-name="{{ $g['leader']->nama }}"
+                                                data-members="{{ $g['members']->toJson() }}">
+                                            <i class="fas fa-search"></i> Pantau Kelompok
+                                        </button>
                                     @endif
+                                    <div class="action-row">
+                                        <a href="{{ route('guru.logbook', $g['leader']->nisn) }}" class="btn-action btn-logbook">
+                                            <i class="fas fa-book"></i> Logbook
+                                        </a>
+                                        <a href="{{ route('guru.absensi', $g['leader']->nisn) }}" class="btn-action btn-absensi">
+                                            <i class="fas fa-calendar-check"></i> Absensi
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <label class="info-label"><i class="fas fa-school me-1"></i> SEKOLAH</label>
-                                    <span class="info-value">{{ $g['leader']->sekolah }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <label class="info-label"><i class="fas fa-building me-1"></i> PERUSAHAAN</label>
-                                    <span class="info-value">{{ $g['leader']->perusahaan }}</span>
-                                </div>
-                            </div>
-                            <div class="action-grid">
-                                @if($g['is_group'])
-                                    <button class="btn-action btn-detail-group btn-show-members" 
-                                            data-name="{{ $g['leader']->nama }}"
-                                            data-members="{{ $g['members']->toJson() }}">
-                                        <i class="fas fa-search"></i> Pantau Kelompok
-                                    </button>
-                                @endif
-                                <div class="action-row">
-                                    <a href="{{ route('guru.logbook', $g['leader']->nisn) }}" class="btn-action btn-logbook">
-                                        <i class="fas fa-book"></i> Logbook
-                                    </a>
-                                    <a href="{{ route('guru.absensi', $g['leader']->nisn) }}" class="btn-action btn-absensi">
-                                        <i class="fas fa-calendar-check"></i> Absensi
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="empty-state">Belum ada siswa bimbingan.</div>
-                    @endforelse
-                    <div id="noResultsBimbingan" class="empty-state" style="display: none; width: 100%;">Tidak ada siswa bimbingan yang cocok dengan pencarian.</div>
+                        @empty
+                            <div class="empty-state">Belum ada siswa bimbingan.</div>
+                        @endforelse
+                    </div>
                 </div>
+
+                {{-- Flat View (Table) --}}
+                <div class="view-container d-none" id="bimbingan-flat-view">
+                    <div class="ui-card">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">No</th>
+                                        <th>Identitas Siswa</th>
+                                        <th>Status Hari Ini</th>
+                                        <th>Sekolah / Perusahaan</th>
+                                        <th class="text-end pe-4">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($siswas as $idx => $s)
+                                        <tr class="active-flat-row">
+                                            <td class="ps-4 text-muted small">{{ $idx + 1 }}</td>
+                                            <td>
+                                                <div class="td-siswa-name">{{ $s->nama }}</div>
+                                                <div class="td-siswa-nisn"><i class="fas fa-id-card-alt me-1 opacity-50"></i> {{ $s->nisn }}</div>
+                                            </td>
+                                            <td>
+                                                @if($s->absen_hari_ini)
+                                                    <span class="status-badge status-hadir"><i class="fas fa-check-circle"></i> Hadir</span>
+                                                @else
+                                                    <span class="status-badge status-absen"><i class="fas fa-times-circle"></i> Belum Absen</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <span class="badge-school small"><i class="fas fa-university me-1"></i> {{ $s->sekolah }}</span>
+                                                    <small class="text-muted"><i class="fas fa-building me-1"></i> {{ $s->perusahaan }}</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <a href="{{ route('guru.logbook', $s->nisn) }}" class="btn-small" style="background: var(--primary-light); color: var(--primary);" title="Logbook">
+                                                        <i class="fas fa-book"></i>
+                                                    </a>
+                                                    <a href="{{ route('guru.absensi', $s->nisn) }}" class="btn-small" style="background: var(--warning-light); color: #92400e;" title="Absensi">
+                                                        <i class="fas fa-calendar-check"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="5" class="text-center p-4">Tidak ada data.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="noResultsBimbingan" class="empty-state" style="display: none; width: 100%;">Tidak ada siswa bimbingan yang cocok dengan pencarian.</div>
             </div>
 
             {{-- Tab Cari Siswa --}}
@@ -225,67 +296,186 @@
 
             {{-- Tab Riwayat Siswa --}}
             <div class="tab-pane fade" id="riwayat-history" role="tabpanel">
-                <div class="ui-card">
-                    <div class="table-wrapper">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th class="ps-4">No</th>
-                                    <th>Identitas Siswa</th>
-                                    <th>Sekolah / Perusahaan</th>
-                                    <th>Periode Magang</th>
-                                    <th class="text-end pe-4">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="riwayatTableBody">
-                                @forelse($riwayatSiswas as $index => $siswa)
-                                    <tr class="history-row">
-                                        <td class="ps-4 text-muted small">{{ $index + 1 }}</td>
-                                        <td>
-                                            <div class="td-siswa-name fw-bold text-dark">{{ $siswa->nama }}</div>
-                                            <div class="td-siswa-nisn small text-muted"><i class="fas fa-id-card-alt me-1 opacity-50"></i> {{ $siswa->nisn }}</div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex flex-column gap-1">
-                                                <span class="badge-school bg-light text-dark px-2 py-1 rounded small" style="border: 1px solid #eee; font-size: 0.75rem;"><i class="fas fa-university me-1 text-primary"></i> {{ $siswa->sekolah }}</span>
-                                                <small class="text-muted" style="font-size: 0.7rem;"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }}</small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="small text-muted" style="line-height: 1.4;">
-                                                <div class="d-flex align-items-center mb-1">
-                                                    <i class="fas fa-calendar-alt me-2 text-primary opacity-75" style="width: 14px;"></i>
-                                                    <span style="font-size: 0.75rem;">{{ $siswa->tgl_mulai_magang ? \Carbon\Carbon::parse($siswa->tgl_mulai_magang)->translatedFormat('d M Y') : '-' }}</span>
-                                                </div>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-flag-checkered me-2 text-primary opacity-75" style="width: 14px;"></i>
-                                                    <span style="font-size: 0.75rem;">{{ $siswa->tgl_selesai_magang ? \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->translatedFormat('d M Y') : '-' }}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <a href="{{ route('guru.logbook', $siswa->nisn) }}" class="btn-small" title="Lihat Logbook" 
-                                                   style="background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 10px; border-radius: 8px;">
-                                                    <i class="fas fa-book-open"></i>
-                                                </a>
-                                                <a href="{{ route('guru.absensi', $siswa->nisn) }}" class="btn-small" title="Lihat Absensi"
-                                                   style="background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 6px 10px; border-radius: 8px;">
-                                                    <i class="fas fa-calendar-check"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
+
+                {{-- View Mode Toggle --}}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="view-mode-wrapper" style="background: rgba(15, 23, 42, 0.04); padding: 4px; border-radius: 12px; display: inline-flex; gap: 4px;">
+                        <button class="view-mode-btn" data-view="grouped" data-target="history">
+                            <i class="fas fa-th-large me-1"></i> Perkelompok
+                        </button>
+                        <button class="view-mode-btn active" data-view="flat" data-target="history">
+                            <i class="fas fa-list me-1"></i> Seluruh Siswa
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Filter Periode --}}
+                <div class="history-filter-bar mb-4 d-flex align-items-center flex-wrap" style="background:#ffffff; border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem 1.5rem; box-shadow:var(--shadow-sm);">
+                    <div class="filter-label" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.04em; margin-bottom: 0;">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter Periode:</span>
+                    </div>
+                    <form id="periodeFilterForm" method="GET" action="{{ route('guru.siswa') }}" class="filter-form d-flex align-items-center flex-wrap ms-md-4 ms-2 mt-2 mt-md-0" style="gap:0.75rem;">
+                        @if($search)
+                            <input type="hidden" name="search" value="{{ $search }}">
+                        @endif
+                        <input type="hidden" name="tab" value="history">
+                        <select name="periode" id="periodeSelect" class="form-select" style="min-width:220px; border-radius:var(--radius-sm); font-weight:600; font-size:0.85rem; border:1.5px solid var(--border); cursor:pointer;" onchange="document.getElementById('periodeFilterForm').submit()">
+                            <option value="">-- Semua Periode --</option>
+                            @foreach($periodeOptions as $opt)
+                                <option value="{{ $opt->id_tahun_ajaran }}"
+                                    {{ $periodeId == $opt->id_tahun_ajaran ? 'selected' : '' }}>
+                                    {{ $opt->tahun_ajaran }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($periodeId)
+                            <a href="{{ route('guru.siswa', array_filter(['search' => $search, 'tab' => 'history'])) }}"
+                               class="btn btn-outline-danger btn-sm" style="border-radius:var(--radius-sm); font-weight:700; padding:0.45rem 1rem;" title="Hapus Filter">
+                                <i class="fas fa-times me-1"></i> Reset
+                            </a>
+                        @endif
+                    </form>
+                    @if($periodeId)
+                        @php $selectedPeriode = $periodeOptions->firstWhere('id_tahun_ajaran', $periodeId); @endphp
+                        @if($selectedPeriode)
+                            <span class="badge bg-primary ms-auto mt-2 mt-md-0" style="padding:0.5rem 1rem; border-radius:99px; font-weight:800; font-size:0.75rem;">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ $selectedPeriode->tahun_ajaran }}
+                            </span>
+                        @endif
+                    @endif
+                </div>
+
+                {{-- Grouped View (Cards) - Hidden by default for History --}}
+                <div class="view-container d-none" id="history-grouped-view">
+                    <div class="siswa-grid">
+                        @forelse($groupedRiwayat as $groupKey => $g)
+                            <div class="student-card group-card">
+                                <div class="student-header">
+                                    <div class="student-avatar">
+                                        @if($g['is_group'])
+                                            <i class="fas fa-layer-group"></i>
+                                        @else
+                                            {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    <div class="student-meta">
+                                        <h6 class="student-name">
+                                            {{ $g['leader']->nama }}
+                                            @if($g['is_group'])
+                                                <span class="badge bg-info-light text-info-dark ms-1" style="font-size: 0.65rem; border-radius: 50px;">{{ $g['members']->count() }} Anggota</span>
+                                            @endif
+                                        </h6>
+                                        <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
+                                        <div class="mt-2 text-start">
+                                            <span class="badge bg-secondary text-white" style="font-size: 0.65rem; border-radius: 50px; padding: 2px 8px;">
+                                                <i class="fas fa-flag-checkered me-1"></i> SELESAI
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="status-wrapper">
+                                        <span class="status-badge status-hadir" style="background: rgba(100, 116, 139, 0.1); color: #64748b;">
+                                            <i class="fas fa-archive"></i> Arsip
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <label class="info-label"><i class="fas fa-school me-1"></i> SEKOLAH</label>
+                                        <span class="info-value">{{ $g['leader']->sekolah }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label class="info-label"><i class="fas fa-building me-1"></i> PERUSAHAAN</label>
+                                        <span class="info-value">{{ $g['leader']->perusahaan }}</span>
+                                    </div>
+                                </div>
+                                <div class="action-grid">
+                                    @if($g['is_group'])
+                                        <button class="btn-action btn-detail-group btn-show-members" 
+                                                data-name="{{ $g['leader']->nama }}"
+                                                data-members="{{ $g['members']->toJson() }}"
+                                                data-context="history">
+                                            <i class="fas fa-users"></i> Anggota Kelompok
+                                        </button>
+                                    @endif
+                                    <div class="action-row">
+                                        <button class="btn-action btn-absensi btn-preview-pdf" data-url="{{ route('guru.rekap.kelompok', $g['leader']->nisn) }}" style="width: 100%;">
+                                            <i class="fas fa-file-signature"></i> Rekap Absensi Kelompok
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="empty-state">Belum ada riwayat siswa.</div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- Flat View (Table) --}}
+                <div class="view-container" id="history-flat-view">
+                    <div class="ui-card">
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
                                     <tr>
-                                        <td colspan="5" class="empty-row text-center p-5">
-                                            <i class="fas fa-history fa-5x mb-3 text-muted opacity-25"></i>
-                                            <p class="text-muted">Belum ada riwayat siswa binaan yang selesai.</p>
-                                        </td>
+                                        <th class="ps-4">No</th>
+                                        <th>Identitas Siswa</th>
+                                        <th>Sekolah / Perusahaan</th>
+                                        <th>Periode Magang</th>
+                                        <th class="text-end pe-4">Aksi</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody id="riwayatTableBody">
+                                    @forelse($riwayatSiswas as $index => $siswa)
+                                        <tr class="history-row">
+                                            <td class="ps-4 text-muted small">{{ $index + 1 }}</td>
+                                            <td>
+                                                <div class="td-siswa-name fw-bold text-dark">{{ $siswa->nama }}</div>
+                                                <div class="td-siswa-nisn small text-muted"><i class="fas fa-id-card-alt me-1 opacity-50"></i> {{ $siswa->nisn }}</div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-1">
+                                                    <span class="badge-school bg-light text-dark px-2 py-1 rounded small" style="border: 1px solid #eee; font-size: 0.75rem;"><i class="fas fa-university me-1 text-primary"></i> {{ $siswa->sekolah }}</span>
+                                                    <small class="text-muted" style="font-size: 0.7rem;"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="small text-muted" style="line-height: 1.4;">
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <i class="fas fa-calendar-alt me-2 text-primary opacity-75" style="width: 14px;"></i>
+                                                        <span style="font-size: 0.75rem;">{{ $siswa->tgl_mulai_magang ? \Carbon\Carbon::parse($siswa->tgl_mulai_magang)->translatedFormat('d M Y') : '-' }}</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-flag-checkered me-2 text-primary opacity-75" style="width: 14px;"></i>
+                                                        <span style="font-size: 0.75rem;">{{ $siswa->tgl_selesai_magang ? \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->translatedFormat('d M Y') : '-' }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="d-flex justify-content-end gap-2">
+                                                    <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="{{ route('guru.rekap.jurnal', $siswa->nisn) }}"
+                                                       style="background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; padding: 6px 10px; border-radius: 8px;">
+                                                        <i class="fas fa-book"></i>
+                                                    </button>
+                                                    <button class="btn-small btn-preview-pdf" title="Cetak Absensi" data-url="{{ route('guru.rekap.absensi', $siswa->nisn) }}"
+                                                       style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; padding: 6px 10px; border-radius: 8px;">
+                                                        <i class="fas fa-file-signature"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="empty-row text-center p-5">
+                                                <i class="fas fa-history fa-5x mb-3 text-muted opacity-25"></i>
+                                                <p class="text-muted">Belum ada riwayat siswa binaan yang selesai.</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -452,8 +642,64 @@
                 }
             }
 
-            const modalElement = document.getElementById('groupMembersModal');
-            const modal = new bootstrap.Modal(modalElement);
+            // Auto-buka tab riwayat jika ada param ?tab=history atau ada filter periode aktif
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'history' || urlParams.get('periode')) {
+                const historyTabBtn = document.getElementById('history-tab');
+                if (historyTabBtn) {
+                    const tab = new bootstrap.Tab(historyTabBtn);
+                    tab.show();
+                }
+            }
+
+            // PDF Preview Logic
+            const pdfModalElement = document.getElementById('previewPdfModal');
+            const pdfModalStatus = pdfModalElement ? new bootstrap.Modal(pdfModalElement) : null;
+            const pdfIframe = document.getElementById('pdfIframe');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            const printPdfBtn = document.getElementById('printPdfBtn');
+
+            function handlePdfPreview() {
+                const url = this.getAttribute('data-url');
+                if (url) {
+                    const previewUrl = url.includes('#') ? url : url + '#view=Fit';
+                    pdfIframe.src = previewUrl;
+                    
+                    const downloadUrl = url.includes('?') ? url + '&download=1' : url + '?download=1';
+                    if (downloadPdfBtn) downloadPdfBtn.href = downloadUrl;
+                    if (pdfModalStatus) pdfModalStatus.show();
+                }
+            }
+
+            function initPdfPreviewListeners() {
+                const previewButtons = document.querySelectorAll('.btn-preview-pdf');
+                previewButtons.forEach(button => {
+                    button.removeEventListener('click', handlePdfPreview);
+                    button.addEventListener('click', handlePdfPreview);
+                });
+            }
+
+            if (pdfModalElement) {
+                const triggerPrint = function() {
+                    if (pdfIframe) {
+                        pdfIframe.contentWindow.focus();
+                        pdfIframe.contentWindow.print();
+                    }
+                };
+
+                if (printPdfBtn) printPdfBtn.addEventListener('click', triggerPrint);
+
+                pdfModalElement.addEventListener('hidden.bs.modal', function() {
+                    pdfIframe.src = '';
+                });
+            }
+
+            // Init listeners for initial content
+            initPdfPreviewListeners();
+
+            // Modal Group Members
+            const groupModalElement = document.getElementById('groupMembersModal');
+            const groupModalInstance = groupModalElement ? new bootstrap.Modal(groupModalElement) : null;
             const modalName = document.getElementById('modalGroupName');
             const modalBody = document.getElementById('modalGroupBody');
 
@@ -461,6 +707,7 @@
                 button.addEventListener('click', function() {
                     const name = this.getAttribute('data-name');
                     const members = JSON.parse(this.getAttribute('data-members'));
+                    const context = this.getAttribute('data-context');
                     
                     modalName.innerText = name;
                     modalBody.innerHTML = '';
@@ -468,47 +715,127 @@
                     // Route patterns
                     const logbookRouteBase = "{{ route('guru.logbook', ['nisn' => ':nisn']) }}";
                     const absensiRouteBase = "{{ route('guru.absensi', ['nisn' => ':nisn']) }}";
+                    const logbookDownloadBase = "{{ route('guru.rekap.jurnal', ['nisn' => ':nisn']) }}";
+                    const absensiDownloadBase = "{{ route('guru.rekap.absensi', ['nisn' => ':nisn']) }}";
 
-                members.forEach((member, index) => {
-                    const statusClass = member.absen_hari_ini ? 'status-hadir' : 'status-absen';
-                    const statusText = member.absen_hari_ini 
-                        ? '<i class="fas fa-check-circle"></i> Hadir' 
-                        : '<i class="fas fa-times-circle"></i> Belum Absen';
-                    
-                    const logbookUrl = logbookRouteBase.replace(':nisn', member.nisn);
-                    const absensiUrl = absensiRouteBase.replace(':nisn', member.nisn);
-                    const initial = member.nama.charAt(0).toUpperCase();
+                    members.forEach((member) => {
+                        const statusClass = member.absen_hari_ini ? 'status-hadir' : 'status-absen';
+                        const statusText = member.absen_hari_ini 
+                            ? '<i class="fas fa-check-circle"></i> Hadir' 
+                            : '<i class="fas fa-times-circle"></i> Belum Absen';
+                        
+                        let actionButtons = '';
+                        if (context === 'history') {
+                            const logDownload = logbookDownloadBase.replace(':nisn', member.nisn);
+                            const absDownload = absensiDownloadBase.replace(':nisn', member.nisn);
+                            actionButtons = `
+                                <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}" style="background: #f0f9ff; color: #0369a1; padding: 5px 8px; border-radius: 6px; border: 1px solid #bae6fd;">
+                                    <i class="fas fa-book"></i>
+                                </button>
+                                <button class="btn-small btn-preview-pdf" title="Cetak Absensi" data-url="${absDownload}" style="background: #f0fdf4; color: #15803d; padding: 5px 8px; border-radius: 6px; border: 1px solid #bbf7d0;">
+                                    <i class="fas fa-file-signature"></i>
+                                </button>
+                            `;
+                        } else {
+                            const logbookUrl = logbookRouteBase.replace(':nisn', member.nisn);
+                            const absensiUrl = absensiRouteBase.replace(':nisn', member.nisn);
+                            actionButtons = `
+                                <a href="${logbookUrl}" class="btn-small" title="Logbook" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
+                                    <i class="fas fa-book"></i>
+                                </a>
+                                <a href="${absensiUrl}" class="btn-small" title="Absensi" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
+                                    <i class="fas fa-calendar-check"></i>
+                                </a>
+                            `;
+                        }
 
-                    const card = `
-                        <tr>
-                            <td>
-                                <div class="td-siswa-name fw-bold">${member.nama}</div>
-                                <div class="td-siswa-nisn small text-muted">NISN: ${member.nisn}</div>
-                            </td>
-                            <td class="text-center">
-                                <span class="status-badge ${statusClass}" style="padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">
-                                    ${statusText}
-                                </span>
-                            </td>
-                            <td class="text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="${logbookUrl}" class="btn-small" title="Logbook" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
-                                        <i class="fas fa-book"></i>
-                                    </a>
-                                    <a href="${absensiUrl}" class="btn-small" title="Absensi" style="background: var(--bg-color); color: var(--primary-color); padding: 5px 8px; border-radius: 6px;">
-                                        <i class="fas fa-calendar-check"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                    modalBody.innerHTML += card;
-                });
+                        const row = `
+                            <tr>
+                                <td>
+                                    <div class="td-siswa-name fw-bold">${member.nama}</div>
+                                    <div class="td-siswa-nisn small text-muted">NISN: ${member.nisn}</div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="status-badge ${statusClass}" style="padding: 4px 10px; border-radius: 50px; font-size: 0.75rem;">
+                                        ${statusText}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        ${actionButtons}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        modalBody.innerHTML += row;
+                    });
                     
-                    modal.show();
+                    // Re-init listeners for new modal content
+                    initPdfPreviewListeners();
+                    
+                    if (groupModalInstance) groupModalInstance.show();
                 });
+            });
+
+            // View Mode Switching Logic
+            document.querySelectorAll('.view-mode-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    const target = this.getAttribute('data-target');
+                    const parent = this.closest('.tab-pane');
+                    
+                    parent.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (view === 'grouped') {
+                        parent.querySelector(`#${target}-grouped-view`).classList.remove('d-none');
+                        parent.querySelector(`#${target}-flat-view`).classList.add('d-none');
+                    } else {
+                        parent.querySelector(`#${target}-grouped-view`).classList.add('d-none');
+                        parent.querySelector(`#${target}-flat-view`).classList.remove('d-none');
+                    }
+                    localStorage.setItem(`view_mode_${target}`, view);
+                });
+
+                const target = btn.getAttribute('data-target');
+                const savedView = localStorage.getItem(`view_mode_${target}`);
+                if (savedView && btn.getAttribute('data-view') === savedView) {
+                    btn.click();
+                }
             });
         });
     </script>
+
+    <!-- Modal Preview PDF -->
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-labelledby="previewPdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 900px;">
+            <div class="modal-content border-0 shadow-2xl" style="border-radius: 20px; overflow: hidden; background: #f8fafc;">
+                <div class="modal-header bg-white text-dark border-bottom py-3 px-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-danger-light p-2 rounded-3 me-3">
+                            <i class="fas fa-file-pdf text-danger fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title fw-bold mb-0" id="previewPdfModalLabel">Pratinjau Laporan</h6>
+                            <small class="text-muted" style="font-size: 0.7rem;">Gunakan tombol di atas PDF untuk kontrol lebih lanjut</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a id="downloadPdfBtn" href="#" class="btn btn-sm btn-primary px-3 rounded-pill">
+                            <i class="fas fa-download me-1"></i> Unduh
+                        </a>
+                        <button id="printPdfBtn" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">
+                            <i class="fas fa-print me-1"></i> Cetak
+                        </button>
+                        <div class="vr mx-2 opacity-10"></div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-0 bg-light" style="height: 75vh;">
+                    <iframe id="pdfIframe" src="" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 @endpush
 @endsection

@@ -33,9 +33,9 @@
                     <i class="fas fa-user-clock"></i>
                     <span>Siswa Bimbingan ({{ $siswasActive->count() }})</span>
                 </button>
-                <button class="tab-button btn-tab-trigger" data-target="history-students">
+                <button class="tab-button btn-tab-trigger" data-target="history-students" id="btnTabHistory">
                     <i class="fas fa-history"></i>
-                    <span>Riwayat Siswa ({{ $siswasHistory->count() }})</span>
+                    <span>Riwayat Siswa ({{ $siswasHistory->count() }}{{ $periodeId ? ' &bull; filtered' : '' }})</span>
                 </button>
             </div>
         </div>
@@ -133,16 +133,57 @@
 
             {{-- Tab Riwayat Siswa (Selesai/Sudah Dinilai) --}}
             <div class="tab-pane-content" id="history-students" style="display: none;">
+
+                {{-- Filter Periode --}}
+                <div class="history-filter-bar">
+                    <div class="filter-label">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter Periode:</span>
+                    </div>
+                    <form id="periodeFilterForm" method="GET" action="{{ route('pembimbing.siswa') }}" class="filter-form">
+                        @if($search)
+                            <input type="hidden" name="search" value="{{ $search }}">
+                        @endif
+                        {{-- hidden input agar tab riwayat terbuka otomatis --}}
+                        <input type="hidden" name="tab" value="history">
+                        <select name="periode" id="periodeSelect" class="filter-select" onchange="document.getElementById('periodeFilterForm').submit()">
+                            <option value="">-- Semua Periode --</option>
+                            @foreach($periodeOptions as $opt)
+                                <option value="{{ $opt->id_tahun_ajaran }}"
+                                    {{ $periodeId == $opt->id_tahun_ajaran ? 'selected' : '' }}>
+                                    {{ $opt->tahun_ajaran }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($periodeId)
+                            <a href="{{ route('pembimbing.siswa', array_filter(['search' => $search, 'tab' => 'history'])) }}"
+                               class="btn-reset-filter" title="Hapus Filter">
+                                <i class="fas fa-times"></i> Reset
+                            </a>
+                        @endif
+                    </form>
+                    @if($periodeId)
+                        @php $selectedPeriode = $periodeOptions->firstWhere('id_tahun_ajaran', $periodeId); @endphp
+                        @if($selectedPeriode)
+                            <span class="filter-active-badge">
+                                <i class="fas fa-calendar-alt"></i>
+                                {{ $selectedPeriode->tahun_ajaran }}
+                            </span>
+                        @endif
+                    @endif
+                </div>
+
                 <div class="content-card">
                     <div class="custom-table-wrapper">
                         <table class="custom-table">
                             <thead>
                                 <tr>
                                     <th width="5%" class="text-center">No</th>
-                                    <th width="35%">Info Siswa</th>
+                                    <th width="28%">Info Siswa</th>
                                     <th width="20%">Sekolah / Perusahaan</th>
-                                    <th width="15%" class="text-center">Rata-rata Nilai</th>
-                                    <th width="25%" class="text-center">Aksi</th>
+                                    <th width="17%" class="text-center">Periode Magang</th>
+                                    <th width="12%" class="text-center">Rata-rata Nilai</th>
+                                    <th width="18%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
@@ -175,6 +216,22 @@
                                                 <span class="badge-role bg-purple-light text-purple"><i class="fas fa-school me-1"></i> {{ $siswa->sekolah }}</span>
                                                 <span class="small text-muted"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }}</span>
                                             </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($siswa->tahunAjaran)
+                                                <span class="periode-badge">
+                                                    <i class="fas fa-calendar-check me-1"></i>
+                                                    {{ $siswa->tahunAjaran->tahun_ajaran }}
+                                                </span>
+                                            @elseif($siswa->tgl_mulai_magang && $siswa->tgl_selesai_magang)
+                                                <span class="periode-badge periode-badge-plain">
+                                                    {{ \Carbon\Carbon::parse($siswa->tgl_mulai_magang)->format('M Y') }}
+                                                    &ndash;
+                                                    {{ \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->format('M Y') }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
                                             @if($penilaian)
@@ -210,17 +267,23 @@
                                     </tr>
                                 @empty
                                     <tr class="empty-row">
-                                        <td colspan="5" class="text-center py-5">
+                                        <td colspan="6" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="fas fa-history empty-icon"></i>
                                                 <h4>Belum Ada Riwayat</h4>
-                                                <p class="text-muted">Belum ada siswa yang menyelesaikan bimbingan/penilaian.</p>
+                                                <p class="text-muted">
+                                                    @if($periodeId)
+                                                        Tidak ada siswa yang menyelesaikan magang pada periode ini.
+                                                    @else
+                                                        Belum ada siswa yang menyelesaikan bimbingan/penilaian.
+                                                    @endif
+                                                </p>
                                             </div>
                                         </td>
                                     </tr>
                                 @endforelse
                                 <tr id="noResultsHistory" style="display: none;">
-                                    <td colspan="5" class="text-center py-5">
+                                    <td colspan="6" class="text-center py-5">
                                         <div class="empty-state">
                                             <i class="fas fa-search empty-icon"></i>
                                             <h4>Tidak Ditemukan</h4>
@@ -296,20 +359,26 @@
             const tabTriggers = document.querySelectorAll('.btn-tab-trigger');
             const tabPanes = document.querySelectorAll('.tab-pane-content');
 
+            function activateTab(targetId) {
+                tabTriggers.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(pane => {
+                    pane.style.display = pane.id === targetId ? 'block' : 'none';
+                });
+                const activeBtn = document.querySelector(`.btn-tab-trigger[data-target="${targetId}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+
             tabTriggers.forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-target');
-                    
-                    // Update buttons
-                    tabTriggers.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // Update contents
-                    tabPanes.forEach(pane => {
-                        pane.style.display = pane.id === targetId ? 'block' : 'none';
-                    });
+                    activateTab(this.getAttribute('data-target'));
                 });
             });
+
+            // Auto-buka tab riwayat jika ada param ?tab=history atau ada filter periode aktif
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'history' || urlParams.get('periode')) {
+                activateTab('history-students');
+            }
 
             // Live Search Logic for both tables
             const searchInput = document.getElementById('searchInput');

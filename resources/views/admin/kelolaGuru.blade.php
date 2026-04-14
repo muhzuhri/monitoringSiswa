@@ -107,58 +107,97 @@
             <div class="modal-content">
                 <form method="POST" action="{{ route('admin.storeGuru') }}">
                     @csrf
-                    <div class="modal-header-custom">
-                        <h5><i class="fas fa-user-plus"></i> Registrasi Guru Pembimbing</h5>
+                    <div class="modal-header-primary">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="modal-header-icon on-primary">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="modal-header-title">
+                                <h5>Registrasi Guru Pembimbing</h5>
+                                <p>Lengkapi formulir untuk mendaftarkan guru baru.</p>
+                            </div>
+                        </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <div class="modal-body-custom">
+                    <div class="modal-form-body">
                         <div class="p-form-group">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="nama" class="p-input" required
-                                placeholder="Contoh: Budi Santoso, S.Pd.">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="nama" class="p-input with-icon" required
+                                    placeholder="Contoh: Budi Santoso, S.Pd.">
+                            </div>
                         </div>
 
                         <div class="p-form-group">
                             <label>Alamat Email Resmi</label>
-                            <input type="email" name="email" class="p-input" required placeholder="budi@sekolah.sch.id">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" name="email" class="p-input with-icon" required placeholder="budi@sekolah.sch.id">
+                            </div>
                         </div>
 
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Kata Sandi</label>
-                                <input type="password" name="password" class="p-input" required
-                                    placeholder="Minimal 6 karakter">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="p-input with-icon" required
+                                            placeholder="Minimal 6 karakter">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Konfirmasi Kata Sandi</label>
-                                <input type="password" name="password_confirmation" class="p-input" required
-                                    placeholder="Ulangi kata sandi">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-shield-alt input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" class="p-input with-icon" required
+                                            placeholder="Ulangi kata sandi">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="p-form-group">
                             <label>Nomor Induk Pegawai (NIP)</label>
-                            <input type="text" name="id_guru" class="p-input" required placeholder="Masukkan NIP Resmi">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" name="id_guru" class="p-input with-icon" required placeholder="Masukkan NIP Resmi">
+                            </div>
                         </div>
 
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Jabatan / Bidang</label>
-                                <input type="text" name="jabatan" class="p-input" required
-                                    placeholder="Contoh: Informatika">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-briefcase input-icon"></i>
+                                    <input type="text" name="jabatan" class="p-input with-icon" required
+                                        placeholder="Contoh: Informatika">
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Asal Instansi Sekolah</label>
-                                <input type="text" name="sekolah" class="p-input" required
-                                    placeholder="Contoh: SMK Negeri 1 Palembang">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-school input-icon"></i>
+                                    <input type="text" name="sekolah" class="p-input with-icon" required
+                                        placeholder="Contoh: SMK Negeri 1 Palembang">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-footer-custom">
-                        <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-p-main">Simpan Data Guru</button>
+                    <div class="modal-form-footer">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-primary-custom rounded-pill px-5">Simpan Data Guru</button>
                     </div>
                 </form>
             </div>
@@ -172,48 +211,87 @@
                 <form id="formEditGuru" method="POST">
                     @csrf
                     @method('PUT')
-                    <div class="modal-header-custom">
-                        <h5><i class="fas fa-user-edit"></i> Edit Profil Guru</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <div class="modal-header-warning">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="modal-header-icon on-warning">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <div class="modal-header-title">
+                                <h5>Edit Profil Guru</h5>
+                                <p>Perbarui informasi data guru pembimbing.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body-custom">
+                    <div class="modal-form-body">
                         <div class="p-form-group">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="nama" id="edit_nama" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="nama" id="edit_nama" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-group">
                             <label>Email Resmi</label>
-                            <input type="email" name="email" id="edit_email" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" name="email" id="edit_email" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Ganti Kata Sandi (Opsional)</label>
-                                <input type="password" name="password" class="p-input" placeholder="Isi jika ingin diubah">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="p-input with-icon" placeholder="Isi jika ingin diubah">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Konfirmasi Sandi</label>
-                                <input type="password" name="password_confirmation" class="p-input"
-                                    placeholder="Isi jika ingin diubah">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-shield-alt input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" class="p-input with-icon"
+                                            placeholder="Isi jika ingin diubah">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="p-form-group">
                             <label>NIP</label>
-                            <input type="text" name="id_guru" id="edit_id_guru" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" name="id_guru" id="edit_id_guru" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Jabatan</label>
-                                <input type="text" name="jabatan" id="edit_jabatan" class="p-input" required>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-briefcase input-icon"></i>
+                                    <input type="text" name="jabatan" id="edit_jabatan" class="p-input with-icon" required>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Sekolah</label>
-                                <input type="text" name="sekolah" id="edit_sekolah" class="p-input" required>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-school input-icon"></i>
+                                    <input type="text" name="sekolah" id="edit_sekolah" class="p-input with-icon" required>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer-custom">
-                        <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-p-main">Perbarui Profil</button>
+                    <div class="modal-form-footer">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold">Perbarui Profil</button>
                     </div>
                 </form>
             </div>
@@ -365,6 +443,21 @@
                 button.addEventListener('click', function () {
                     const url = this.getAttribute('data-url');
                     deleteForm.action = url;
+                });
+            });
+
+            // Password Toggle Logic
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.closest('.input-group').querySelector('input');
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    }
                 });
             });
         });

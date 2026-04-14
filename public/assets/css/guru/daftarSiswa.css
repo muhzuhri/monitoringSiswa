@@ -21,12 +21,14 @@
     --radius-md: 16px;
     --radius-sm: 12px;
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    --font-heading: 'Outfit', sans-serif;
+    --shadow-md:
+        0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-hover:
+        0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --font-heading: "Outfit", sans-serif;
 }
 
-body{
+body {
     background: var(--bg-color);
     color: var(--text-medium);
     min-height: 100vh;
@@ -79,7 +81,9 @@ body{
 }
 
 @media (max-width: 767px) {
-    .search-wrapper { max-width: 100%; }
+    .search-wrapper {
+        max-width: 100%;
+    }
 }
 
 .search-form {
@@ -89,7 +93,9 @@ body{
     border: 1.5px solid var(--border);
     border-radius: 15px;
     overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .search-form:focus-within {
@@ -123,11 +129,15 @@ body{
 }
 
 @media (min-width: 640px) {
-    .siswa-grid { grid-template-columns: repeat(2, 1fr); }
+    .siswa-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (min-width: 1024px) {
-    .siswa-grid { grid-template-columns: repeat(3, 1fr); }
+    .siswa-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* ── Kartu Siswa ── */
@@ -147,7 +157,7 @@ body{
 }
 
 .student-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -241,8 +251,14 @@ body{
     flex-shrink: 0;
 }
 
-.status-hadir { background: rgba(25, 135, 84, 0.1); color: var(--success); }
-.status-absen { background: rgba(220, 53, 69, 0.1); color: var(--danger); }
+.status-hadir {
+    background: rgba(25, 135, 84, 0.1);
+    color: var(--success);
+}
+.status-absen {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+}
 
 /* ── Info Grid ── */
 .info-grid {
@@ -357,8 +373,8 @@ body{
     background: var(--primary-light);
     color: var(--primary);
 }
-.btn-logbook:hover { 
-    background: var(--primary); 
+.btn-logbook:hover {
+    background: var(--primary);
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
@@ -368,19 +384,32 @@ body{
     background: var(--warning-light);
     color: #92400e;
 }
-.btn-absensi:hover { 
-    background: var(--warning); 
+.btn-absensi:hover {
+    background: var(--warning);
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 /* Custom Badges */
-.bg-info-light { background: var(--info-light); }
-.text-info-dark { color: #0e7490; }
+.bg-info-light {
+    background: var(--info-light);
+}
+.text-info-dark {
+    color: #0e7490;
+}
 
-.status-hadir { background: var(--success-light); color: var(--success); }
-.status-warning { background: var(--warning-light); color: #92400e; }
-.status-absen { background: var(--danger-light); color: var(--danger); }
+.status-hadir {
+    background: var(--success-light);
+    color: var(--success);
+}
+.status-warning {
+    background: var(--warning-light);
+    color: #92400e;
+}
+.status-absen {
+    background: var(--danger-light);
+    color: var(--danger);
+}
 
 /* ── State Kosong ── */
 .empty-state {
@@ -423,12 +452,20 @@ body{
     transition: opacity 0.2s;
 }
 
-.btn-reset:hover { opacity: 0.88; }
+.btn-reset:hover {
+    opacity: 0.88;
+}
 
 /* ── Animasi ── */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .student-card {
@@ -471,7 +508,7 @@ body{
 .tab-button.active {
     background: var(--primary);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* Tab Pane Visibility */
@@ -483,7 +520,7 @@ body{
 }
 
 .tab-button.has-notif::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 10px;
     right: 25%;
@@ -495,8 +532,12 @@ body{
 }
 
 @media (max-width: 576px) {
-    .tab-button span { display: none; }
-    .tab-button i { font-size: 1.2rem; }
+    .tab-button span {
+        display: none;
+    }
+    .tab-button i {
+        font-size: 1.2rem;
+    }
 }
 
 /* ── UI Card & Table Modernization ── */
@@ -509,10 +550,12 @@ body{
     transition: box-shadow 0.3s ease;
 }
 
-.ui-card:hover { box-shadow: var(--shadow-md); }
+.ui-card:hover {
+    box-shadow: var(--shadow-md);
+}
 
-.table-wrapper { 
-    overflow-x: auto; 
+.table-wrapper {
+    overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
@@ -545,16 +588,16 @@ body{
     background: rgba(79, 70, 229, 0.02);
 }
 
-.td-siswa-name { 
-    font-weight: 800; 
-    color: var(--text-main); 
-    font-size: 1rem; 
+.td-siswa-name {
+    font-weight: 800;
+    color: var(--text-main);
+    font-size: 1rem;
     margin-bottom: 2px;
 }
 
-.td-siswa-nisn { 
-    font-size: 0.825rem; 
-    color: var(--text-muted); 
+.td-siswa-nisn {
+    font-size: 0.825rem;
+    color: var(--text-muted);
     font-family: inherit;
 }
 
@@ -563,7 +606,7 @@ code {
     color: var(--primary);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: 'Fira Code', monospace;
+    font-family: "Fira Code", monospace;
     font-size: 0.85em;
 }
 
@@ -675,16 +718,37 @@ code {
     gap: 6px;
 }
 
-.btn-accept { background: var(--success); color: #ffffff; }
-.btn-accept:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-accept {
+    background: var(--success);
+    color: #ffffff;
+}
+.btn-accept:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
 
-.btn-reject { background: #fee2e2; color: var(--danger); }
-.btn-reject:hover { background: #fecaca; transform: translateY(-1px); }
+.btn-reject {
+    background: #fee2e2;
+    color: var(--danger);
+}
+.btn-reject:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+}
 
 /* ── Empty States ── */
-.empty-row { text-align: center; padding: 4rem 1rem; }
-.empty-mini { color: var(--text-muted); opacity: 0.6; }
-.empty-mini i { font-size: 2.5rem; margin-bottom: 1rem; }
+.empty-row {
+    text-align: center;
+    padding: 4rem 1rem;
+}
+.empty-mini {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+.empty-mini i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
 
 /* ── Responsif Mobile ── */
 /* Avatar Stack */
@@ -717,13 +781,27 @@ code {
 }
 
 /* Fallback staggered animations */
-.siswa-grid > *:nth-child(1) { animation-delay: 0.1s; }
-.siswa-grid > *:nth-child(2) { animation-delay: 0.18s; }
-.siswa-grid > *:nth-child(3) { animation-delay: 0.26s; }
-.siswa-grid > *:nth-child(4) { animation-delay: 0.34s; }
-.siswa-grid > *:nth-child(5) { animation-delay: 0.42s; }
-.siswa-grid > *:nth-child(6) { animation-delay: 0.5s; }
-.siswa-grid > *:nth-child(n+7) { animation-delay: 0.6s; }
+.siswa-grid > *:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.siswa-grid > *:nth-child(2) {
+    animation-delay: 0.18s;
+}
+.siswa-grid > *:nth-child(3) {
+    animation-delay: 0.26s;
+}
+.siswa-grid > *:nth-child(4) {
+    animation-delay: 0.34s;
+}
+.siswa-grid > *:nth-child(5) {
+    animation-delay: 0.42s;
+}
+.siswa-grid > *:nth-child(6) {
+    animation-delay: 0.5s;
+}
+.siswa-grid > *:nth-child(n + 7) {
+    animation-delay: 0.6s;
+}
 
 /* Modal Customization - Solid & Premium */
 .modal-content {
@@ -799,7 +877,7 @@ code {
 }
 
 .profile-modal-avatar {
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
 }
 
@@ -846,6 +924,39 @@ code {
 }
 
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* View Mode Buttons */
+.view-mode-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.view-mode-btn.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.view-mode-btn:not(.active):hover {
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.5);
 }

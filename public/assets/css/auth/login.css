@@ -129,6 +129,39 @@ body::before {
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
+/* Input group fix for rounded corners */
+.input-group {
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: #f5f7fa;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.input-group .form-control {
+    border: none;
+    border-radius: 0 !important;
+}
+
+.input-group .btn-outline-secondary {
+    border: none !important;
+    background-color: transparent !important;
+    color: #64748b;
+    padding-right: 16px;
+    padding-left: 16px;
+}
+
+.input-group .btn-outline-secondary:hover {
+    color: #2563eb !important;
+    background-color: transparent !important;
+}
+
+.input-group:focus-within {
+    border-color: #2563eb;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
 /* ===============================
    BUTTON MODERN
 ================================= */

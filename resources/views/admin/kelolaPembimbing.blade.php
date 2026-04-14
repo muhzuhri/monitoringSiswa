@@ -44,49 +44,53 @@
                     </thead>
                     <tbody>
                         @forelse ($pembimbing as $index => $item)
-                                            <tr>
-                                                <td data-label="#">{{ $pembimbing->firstItem() + $index }}</td>
+                            <tr>
+                                <td data-label="#">{{ $pembimbing->firstItem() + $index }}</td>
 
-                                                <td data-label="Nama">{{ $item->nama }}</td>
-                                                <td data-label="Email">{{ $item->email }}</td>
-                                                <td data-label="Jabatan">{{ $item->jabatan }}</td>
-                                                <td data-label="Siswa Bimbingan">
-                                                    <span
-                                                        class="badge {{ $item->siswas->count() > 0 ? 'bg-success-soft text-success' : 'bg-secondary-soft text-muted' }}"
-                                                        style="border-radius: 8px; padding: 0.5rem 0.75rem; font-weight: 700;">
-                                                        {{ $item->siswas->count() }} Siswa
-                                                    </span>
-                                                </td>
-                                                <td data-label="Aksi">
-                                                    <div class="action-group">
-                                                        <button class="btn-icon btn-detail-soft btn-detail" data-bs-toggle="modal"
-                                                            data-bs-target="#modalDetailDosen" data-nama="{{ $item->nama }}"
-                                                            data-email="{{ $item->email }}" data-jabatan="{{ $item->jabatan }}"
-                                                            data-instansi="{{ $item->instansi }}" data-telp="{{ $item->no_telp }}" data-siswas="{{ json_encode($item->siswas->map(function ($s) {
-                                return ['nama' => $s->nama, 'nisn' => $s->nisn];
-                            })) }}">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button class="btn-icon btn-edit-soft btn-edit" data-bs-toggle="modal"
-                                                            data-bs-target="#modalEditDosen" data-id="{{ $item->id_pembimbing }}"
-                                                            data-nama="{{ $item->nama }}" data-email="{{ $item->email }}"
-                                                            data-jabatan="{{ $item->jabatan }}" data-instansi="{{ $item->instansi }}"
-                                                            data-telp="{{ $item->no_telp }}">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn-icon btn-delete-soft btn-delete-trigger" data-bs-toggle="modal"
-                                                            data-bs-target="#modalHapus"
-                                                            data-url="{{ route('admin.destroyPembimbing', $item->id_pembimbing) }}">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                <td data-label="Nama">{{ $item->nama }}</td>
+                                <td data-label="Email">{{ $item->email }}</td>
+                                <td data-label="Jabatan">{{ $item->jabatan }}</td>
+                                <td data-label="Siswa Bimbingan">
+                                    <span
+                                        class="badge {{ $item->siswas->count() > 0 ? 'bg-success-soft text-success' : 'bg-secondary-soft text-muted' }}"
+                                        style="border-radius: 8px; padding: 0.5rem 0.75rem; font-weight: 700;">
+                                        {{ $item->siswas->count() }} Siswa
+                                    </span>
+                                </td>
+                                <td data-label="Aksi">
+                                    <div class="action-group">
+                                        <button class="btn-icon btn-detail-soft btn-detail" data-bs-toggle="modal"
+                                            data-bs-target="#modalDetailDosen" data-nama="{{ $item->nama }}"
+                                            data-email="{{ $item->email }}" data-jabatan="{{ $item->jabatan }}"
+                                            data-instansi="{{ $item->instansi }}" data-telp="{{ $item->no_telp }}"
+                                            data-siswas="{{ json_encode(
+                                                $item->siswas->map(function ($s) {
+                                                    return ['nama' => $s->nama, 'nisn' => $s->nisn];
+                                                }),
+                                            ) }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon btn-edit-soft btn-edit" data-bs-toggle="modal"
+                                            data-bs-target="#modalEditDosen" data-id="{{ $item->id_pembimbing }}"
+                                            data-nama="{{ $item->nama }}" data-email="{{ $item->email }}"
+                                            data-jabatan="{{ $item->jabatan }}" data-instansi="{{ $item->instansi }}"
+                                            data-telp="{{ $item->no_telp }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon btn-delete-soft btn-delete-trigger" data-bs-toggle="modal"
+                                            data-bs-target="#modalHapus"
+                                            data-url="{{ route('admin.destroyPembimbing', $item->id_pembimbing) }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center-muted"
                                     style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                                    Belum ada data pembimbing lapangan. Klik tombol <strong>Tambah Pembimbing Lapangan</strong>
+                                    Belum ada data pembimbing lapangan. Klik tombol <strong>Tambah Pembimbing
+                                        Lapangan</strong>
                                     untuk membuat akun baru.
                                 </td>
                             </tr>
@@ -110,69 +114,113 @@
             <div class="modal-content">
                 <form method="POST" action="{{ route('admin.storePembimbing') }}">
                     @csrf
-                    <div class="modal-header-custom">
-                        <h5><i class="fas fa-user-plus"></i> Registrasi Pembimbing Lapangan</h5>
+                    <div class="modal-header-primary">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="modal-header-icon on-primary">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="modal-header-title">
+                                <h5>Registrasi Pembimbing Lapangan</h5>
+                                <p>Daftarkan pembimbing baru dari instansi mitra.</p>
+                            </div>
+                        </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <div class="modal-body-custom">
+                    <div class="modal-form-body">
                         <div class="p-form-group">
                             <label>NIP / ID Pembimbing</label>
-                            <input type="text" name="id_pembimbing" class="p-input" required placeholder="Masukkan NIP/ID unik">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" name="id_pembimbing" class="p-input with-icon" required
+                                    placeholder="Masukkan NIP/ID unik">
+                            </div>
                         </div>
 
                         <div class="p-form-group">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="nama" class="p-input" required placeholder="Masukkan nama lengkap">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="nama" class="p-input with-icon" required
+                                    placeholder="Masukkan nama lengkap">
+                            </div>
                         </div>
 
                         <div class="p-form-group">
                             <label>Alamat Email Resmi</label>
-                            <input type="email" name="email" class="p-input" required placeholder="nama@email.com">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" name="email" class="p-input with-icon" required placeholder="nama@email.com">
+                            </div>
                         </div>
 
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Kata Sandi</label>
-                                <input type="password" name="password" class="p-input" required
-                                    placeholder="Minimal 6 karakter">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="p-input with-icon" required
+                                            placeholder="Minimal 6 karakter">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Konfirmasi Kata Sandi</label>
-                                <input type="password" name="password_confirmation" class="p-input" required
-                                    placeholder="Ulangi kata sandi">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-shield-alt input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" class="p-input with-icon" required
+                                            placeholder="Ulangi kata sandi">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="p-form-group">
                             <label>Jabatan</label>
-                            <input type="text" name="jabatan" class="p-input" required
-                                placeholder="Contoh: Pembimbing Lapangan">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-briefcase input-icon"></i>
+                                <input type="text" name="jabatan" class="p-input with-icon" required
+                                    placeholder="Contoh: Pembimbing Lapangan">
+                            </div>
                         </div>
 
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Instansi</label>
-                                <select name="instansi" class="p-input" required style="appearance: auto;">
-                                    <option value="">-- Pilih Instansi --</option>
-                                    <option value="Fasilkom Unsri Indralaya">Fasilkom Unsri Indralaya</option>
-                                    <option value="Fasilkom Unsri Bukit">Fasilkom Unsri Bukit</option>
-                                </select>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-building input-icon"></i>
+                                    <select name="instansi" class="p-input with-icon" required style="appearance: auto;">
+                                        <option value="">-- Pilih Instansi --</option>
+                                        <option value="Fasilkom Unsri Indralaya">Fasilkom Unsri Indralaya</option>
+                                        <option value="Fasilkom Unsri Bukit">Fasilkom Unsri Bukit</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Nomor Telepon</label>
-                                <input type="text" name="no_telp" class="p-input" required placeholder="08XXXXXXXXXX">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input type="text" name="no_telp" class="p-input with-icon" required placeholder="08XXXXXXXXXX">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-footer-custom">
-                        <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-p-main">Simpan Data Pembimbing Lapangan</button>
+                    <div class="modal-form-footer">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-primary-custom rounded-pill px-5">Simpan Data Pembimbing</button>
                     </div>
-                </form>
-            </div>
+            </form>
         </div>
+    </div>
     </div>
 
     <!-- Modal Edit Pembimbing Lapangan -->
@@ -182,58 +230,101 @@
                 <form id="formEditDosen" method="POST">
                     @csrf
                     @method('PUT')
-                    <div class="modal-header-custom">
-                        <h5><i class="fas fa-user-edit"></i> Edit Profil Pembimbing Lapangan</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <div class="modal-header-warning">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="modal-header-icon on-warning">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <div class="modal-header-title">
+                                <h5>Edit Profil Pembimbing</h5>
+                                <p>Perbarui informasi data pembimbing lapangan.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body-custom">
+                    <div class="modal-form-body">
                         <div class="p-form-group">
                             <label>NIP / ID Pembimbing</label>
-                            <input type="text" id="edit_id_display" class="p-input" disabled
-                                style="background: #f1f5f9; cursor: not-allowed;" title="NIP/ID tidak dapat diubah">
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" id="edit_id_display" class="p-input with-icon" disabled
+                                    style="background: #f1f5f9; cursor: not-allowed;" title="NIP/ID tidak dapat diubah">
+                            </div>
                         </div>
                         <div class="p-form-group">
                             <label>Nama Lengkap</label>
-                            <input type="text" name="nama" id="edit_nama" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="nama" id="edit_nama" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-group">
                             <label>Email Resmi</label>
-                            <input type="email" name="email" id="edit_email" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" name="email" id="edit_email" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Ganti Kata Sandi (Opsional)</label>
-                                <input type="password" name="password" class="p-input" placeholder="Isi jika ingin diubah">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="p-input with-icon"
+                                            placeholder="Isi jika ingin diubah">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Konfirmasi Sandi</label>
-                                <input type="password" name="password_confirmation" class="p-input"
-                                    placeholder="Isi jika ingin diubah">
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-shield-alt input-icon"></i>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" class="p-input with-icon"
+                                            placeholder="Isi jika ingin diubah">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="p-form-group">
                             <label>Jabatan</label>
-                            <input type="text" name="jabatan" id="edit_jabatan" class="p-input" required>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-briefcase input-icon"></i>
+                                <input type="text" name="jabatan" id="edit_jabatan" class="p-input with-icon" required>
+                            </div>
                         </div>
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Instansi</label>
-                                <select name="instansi" id="edit_instansi" class="p-input" required
-                                    style="appearance: auto;">
-                                    <option value="">-- Pilih Instansi --</option>
-                                    <option value="Fasilkom Unsri Indralaya">Fasilkom Unsri Indralaya</option>
-                                    <option value="Fasilkom Unsri Bukit">Fasilkom Unsri Bukit</option>
-                                </select>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-building input-icon"></i>
+                                    <select name="instansi" id="edit_instansi" class="p-input with-icon" required
+                                        style="appearance: auto;">
+                                        <option value="">-- Pilih Instansi --</option>
+                                        <option value="Fasilkom Unsri Indralaya">Fasilkom Unsri Indralaya</option>
+                                        <option value="Fasilkom Unsri Bukit">Fasilkom Unsri Bukit</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="p-form-group">
                                 <label>Nomor Telepon</label>
-                                <input type="text" name="no_telp" id="edit_telp" class="p-input" required>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input type="text" name="no_telp" id="edit_telp" class="p-input with-icon" required>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer-custom">
-                        <button type="button" class="btn-secondary-custom" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-p-main">Perbarui Profil</button>
+                    <div class="modal-form-footer">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold">Perbarui Profil</button>
                     </div>
                 </form>
             </div>
@@ -324,13 +415,13 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Edit Logic
             const editButtons = document.querySelectorAll('.btn-edit');
             const editForm = document.getElementById('formEditDosen');
 
             editButtons.forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
                     const nama = this.getAttribute('data-nama');
                     const email = this.getAttribute('data-email');
@@ -351,13 +442,19 @@
             // Preview Detail Logic
             const detailButtons = document.querySelectorAll('.btn-detail');
             detailButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    document.getElementById('det_id').textContent = this.closest('tr').querySelector('.btn-edit').getAttribute('data-id');
-                    document.getElementById('det_nama').textContent = this.getAttribute('data-nama');
-                    document.getElementById('det_jabatan').textContent = this.getAttribute('data-jabatan');
-                    document.getElementById('det_email').textContent = this.getAttribute('data-email');
-                    document.getElementById('det_telp').textContent = this.getAttribute('data-telp');
-                    document.getElementById('det_instansi').textContent = this.getAttribute('data-instansi');
+                button.addEventListener('click', function() {
+                    document.getElementById('det_id').textContent = this.closest('tr')
+                        .querySelector('.btn-edit').getAttribute('data-id');
+                    document.getElementById('det_nama').textContent = this.getAttribute(
+                        'data-nama');
+                    document.getElementById('det_jabatan').textContent = this.getAttribute(
+                        'data-jabatan');
+                    document.getElementById('det_email').textContent = this.getAttribute(
+                        'data-email');
+                    document.getElementById('det_telp').textContent = this.getAttribute(
+                        'data-telp');
+                    document.getElementById('det_instansi').textContent = this.getAttribute(
+                        'data-instansi');
 
                     // Populate supervised students list
                     const siswas = JSON.parse(this.getAttribute('data-siswas'));
@@ -378,7 +475,8 @@
                             listContainer.appendChild(studentDiv);
                         });
                     } else {
-                        listContainer.innerHTML = '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan.</div>';
+                        listContainer.innerHTML =
+                            '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan.</div>';
                     }
                 });
             });
@@ -388,9 +486,24 @@
             const deleteForm = document.getElementById('formHapus');
 
             deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const url = this.getAttribute('data-url');
                     deleteForm.action = url;
+                });
+            });
+
+            // Password Toggle Logic
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.closest('.input-group').querySelector('input');
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                    }
                 });
             });
         });

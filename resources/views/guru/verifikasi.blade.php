@@ -88,18 +88,7 @@
                                         <i class="fas fa-check-circle"></i>
                                         <span>SETUJUI LAPORAN</span>
                                     </label>
-
-                                    <!-- <input type="radio" class="decision-radio" name="status" id="reject" value="rejected">
-                                    <label class="decision-btn decision-reject" for="reject">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>TOLAK / REVISI</span>
-                                    </label> -->
-                                </div>
-
-                                <!-- <label class="form-label">Catatan / Feedback untuk Siswa</label>
-                                <textarea name="catatan" class="form-textarea" rows="5"
-                                    placeholder="Berikan alasan persetujuan atau detail revisi yang harus diperbaiki oleh siswa..."></textarea> -->
-
+                                </div>                         
                                 <div class="form-actions">
                                     <button type="submit" class="btn-verify">
                                         Simpan Verifikasi <i class="fas fa-save"></i>
@@ -177,6 +166,47 @@
 
                 {{-- Tab Riwayat --}}
                 <div class="tab-pane fade" id="history" role="tabpanel">
+
+                    {{-- Filter Periode --}}
+                    <div class="history-filter-bar mb-4 d-flex align-items-center flex-wrap" style="background:#ffffff; border:1px solid var(--border); border-radius:16px; padding:1rem 1.5rem; box-shadow:var(--shadow-sm);">
+                        <div class="filter-label" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.04em;">
+                            <i class="fas fa-filter"></i>
+                            <span>Filter Periode:</span>
+                        </div>
+                        <form id="periodeFilterForm" method="GET" action="{{ route('guru.verifikasi') }}" class="filter-form d-flex align-items-center flex-wrap ms-md-4 ms-2 mt-2 mt-md-0" style="gap:0.75rem;">
+                            @if(isset($search))
+                                <input type="hidden" name="search" value="{{ $search }}">
+                            @endif
+                            <input type="hidden" name="tab" value="history">
+                            <select name="periode" id="periodeSelect" class="form-select" style="min-width:220px; border-radius:12px; font-weight:600; font-size:0.85rem; border:1.5px solid var(--border); cursor:pointer;" onchange="document.getElementById('periodeFilterForm').submit()">
+                                <option value="">-- Semua Periode --</option>
+                                @if(isset($periodeOptions))
+                                    @foreach($periodeOptions as $opt)
+                                        <option value="{{ $opt->id_tahun_ajaran }}"
+                                            {{ (isset($periodeId) && $periodeId == $opt->id_tahun_ajaran) ? 'selected' : '' }}>
+                                            {{ $opt->tahun_ajaran }}
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            @if(isset($periodeId) && $periodeId)
+                                <a href="{{ route('guru.verifikasi', array_filter(['search' => $search ?? '', 'tab' => 'history'])) }}"
+                                   class="btn btn-outline-danger btn-sm" style="border-radius:12px; font-weight:700; padding:0.45rem 1rem;" title="Hapus Filter">
+                                    <i class="fas fa-times me-1"></i> Reset
+                                </a>
+                            @endif
+                        </form>
+                        @if(isset($periodeId) && $periodeId && isset($periodeOptions))
+                            @php $selectedPeriode = $periodeOptions->firstWhere('id_tahun_ajaran', $periodeId); @endphp
+                            @if($selectedPeriode)
+                                <span class="badge bg-primary ms-auto mt-2 mt-md-0" style="padding:0.5rem 1rem; border-radius:99px; font-weight:800; font-size:0.75rem;">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ $selectedPeriode->tahun_ajaran }}
+                                </span>
+                            @endif
+                        @endif
+                    </div>
+
                     <div class="ui-card">
                         <div class="table-wrapper">
                             <table class="data-table">
@@ -243,6 +273,16 @@
             const historyRows = document.querySelectorAll('#history table tbody tr:not(#noResultsHistory)');
             const noResultsPending = document.getElementById('noResultsPending');
             const noResultsHistory = document.getElementById('noResultsHistory');
+
+            // Auto-buka tab riwayat jika ada param ?tab=history atau ada filter periode aktif
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'history' || urlParams.get('periode')) {
+                const historyTabBtn = document.getElementById('history-tab');
+                if (historyTabBtn) {
+                    const tab = new bootstrap.Tab(historyTabBtn);
+                    tab.show();
+                }
+            }
 
             if (searchInput) {
                 searchInput.addEventListener('input', function() {

@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     // Laporan
     Route::get('/siswa/laporan', [SiswaController::class, 'laporan'])->name('siswa.laporan');
     Route::post('/siswa/laporan/upload', [SiswaController::class, 'uploadLaporanAkhir'])->name('siswa.laporan.upload');
+    Route::get('/siswa/laporan/download-akhir', [SiswaController::class, 'previewLaporanAkhir'])->name('siswa.laporan.downloadAkhir');
     Route::get('/siswa/laporan/download/jurnal-mingguan', [SiswaController::class, 'downloadJurnalMingguan'])->name('siswa.rekap.jurnal');
     Route::get('/siswa/laporan/download/rekap-individu', [SiswaController::class, 'downloadRekapAbsensiIndividu'])->name('siswa.rekap.individu');
     Route::get('/siswa/laporan/download/rekap-kelompok', [SiswaController::class, 'downloadRekapAbsensiKelompok'])->name('siswa.rekap.kelompok');
@@ -67,12 +68,24 @@ Route::middleware('auth')->group(function () {
     Route::post('/guru/penilaian/{nisn}', [GuruController::class, 'storePenilaian'])->name('guru.penilaian.store');
     Route::get('/guru/penilaian/{nisn}/export', [GuruController::class, 'exportPenilaian'])->name('guru.penilaian.export');
 
+    // Manajemen Kriteria Penilaian Guru (Dynamic)
+    Route::post('/guru/kriteria', [GuruController::class, 'storeKriteria'])->name('guru.kriteria.store');
+    Route::put('/guru/kriteria/{id}', [GuruController::class, 'updateKriteria'])->name('guru.kriteria.update');
+    Route::delete('/guru/kriteria/{id}', [GuruController::class, 'destroyKriteria'])->name('guru.kriteria.destroy');
+
     // Claim Siswa (Teacher side)
     Route::post('/guru/siswa/{nisn}/claim', [GuruController::class, 'claimSiswa'])->name('guru.siswa.claim');
 
     // Profil Guru
     Route::get('/guru/profil', [GuruController::class, 'profil'])->name('guru.profil');
     Route::post('/guru/profil', [GuruController::class, 'updateProfil'])->name('guru.profil.update');
+
+    // Download Reports (Guru)
+    Route::get('/guru/siswa/{nisn}/download-jurnal', [GuruController::class, 'downloadJurnalMingguan'])->name('guru.rekap.jurnal');
+    Route::get('/guru/siswa/{nisn}/download-absensi', [GuruController::class, 'downloadRekapAbsensiIndividu'])->name('guru.rekap.absensi');
+    Route::get('/guru/siswa/{nisn}/download-rekap-kelompok', [GuruController::class, 'downloadRekapAbsensiKelompok'])->name('guru.rekap.kelompok');
+
+
 
     Route::get('/pembimbing/pembimbing', [AuthController::class, 'pembimbing'])->name('pembimbing.pembimbing');
     Route::get('/pembimbing/siswa', [PembimbingController::class, 'daftarSiswa'])->name('pembimbing.siswa');
@@ -85,6 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembimbing/logbook/siswa/{nisn}/validasi-semua', [PembimbingController::class, 'validasiSemuaLogbook'])->name('pembimbing.logbook.validasi-semua');
     Route::post('/pembimbing/absensi/siswa/{nisn}/validasi-semua', [PembimbingController::class, 'validasiSemuaAbsensi'])->name('pembimbing.absensi.validasi-semua');
     Route::get('/pembimbing/evaluasi', [PembimbingController::class, 'evaluasiSiswa'])->name('pembimbing.evaluasi');
+    Route::get('/pembimbing/evaluasi/input/{nisn}', [PembimbingController::class, 'inputEvaluasi'])->name('pembimbing.evaluasi.input');
     Route::post('/pembimbing/evaluasi', [PembimbingController::class, 'storeEvaluasi'])->name('pembimbing.evaluasi.store');
     
     // Pengajuan Siswa
@@ -99,6 +113,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembimbing/profil', [PembimbingController::class, 'profil'])->name('pembimbing.profil');
     Route::post('/pembimbing/profil', [PembimbingController::class, 'updateProfil'])->name('pembimbing.profil.update');
 
+    // Manajemen Kriteria Penilaian (Dynamic)
+    Route::get('/pembimbing/kriteria', [PembimbingController::class, 'kriteriaPenilaian'])->name('pembimbing.kriteria');
+    Route::post('/pembimbing/kriteria', [PembimbingController::class, 'storeKriteria'])->name('pembimbing.kriteria.store');
+    Route::put('/pembimbing/kriteria/{id}', [PembimbingController::class, 'updateKriteria'])->name('pembimbing.kriteria.update');
+    Route::delete('/pembimbing/kriteria/{id}', [PembimbingController::class, 'destroyKriteria'])->name('pembimbing.kriteria.destroy');
+
     Route::get('/admin/admin', [AuthController::class, 'admin'])->name('admin.admin');
 
     Route::get('/admin/pembimbing', [AdminPembimbingController::class, 'kelolaPembimbing'])->name('admin.kelolaPembimbing');
@@ -111,6 +131,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/siswa', [AdminSiswaController::class, 'store'])->name('admin.storeSiswa');
     Route::put('/admin/siswa/{id}', [AdminSiswaController::class, 'update'])->name('admin.updateSiswa');
     Route::delete('/admin/siswa/{id}', [AdminSiswaController::class, 'destroy'])->name('admin.destroySiswa');
+    Route::get('/admin/siswa/{nisn}/absensi', [AdminSiswaController::class, 'absensiSiswa'])->name('admin.siswa.absensi');
+    Route::get('/admin/siswa/{nisn}/logbook', [AdminSiswaController::class, 'logbookSiswa'])->name('admin.siswa.logbook');
+
+    // Admin Rekap Routes
+    Route::get('/admin/siswa/{nisn}/download-jurnal', [AdminSiswaController::class, 'downloadJurnalMingguan'])->name('admin.rekap.jurnal');
+    Route::get('/admin/siswa/{nisn}/download-absensi', [AdminSiswaController::class, 'downloadRekapAbsensiIndividu'])->name('admin.rekap.absensi');
+    Route::get('/admin/siswa/{nisn}/download-rekap-kelompok', [AdminSiswaController::class, 'downloadRekapAbsensiKelompok'])->name('admin.rekap.kelompok');
 
     // Manajemen guru oleh admin
     Route::get('/admin/guru', [AdminGuruController::class, 'kelolaGuru'])->name('admin.kelolaGuru');

@@ -260,20 +260,9 @@ body {
     }
 }
 
-/* ── Common Utilities (Replacing Bootstrap) ── */
+/* ── Utilities supplied by Bootstrap CSS (loaded in layout) ── */
+/* Navbar-specific overrides only */
 .d-none { display: none !important; }
 @media (min-width: 768px) {
     .d-md-block { display: block !important; }
 }
-.me-2 { margin-right: 0.5rem !important; }
-.ms-2 { margin-left: 0.5rem !important; }
-.ms-auto { margin-left: auto !important; }
-.mt-4 { margin-top: 1.5rem !important; }
-.mb-4 { margin-bottom: 1.5rem !important; }
-.fw-bold { font-weight: 700 !important; }
-.text-primary { color: #7c3aed !important; }
-.text-danger { color: #ef4444 !important; }
-.text-warning { color: #f97316 !important; }
-.text-success { color: #22c55e !important; }
-.text-muted { color: #9ca3af !important; }
-.small { font-size: 0.875rem !important; }

@@ -3,24 +3,54 @@
  */
 function updateRoleForms() {
     const role = document.getElementById('role').value;
-    const formSiswa = document.getElementById('form-siswa');
-    const formGuru = document.getElementById('form-guru');
-    const formDosen = document.getElementById('form-dosen');
-    const formAdmin = document.getElementById('form-admin');
+    const forms = {
+        'siswa': document.getElementById('form-siswa'),
+        'guru': document.getElementById('form-guru'),
+        'dosen': document.getElementById('form-dosen'),
+        'admin': document.getElementById('form-admin')
+    };
 
-    formSiswa.classList.add('d-none');
-    formGuru.classList.add('d-none');
-    formDosen.classList.add('d-none');
-    formAdmin.classList.add('d-none');
+    // Sembunyikan semua dan nonaktifkan inputnya
+    Object.keys(forms).forEach(key => {
+        const formEl = forms[key];
+        if (formEl) {
+            formEl.classList.add('d-none');
+            // Disable all inputs inside to prevent browser validation on hidden fields
+            const inputs = formEl.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = true);
+        }
+    });
 
-    if (role === 'siswa') {
-        formSiswa.classList.remove('d-none');
-    } else if (role === 'guru') {
-        formGuru.classList.remove('d-none');
-    } else if (role === 'dosen') {
-        formDosen.classList.remove('d-none');
-    } else if (role === 'admin') {
-        formAdmin.classList.remove('d-none');
+    // Tampilkan yang dipilih dan aktifkan inputnya
+    if (role && forms[role]) {
+        forms[role].classList.remove('d-none');
+        const activeInputs = forms[role].querySelectorAll('input, select, textarea');
+        activeInputs.forEach(input => input.disabled = false);
+        
+        // Trigger specific logic for siswa if needed
+        if (role === 'siswa') {
+            updateMagangType();
+        }
+    }
+}
+
+/**
+ * Logika khusus untuk tipe magang (individu/kelompok)
+ */
+function updateMagangType() {
+    const magangTypeSelect = document.getElementById('tipe_magang');
+    const groupLeaderSection = document.getElementById('group-leader-section');
+    
+    if (magangTypeSelect && groupLeaderSection) {
+        if (magangTypeSelect.value === 'kelompok') {
+            groupLeaderSection.classList.remove('d-none');
+            const inputs = groupLeaderSection.querySelectorAll('input, select');
+            inputs.forEach(input => input.disabled = false);
+        } else {
+            groupLeaderSection.classList.add('d-none');
+            const inputs = groupLeaderSection.querySelectorAll('input, select');
+            inputs.forEach(input => input.disabled = true);
+        }
     }
 }
 
@@ -32,14 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const magangTypeSelect = document.getElementById('tipe_magang');
-    const groupLeaderSection = document.getElementById('group-leader-section');
-    if (magangTypeSelect && groupLeaderSection) {
-        magangTypeSelect.addEventListener('change', function() {
-            if (this.value === 'kelompok') {
-                groupLeaderSection.classList.remove('d-none');
-            } else {
-                groupLeaderSection.classList.add('d-none');
-            }
-        });
+    if (magangTypeSelect) {
+        magangTypeSelect.addEventListener('change', updateMagangType);
     }
 });

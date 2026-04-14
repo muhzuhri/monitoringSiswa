@@ -9,6 +9,9 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <!-- CSS Khusus Halaman Register -->
     <link href="{{ asset('assets/css/auth/register.css') }}" rel="stylesheet">
 </head>
@@ -59,11 +62,21 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Password</label>
-                                    <input type="password" name="password" class="form-control" required>
+                                    <div class="input-group">
+                                        <input type="password" name="password" id="password" class="form-control" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Konfirmasi Password</label>
-                                    <input type="password" name="password_confirmation" class="form-control" required>
+                                    <div class="input-group">
+                                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password_confirmation">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -92,39 +105,39 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">NISN</label>
-                                        <input type="text" name="nisn" class="form-control">
-                                    </div>
+                                         <label class="form-label">NISN</label>
+                                         <input type="text" name="nisn" class="form-control" required>
+                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Jenis Kelamin</label>
-                                        <select name="jenis_kelamin" class="form-select">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="L">Laki-laki</option>
-                                            <option value="P">Perempuan</option>
-                                        </select>
-                                    </div>
+                                         <label class="form-label">Jenis Kelamin</label>
+                                         <select name="jenis_kelamin" class="form-select" required>
+                                             <option value="">-- Pilih --</option>
+                                             <option value="L">Laki-laki</option>
+                                             <option value="P">Perempuan</option>
+                                         </select>
+                                     </div>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Kelas</label>
-                                        <input type="text" name="kelas" class="form-control">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Jurusan</label>
-                                        <input type="text" name="jurusan" class="form-control">
-                                    </div>
-                                </div>
+                                 <div class="row">
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">Kelas</label>
+                                         <input type="text" name="kelas" class="form-control" required>
+                                     </div>
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">Jurusan</label>
+                                         <input type="text" name="jurusan" class="form-control" required>
+                                     </div>
+                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Asal Sekolah</label>
-                                    <input type="text" name="sekolah_siswa" class="form-control">
-                                </div>
+                                 <div class="mb-3">
+                                     <label class="form-label">Asal Sekolah</label>
+                                     <input type="text" name="sekolah_siswa" class="form-control" required>
+                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Lokasi Magang</label>
-                                    <input type="text" name="perusahaan" class="form-control">
-                                </div>
+                                 <div class="mb-3">
+                                     <label class="form-label">Lokasi Magang</label>
+                                     <input type="text" name="perusahaan" class="form-control" required>
+                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -138,17 +151,17 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">NPSN Sekolah</label>
-                                        <input type="text" name="npsn_siswa" class="form-control"
-                                            placeholder="Masukkan NPSN Sekolah">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Upload Surat Balasan <span
-                                                class="text-muted">(PDF/JPG/PNG)</span></label>
-                                        <input type="file" name="surat_balasan" class="form-control"
-                                            accept=".pdf,.jpg,.jpeg,.png">
-                                    </div>
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">NPSN Sekolah</label>
+                                         <input type="text" name="npsn_siswa" class="form-control"
+                                             placeholder="Masukkan NPSN Sekolah" required>
+                                     </div>
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">Upload Surat Balasan <span
+                                                 class="text-muted">(PDF/JPG/PNG)</span></label>
+                                         <input type="file" name="surat_balasan" class="form-control"
+                                             accept=".pdf,.jpg,.jpeg,.png" required>
+                                     </div>
                                 </div>
 
                                 <div class="row">
@@ -171,27 +184,27 @@
                             <div id="form-guru" class="role-form d-none">
                                 <h6 class="fw-semibold mb-3">Data Guru Pembimbing</h6>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">NIP</label>
-                                        <input type="text" name="id_guru" class="form-control">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Jabatan</label>
-                                        <input type="text" name="jabatan" class="form-control">
-                                    </div>
-                                </div>
+                                 <div class="row">
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">NIP</label>
+                                         <input type="text" name="id_guru" class="form-control" required>
+                                     </div>
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">Jabatan</label>
+                                         <input type="text" name="jabatan" class="form-control" required>
+                                     </div>
+                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Asal Sekolah</label>
-                                        <input type="text" name="sekolah_guru" class="form-control">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">NPSN Sekolah</label>
-                                        <input type="text" name="npsn_guru" class="form-control" placeholder="">
-                                    </div>
-                                </div>
+                                 <div class="row">
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">Asal Sekolah</label>
+                                         <input type="text" name="sekolah_guru" class="form-control" required>
+                                     </div>
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">NPSN Sekolah</label>
+                                         <input type="text" name="npsn_guru" class="form-control" placeholder="" required>
+                                     </div>
+                                 </div>
                             </div>
 
                             <!-- Form khusus Dosen -->
@@ -230,10 +243,10 @@
                             </div>
 
 
-                            <div class="d-flex justify-content-between mt-3">
-                                <a href="{{ route('login') }}">Sudah punya akun? Login</a>
-                                <button type="submit" class="btn btn-primary">Daftar</button>
-                            </div>
+                             <div class="d-flex justify-content-between mt-3">
+                                 <a href="{{ route('login') }}" class="btn btn-link px-0">Sudah punya akun? Login</a>
+                                 <button type="submit" class="btn btn-primary px-4" id="btn-daftar">Daftar</button>
+                             </div>
 
                         </form>
                     </div>
@@ -244,6 +257,24 @@
     </div>
 
     <script src="{{ asset('assets/js/register.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

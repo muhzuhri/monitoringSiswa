@@ -104,6 +104,36 @@ body.register-page::after {
     box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.25);
 }
 
+/* Input group fix for register page */
+.register-page .input-group {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+.register-page .input-group .form-control {
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.register-page .input-group .btn-outline-secondary {
+    border: none !important;
+    background-color: transparent !important;
+    color: #64748b;
+    padding-right: 14px;
+    padding-left: 14px;
+}
+
+.register-page .input-group .btn-outline-secondary:hover {
+    color: #6366f1 !important;
+}
+
+.register-page .input-group:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 0.2rem rgba(99,102,241,0.25);
+}
+
 /* =============================
    ROLE FORM BOX
 ============================= */
