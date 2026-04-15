@@ -59,15 +59,16 @@
                 <!-- Konfigurasi Sistem -->
                 <div class="action-card">
                     <div class="card-icon icon-yellow">
-                        <i class="fas fa-sliders-h"></i>
+                        <i class="fas fa-map-marker-alt"></i>
                     </div>
-                    <div class="card-category">Konfigurasi Sistem</div>
+                    <div class="card-category">Konfigurasi Lokasi</div>
                     <div class="card-info">
-                        <h5>Pengaturan Magang</h5>
-                        <p>Atur tahun ajaran, periode magang, dan konfigurasi umum aplikasi.</p>
-                        <button type="button" class="btn-action btn-disabled" disabled>
-                            Segera Hadir
-                        </button>
+                        <h5>Lokasi Absensi</h5>
+                        <p>Atur titik koordinat kampus/lokasi absensi (Latitude & Longitude) dan radius absen.</p>
+                        <a href="{{ route('admin.kelolaLokasi') }}" class="btn-action btn-primary-custom" style="background: var(--warning-color); border:none;">
+                            <i class="fas fa-arrow-right"></i>
+                            Kelola Lokasi
+                        </a>
                     </div>
                 </div>
             </div>

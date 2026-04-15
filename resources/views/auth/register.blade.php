@@ -129,14 +129,28 @@
                                      </div>
                                  </div>
 
-                                 <div class="mb-3">
-                                     <label class="form-label">Asal Sekolah</label>
-                                     <input type="text" name="sekolah_siswa" class="form-control" required>
+                                 <div class="row mb-3">
+                                     <div class="col-md-6 mb-3">
+                                         <label class="form-label">NPSN Sekolah</label>
+                                         <input type="text" name="npsn_siswa" id="npsn_siswa" class="form-control"
+                                             placeholder="Ketik NPSN Sekolah..." required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Asal Sekolah</label>
+                                                <input type="text" name="sekolah_siswa" id="sekolah_siswa" class="form-control" 
+                                                placeholder="Terisi otomatis jika NPSN ditemukan" readonly required>
+                                            </div>
+                                            <small id="npsn_siswa_msg" class="text-muted"></small>
                                  </div>
 
                                  <div class="mb-3">
                                      <label class="form-label">Lokasi Magang</label>
-                                     <input type="text" name="perusahaan" class="form-control" required>
+                                     <select name="perusahaan" class="form-select" required>
+                                         <option value="">-- Pilih Lokasi Magang --</option>
+                                         @foreach($lokasis as $lok)
+                                             <option value="{{ $lok->nama_lokasi }}">{{ $lok->nama_lokasi }}</option>
+                                         @endforeach
+                                     </select>
                                  </div>
 
                                 <div class="row">
@@ -151,12 +165,7 @@
                                 </div>
 
                                 <div class="row">
-                                     <div class="col-md-6 mb-3">
-                                         <label class="form-label">NPSN Sekolah</label>
-                                         <input type="text" name="npsn_siswa" class="form-control"
-                                             placeholder="Masukkan NPSN Sekolah" required>
-                                     </div>
-                                     <div class="col-md-6 mb-3">
+                                     <div class="col-md-12 mb-3">
                                          <label class="form-label">Upload Surat Balasan <span
                                                  class="text-muted">(PDF/JPG/PNG)</span></label>
                                          <input type="file" name="surat_balasan" class="form-control"
@@ -197,12 +206,15 @@
 
                                  <div class="row">
                                      <div class="col-md-6 mb-3">
-                                         <label class="form-label">Asal Sekolah</label>
-                                         <input type="text" name="sekolah_guru" class="form-control" required>
+                                         <label class="form-label">NPSN Sekolah</label>
+                                         <input type="text" name="npsn_guru" id="npsn_guru" class="form-control" 
+                                             placeholder="Ketik NPSN..." required>
+                                         <small id="npsn_guru_msg" class="text-muted"></small>
                                      </div>
                                      <div class="col-md-6 mb-3">
-                                         <label class="form-label">NPSN Sekolah</label>
-                                         <input type="text" name="npsn_guru" class="form-control" placeholder="" required>
+                                         <label class="form-label">Asal Sekolah</label>
+                                         <input type="text" name="sekolah_guru" id="sekolah_guru" class="form-control" 
+                                             placeholder="Terisi otomatis" readonly required>
                                      </div>
                                  </div>
                             </div>
@@ -273,6 +285,53 @@
                     this.querySelector('i').classList.toggle('fa-eye-slash');
                 });
             });
+
+            // NPSN Lookup Logic
+            function initNpsnLookup(inputId, outputId, msgId) {
+                const npsnInput = document.getElementById(inputId);
+                const schoolInput = document.getElementById(outputId);
+                const msgEl = document.getElementById(msgId);
+                const btnDaftar = document.getElementById('btn-daftar');
+
+                if (!npsnInput) return;
+
+                npsnInput.addEventListener('input', function() {
+                    const npsn = this.value;
+                    if (npsn.length >= 8) {
+                        msgEl.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mencari sekolah...';
+                        msgEl.className = 'text-primary';
+                        
+                        fetch(`/api/schools/${npsn}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    schoolInput.value = data.data.nama_sekolah;
+                                    msgEl.innerHTML = '<i class="fas fa-check-circle me-2"></i> Sekolah ditemukan: ' + data.data.nama_sekolah;
+                                    msgEl.className = 'text-success';
+                                    btnDaftar.disabled = false;
+                                } else {
+                                    schoolInput.value = '';
+                                    msgEl.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Sekolah belum terdaftar. Hubungi Admin.';
+                                    msgEl.className = 'text-danger';
+                                    btnDaftar.disabled = true;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching school:', error);
+                                msgEl.innerHTML = 'Terjadi kesalahan sistem.';
+                                msgEl.className = 'text-danger';
+                            });
+                    } else {
+                        schoolInput.value = '';
+                        msgEl.innerHTML = 'NPSN minimal 8 digit.';
+                        msgEl.className = 'text-muted';
+                        btnDaftar.disabled = false; // Reset to let other roles register if needed
+                    }
+                });
+            }
+
+            initNpsnLookup('npsn_siswa', 'sekolah_siswa', 'npsn_siswa_msg');
+            initNpsnLookup('npsn_guru', 'sekolah_guru', 'npsn_guru_msg');
         });
     </script>
 </body>

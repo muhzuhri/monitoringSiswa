@@ -7,6 +7,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\PembimbingController;
+use App\Http\Controllers\PimpinanController;
+use App\Http\Controllers\AdminMasterDataController;
+use App\Http\Controllers\Api\SchoolApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'index'])
@@ -19,6 +22,7 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/api/schools/{npsn}', [SchoolApiController::class, 'getSchoolByNpsn'])->name('api.schools.show');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -144,4 +148,38 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/guru', [AdminGuruController::class, 'store'])->name('admin.storeGuru');
     Route::put('/admin/guru/{id}', [AdminGuruController::class, 'update'])->name('admin.updateGuru');
     Route::delete('/admin/guru/{id}', [AdminGuruController::class, 'destroy'])->name('admin.destroyGuru');
+
+    // Manajemen Lokasi Absensi oleh admin
+    Route::get('/admin/lokasi', [App\Http\Controllers\AdminSettingController::class, 'index'])->name('admin.kelolaLokasi');
+    Route::post('/admin/lokasi', [App\Http\Controllers\AdminSettingController::class, 'store'])->name('admin.storeLokasi');
+    Route::put('/admin/lokasi/{id}', [App\Http\Controllers\AdminSettingController::class, 'update'])->name('admin.updateLokasi');
+    Route::delete('/admin/lokasi/{id}', [App\Http\Controllers\AdminSettingController::class, 'destroy'])->name('admin.destroyLokasi');
+
+    // Manajemen Rekap Baru oleh admin
+    Route::get('/admin/rekap', [App\Http\Controllers\AdminRekapController::class, 'index'])->name('admin.rekap');
+    Route::get('/admin/rekap/siswa-aktif', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaAktif'])->name('admin.rekap.siswaAktif');
+    Route::get('/admin/rekap/siswa-selesai', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaSelesai'])->name('admin.rekap.siswaSelesai');
+    Route::get('/admin/rekap/siswa-total', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaTotal'])->name('admin.rekap.siswaTotal');
+    Route::get('/admin/rekap/guru', [App\Http\Controllers\AdminRekapController::class, 'rekapGuru'])->name('admin.rekap.guru');
+
+    // Master Data (Sekolah & Periode)
+    Route::get('/admin/master-data', [AdminMasterDataController::class, 'index'])->name('admin.masterData');
+    Route::post('/admin/sekolah', [AdminMasterDataController::class, 'storeSekolah'])->name('admin.storeSekolah');
+    Route::put('/admin/sekolah/{id}', [AdminMasterDataController::class, 'updateSekolah'])->name('admin.updateSekolah');
+    Route::delete('/admin/sekolah/{id}', [AdminMasterDataController::class, 'destroySekolah'])->name('admin.destroySekolah');
+
+    Route::post('/admin/periode', [AdminMasterDataController::class, 'storePeriode'])->name('admin.storePeriode');
+    Route::put('/admin/periode/{id}', [AdminMasterDataController::class, 'updatePeriode'])->name('admin.updatePeriode');
+    Route::delete('/admin/periode/{id}', [AdminMasterDataController::class, 'destroyPeriode'])->name('admin.destroyPeriode');
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// RUTE PIMPINAN
+// ─────────────────────────────────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
+    Route::get('/home', [PimpinanController::class, 'index'])->name('home');
+    Route::get('/siswa', [PimpinanController::class, 'siswa'])->name('siswa');
+    Route::get('/guru', [PimpinanController::class, 'guru'])->name('guru');
+    Route::get('/pembimbing', [PimpinanController::class, 'pembimbing'])->name('pembimbing');
+    Route::get('/rekap', [PimpinanController::class, 'rekap'])->name('rekap');
 });

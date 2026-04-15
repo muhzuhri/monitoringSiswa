@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="{{ asset('assets/css/navbar/navbar.css') }}">
 
-
     @stack('styles')
 </head>
 
@@ -23,7 +22,7 @@
     </div>
     <nav class="custom-navbar">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('admin.admin') }}">
+            <a class="navbar-brand" href="{{ route('pimpinan.home') }}">
                 <img src="{{ asset('images/unsri-pride.png') }}" alt="Logo" width="40" class="me-2">
                 <div class="brand-text">
                     <div class="subtitle">FACULTY OF</div>
@@ -38,35 +37,39 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="nav-list ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.admin') ? 'active' : '' }}" href="{{ route('admin.admin') }}">Dashboard</a>
+                        <a class="nav-link {{ Route::is('pimpinan.home') ? 'active' : '' }}" href="{{ route('pimpinan.home') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaSiswa') ? 'active' : '' }}" href="{{ route('admin.kelolaSiswa') }}">Siswa</a>
+                        <a class="nav-link {{ Route::is('pimpinan.siswa') ? 'active' : '' }}" href="{{ route('pimpinan.siswa') }}">Siswa</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaGuru') ? 'active' : '' }}" href="{{ route('admin.kelolaGuru') }}">Guru</a>
+                        <a class="nav-link {{ Route::is('pimpinan.guru') ? 'active' : '' }}" href="{{ route('pimpinan.guru') }}">Guru</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaPembimbing') ? 'active' : '' }}" href="{{ route('admin.kelolaPembimbing') }}">Pembimbing</a>
+                        <a class="nav-link {{ Route::is('pimpinan.pembimbing') ? 'active' : '' }}" href="{{ route('pimpinan.pembimbing') }}">Pembimbing</a>
                     </li>                    
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.rekap') ? 'active' : '' }}" href="{{ route('admin.rekap') }}">Rekap</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.masterData') ? 'active' : '' }}" href="{{ route('admin.masterData') }}">Data Master</a>
+                        <a class="nav-link {{ Route::is('pimpinan.rekap') ? 'active' : '' }}" href="{{ route('pimpinan.rekap') }}">Rekap</a>
                     </li>
                 </ul>
-                <form action="{{ route('logout') }}" method="post">
-                    @csrf
-                    <button type="submit" class="btn-logout">LOGOUT</button>
-                </form>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="user-profile-nav d-none d-lg-flex">
+                        <div class="user-info text-end">
+                            <div class="user-name text-white">{{ $user->nama }}</div>
+                            <div class="user-role text-white-50 small">{{ $user->jabatan ?? 'Pimpinan' }}</div>
+                        </div>
+                    </div>
+                    <form action="{{ route('logout') }}" method="post">
+                        @csrf
+                        <button type="submit" class="btn-logout">LOGOUT</button>
+                    </form>
+                </div>
 
             </div>
         </div>
     </nav>
 
     @yield('body')
-
 
     {{-- JS utama --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

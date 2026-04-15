@@ -101,7 +101,12 @@
                             <div class="mb-3">
                                 <div class="p-input-wrapper">
                                     <i class="fas fa-building input-icon"></i>
-                                    <input type="text" name="perusahaan" class="p-input with-icon" placeholder="Tempat Penempatan (Kosongkan jika belum)">
+                                    <select name="perusahaan" class="p-input with-icon">
+                                        <option value="">-- Lokasi Penempatan --</option>
+                                        @foreach($lokasis as $lok)
+                                            <option value="{{ $lok->nama_lokasi }}">{{ $lok->nama_lokasi }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -236,7 +241,12 @@
                             <div class="mb-3">
                                 <div class="p-input-wrapper">
                                     <i class="fas fa-building input-icon"></i>
-                                    <input type="text" name="perusahaan" id="edit_perusahaan" class="p-input with-icon" placeholder="Nama Perusahaan">
+                                    <select name="perusahaan" id="edit_perusahaan" class="p-input with-icon">
+                                        <option value="">-- Lokasi Penempatan --</option>
+                                        @foreach($lokasis as $lok)
+                                            <option value="{{ $lok->nama_lokasi }}">{{ $lok->nama_lokasi }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="row g-3">
@@ -412,6 +422,174 @@
                     <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Ya, Hapus Data</button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ============================================================
+     MODALS: LOKASI ABSENSI
+============================================================ --}}
+
+<!-- Modal Tambah Lokasi -->
+<div class="modal fade" id="modalTambahLokasi" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form action="{{ route('admin.storeLokasi') }}" method="POST">
+                @csrf
+                <div class="modal-header bg-primary text-white py-3 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-map-plus fa-lg"></i>
+                        <h5 class="modal-title fw-bold">Tambah Lokasi Baru</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Nama Lokasi</label>
+                        <input type="text" name="nama_lokasi" class="form-control rounded-pill px-3" required placeholder="Contoh: Fasilkom Kampus Palembang">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Latitude</label>
+                            <input type="text" name="latitude" class="form-control rounded-pill px-3" required placeholder="-2.98472005">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Longitude</label>
+                            <input type="text" name="longitude" class="form-control rounded-pill px-3" required placeholder="104.73225951">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Radius Absen (Meter)</label>
+                        <input type="number" name="radius" class="form-control rounded-pill px-3" required value="500">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Simpan Lokasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Lokasi -->
+<div class="modal fade" id="modalEditLokasi" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <form id="formEditLokasi" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-header bg-warning text-dark py-3 px-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-map-marked-alt fa-lg"></i>
+                        <h5 class="modal-title fw-bold">Edit Lokasi Absensi</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted text-uppercase">Nama Lokasi</label>
+                        <input type="text" name="nama_lokasi" id="edit_loc_nama" class="form-control rounded-pill px-3" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Latitude</label>
+                            <input type="text" name="latitude" id="edit_loc_lat" class="form-control rounded-pill px-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Longitude</label>
+                            <input type="text" name="longitude" id="edit_loc_lng" class="form-control rounded-pill px-3" required>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Radius (Meter)</label>
+                            <input type="number" name="radius" id="edit_loc_radius" class="form-control rounded-pill px-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Status</label>
+                            <select name="is_active" id="edit_loc_active" class="form-select rounded-pill px-3">
+                                <option value="1">Aktif</option>
+                                <option value="0">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Update Lokasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Hapus Lokasi -->
+<div class="modal fade" id="modalHapusLokasi" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <div class="text-danger mb-3" style="font-size: 50px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h5 class="fw-bold">Hapus Lokasi?</h5>
+                <p class="text-muted mb-4">Aksi ini tidak dapat dibatalkan.</p>
+                <form id="formHapusLokasi" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger rounded-pill fw-bold shadow-sm">Ya, Hapus</button>
+                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ============================================================
+     MODAL: ANGGOTA KELOMPOK
+============================================================ --}}
+<div class="modal fade" id="groupMembersModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header-primary">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-header-icon on-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="modal-header-title text-white">
+                        <h5 class="mb-0">Daftar Anggota Kelompok</h5>
+                        <p class="mb-0 text-white-50 small" id="modalGroupName">Nama Kelompok</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="px-4 py-3 bg-light border-bottom">
+                    <p class="text-muted small mb-0 fw-bold">
+                        <i class="fas fa-info-circle me-1 text-primary"></i> 
+                        Menampilkan seluruh siswa yang terdaftar dalam kelompok ini.
+                    </p>
+                </div>
+                <div class="table-responsive px-4 pb-4">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Identitas Siswa</th>
+                                <th class="text-center">Status Magang</th>
+                                <th class="text-end">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalGroupBody">
+                            {{-- Rows via JS --}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>

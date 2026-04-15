@@ -18,7 +18,8 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         $tahunAjarans = \App\Models\TahunAjaran::where('status', 'aktif')->get();
-        return view('auth.register', compact('tahunAjarans'));
+        $lokasis = \App\Models\LokasiAbsensi::where('is_active', true)->get();
+        return view('auth.register', compact('tahunAjarans', 'lokasis'));
     }
 
     public function register(Request $request)
@@ -50,8 +51,8 @@ class AuthController extends Controller
             'nisn' => ['nullable', 'string', 'max:20', 'unique:siswa,nisn'],
             'kelas' => ['nullable', 'string', 'max:50'],
             'jurusan' => ['nullable', 'string', 'max:100'],
-            'sekolah_siswa' => ['nullable', 'string', 'max:150'],
-            'npsn_siswa' => ['nullable', 'string', 'max:20'],
+            'sekolah_siswa' => ['required_if:role,siswa', 'nullable', 'string', 'max:150'],
+            'npsn_siswa' => ['required_if:role,siswa', 'nullable', 'string', 'exists:sekolah,npsn'],
             'surat_balasan' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'perusahaan' => ['nullable', 'string', 'max:150'],
             'jenis_kelamin' => ['nullable', 'in:L,P'],
@@ -63,8 +64,8 @@ class AuthController extends Controller
             // Fields for Guru
             'id_guru' => ['nullable', 'string', 'max:50', 'unique:guru,id_guru'],
             'jabatan' => ['nullable', 'string', 'max:100'],
-            'sekolah_guru' => ['nullable', 'string', 'max:150'],
-            'npsn_guru' => ['nullable', 'string', 'max:20'],
+            'sekolah_guru' => ['required_if:role,guru', 'nullable', 'string', 'max:150'],
+            'npsn_guru' => ['required_if:role,guru', 'nullable', 'string', 'exists:sekolah,npsn'],
         ]);
 
         $role = $validated['role'];
@@ -75,7 +76,7 @@ class AuthController extends Controller
                 'kelas' => ['required', 'string', 'max:50'],
                 'jurusan' => ['required', 'string', 'max:100'],
                 'sekolah_siswa' => ['required', 'string', 'max:150'],
-                'npsn_siswa' => ['required', 'string', 'max:20'],
+                'npsn_siswa' => ['required', 'string', 'exists:sekolah,npsn'],
                 'surat_balasan' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
                 'perusahaan' => ['required', 'string', 'max:150'],
                 'jenis_kelamin' => ['required', 'in:L,P'],
@@ -89,7 +90,7 @@ class AuthController extends Controller
                 'id_guru' => ['required', 'string', 'max:50', 'unique:guru,id_guru'],
                 'jabatan' => ['required', 'string', 'max:100'],
                 'sekolah_guru' => ['required', 'string', 'max:150'],
-                'npsn_guru' => ['required', 'string', 'max:20'],
+                'npsn_guru' => ['required', 'string', 'exists:sekolah,npsn'],
             ]);
         }
 
@@ -110,7 +111,7 @@ class AuthController extends Controller
                 'nisn' => $request->input('nisn'),
                 'kelas' => $request->input('kelas'),
                 'jurusan' => $request->input('jurusan'),
-                'sekolah' => $request->input('sekolah_siswa'),
+                'sekolah' => \App\Models\Sekolah::where('npsn', $request->input('npsn_siswa'))->first()->nama_sekolah,
                 'npsn' => $request->input('npsn_siswa'),
                 'surat_balasan' => $request->hasFile('surat_balasan')
                     ? $request->file('surat_balasan')->store('surat_balasan', 'public')
@@ -129,7 +130,7 @@ class AuthController extends Controller
             'guru' => Guru::create(array_merge($common, [
                 'id_guru' => $request->input('id_guru'),
                 'jabatan' => $request->input('jabatan'),
-                'sekolah' => $request->input('sekolah_guru'),
+                'sekolah' => \App\Models\Sekolah::where('npsn', $request->input('npsn_guru'))->first()->nama_sekolah,
                 'npsn' => $request->input('npsn_guru'),
                 'id_tahun_ajaran' => $request->input('id_tahun_ajaran'),
             ])),
@@ -172,6 +173,7 @@ class AuthController extends Controller
                 'guru' => redirect()->route('guru.guru'),
                 'pembimbing' => redirect()->route('pembimbing.pembimbing'),
                 'admin' => redirect()->route('admin.admin'),
+                'pimpinan' => redirect()->route('pimpinan.home'),
                 default => redirect()->route('login'),
             };
         }
@@ -204,6 +206,7 @@ class AuthController extends Controller
             'guru' => redirect()->route('guru.guru'),
             'pembimbing' => redirect()->route('pembimbing.pembimbing'),
             'admin' => redirect()->route('admin.admin'),
+            'pimpinan' => redirect()->route('pimpinan.home'),
             default => redirect()->route('login'),
         };
     }

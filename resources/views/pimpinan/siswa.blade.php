@@ -1,26 +1,39 @@
-@extends('layouts.nav.admin')
+@extends('layouts.nav.pimpinan')
 
-@section('title', 'Manajemen Siswa - Monitoring Siswa Magang')
-@section('body-class', 'dashboard-page admin-page')
+@section('title', 'Data Siswa - Pimpinan Dashboard')
+@section('body-class', 'dashboard-page pimpinan-page')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-siswa.css') }}">
+    <style>
+        .pimpinan-read-only-badge {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        /* Override for Pimpinan specific constraints */
+        .management-header { margin-bottom: 1.5rem; }
+    </style>
 @endpush
 
 @section('body')
     <div class="management-container">
         <div class="admin-content-wrapper">
 
-            {{-- ============================================================
-                 HEADER
-            ============================================================ --}}
+            {{-- HEADER --}}
             <div class="management-header">
                 <div class="header-title">
-                    <h5>Manajemen Siswa</h5>
-                    <p>Kelola data seluruh siswa magang dan riwayat mereka.</p>
+                    <h5>Data Seluruh Siswa Magang</h5>
+                    <p>Memantau biodata dan penempatan siswa magang secara real-time.</p>
                 </div>
                 <div class="header-actions">
-                    <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="search-form" id="searchForm">
+                    <form action="{{ route('pimpinan.siswa') }}" method="GET" class="search-form" id="searchForm">
                         <div class="p-input-wrapper">
                             <i class="fas fa-search input-icon"></i>
                             <input
@@ -33,58 +46,36 @@
                             >
                         </div>
                     </form>
-                    <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
-                        <i class="fas fa-plus"></i>
-                        <span>Tambah Siswa</span>
-                    </button>
+                    <div class="pimpinan-read-only-badge">
+                        <i class="fas fa-eye"></i> Tampilan Baca-Saja
+                    </div>
                 </div>
             </div>
 
-            {{-- ============================================================
-                 NOTIFICATION
-            ============================================================ --}}
-            @if (session('success'))
-                <div class="custom-alert alert-success-custom">
-                    <span><i class="fas fa-check-circle me-2"></i> {{ session('success') }}</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            {{-- ============================================================
-                 TABS NAVIGATION
-            ============================================================ --}}
-            <div class="tabs-wrapper">
+            {{-- TABS NAVIGATION --}}
+            <div class="tabs-wrapper px-0">
                 <div class="tabs-nav" role="tablist">
                     <button class="tab-button active" id="siswa-tab"
                         data-bs-toggle="pill" data-bs-target="#pane-siswa"
-                        type="button" role="tab">
+                        type="button" role="tab" aria-controls="pane-siswa" aria-selected="true">
                         <i class="fas fa-users"></i>
-                        <span>Siswa Magang ({{ $siswa->count() }})</span>
+                        <span>Siswa Magang ({{ $siswa->total() }})</span>
                     </button>
                     <button class="tab-button" id="history-tab"
                         data-bs-toggle="pill" data-bs-target="#pane-riwayat"
-                        type="button" role="tab">
+                        type="button" role="tab" aria-controls="pane-riwayat" aria-selected="false">
                         <i class="fas fa-history"></i>
                         <span>Riwayat Siswa ({{ $riwayatSiswas->count() }})</span>
-                    </button>
-                    <button class="tab-button" id="lokasi-tab"
-                        data-bs-toggle="pill" data-bs-target="#pane-lokasi"
-                        type="button" role="tab">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Lokasi Absensi ({{ $lokasis->count() }})</span>
                     </button>
                 </div>
             </div>
 
-            {{-- ============================================================
-                 TAB CONTENT
-            ============================================================ --}}
+            {{-- TAB CONTENT --}}
             <div class="tab-content">
 
                 {{-- ==================== TAB: SISWA AKTIF ==================== --}}
                 <div class="tab-pane fade show active" id="pane-siswa" role="tabpanel">
 
-                    {{-- Toolbar --}}
                     <div class="tab-toolbar">
                         <div class="view-mode-wrapper">
                             <button class="view-mode-btn active" data-view="grouped" data-target="active">
@@ -95,7 +86,7 @@
                             </button>
                         </div>
                         <div class="tab-toolbar-info">
-                            Menampilkan <strong>{{ $siswa->count() }}</strong> siswa aktif
+                            Menampilkan <strong>{{ $siswa->count() }}</strong> siswa aktif pada halaman ini
                         </div>
                     </div>
 
@@ -105,52 +96,23 @@
                             @forelse($groupedSiswas as $g)
                                 <div class="col-xl-4 col-md-6">
                                     <div class="student-card">
-
-                                        {{-- Quick Action Buttons --}}
                                         <div class="card-actions">
                                             <button class="action-round btn-detail"
                                                 data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                data-nisn="{{ $g['leader']->nisn }}"
-                                                data-nama="{{ $g['leader']->nama }}"
-                                                data-email="{{ $g['leader']->email }}"
-                                                data-no_hp="{{ $g['leader']->no_hp }}"
-                                                data-kelas="{{ $g['leader']->kelas }}"
-                                                data-jurusan="{{ $g['leader']->jurusan }}"
-                                                data-sekolah="{{ $g['leader']->sekolah }}"
-                                                data-perusahaan="{{ $g['leader']->perusahaan }}"
+                                                data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
+                                                data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
+                                                data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
+                                                data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
                                                 data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
                                                 data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}"
-                                                data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
-                                                data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}"
-                                                data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
+                                                data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
+                                                data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
                                                 data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}"
                                                 title="Lihat Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="action-round btn-edit"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditSiswa"
-                                                data-id="{{ $g['leader']->nisn }}"
-                                                data-nama="{{ $g['leader']->nama }}"
-                                                data-email="{{ $g['leader']->email }}"
-                                                data-kelas="{{ $g['leader']->kelas }}"
-                                                data-jurusan="{{ $g['leader']->jurusan }}"
-                                                data-sekolah="{{ $g['leader']->sekolah }}"
-                                                data-perusahaan="{{ $g['leader']->perusahaan }}"
-                                                data-guru-nip="{{ $g['leader']->id_guru }}"
-                                                data-pl-nip="{{ $g['leader']->id_pembimbing }}"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="action-round btn-delete-trigger"
-                                                data-bs-toggle="modal" data-bs-target="#modalHapus"
-                                                data-url="{{ route('admin.destroySiswa', $g['leader']->nisn) }}"
-                                                title="Hapus">
-                                                <i class="fas fa-trash text-danger"></i>
+                                                <i class="fas fa-eye text-primary"></i>
                                             </button>
                                         </div>
 
-                                        {{-- Identity --}}
                                         <div class="card-identity">
                                             <div class="card-avatar">
                                                 @if($g['is_group'])
@@ -168,7 +130,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Info List --}}
                                         <div class="card-info-list">
                                             <div class="card-info-row">
                                                 <span class="card-info-label">Sekolah</span>
@@ -180,7 +141,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Footer --}}
                                         <div class="card-footer-bar">
                                             @if($g['leader']->absen_hari_ini)
                                                 <span class="status-label hadir">
@@ -196,17 +156,19 @@
                                                 {{ Str::limit($g['leader']->guru->nama ?? '-', 18) }}
                                             </span>
                                         </div>
-
                                     </div>
                                 </div>
                             @empty
-                                <div class="col-12">
+                                <div class="col-12 text-center py-5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon"><i class="fas fa-user-slash"></i></div>
                                         <p>Tidak ada siswa aktif ditemukan.</p>
                                     </div>
                                 </div>
                             @endforelse
+                        </div>
+                        <div class="mt-4">
+                            {{ $siswa->links() }}
                         </div>
                     </div>
 
@@ -262,22 +224,7 @@
                                                         data-pl-nama="{{ $s->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $s->pembimbing->id_pembimbing ?? '-' }}"
                                                         data-pl-hp="{{ $s->pembimbing->no_telp ?? '-' }}"
                                                         title="Lihat Detail">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-edit-soft btn-edit"
-                                                        data-bs-toggle="modal" data-bs-target="#modalEditSiswa"
-                                                        data-id="{{ $s->nisn }}" data-nama="{{ $s->nama }}" data-email="{{ $s->email }}"
-                                                        data-kelas="{{ $s->kelas }}" data-jurusan="{{ $s->jurusan }}" data-sekolah="{{ $s->sekolah }}"
-                                                        data-perusahaan="{{ $s->perusahaan }}" data-guru-nip="{{ $s->id_guru }}"
-                                                        data-pl-nip="{{ $s->id_pembimbing }}"
-                                                        title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn-icon btn-delete-soft btn-delete-trigger"
-                                                        data-bs-toggle="modal" data-bs-target="#modalHapus"
-                                                        data-url="{{ route('admin.destroySiswa', $s->nisn) }}"
-                                                        title="Hapus">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="fas fa-eye text-primary"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -298,46 +245,38 @@
                 {{-- ==================== TAB: RIWAYAT SISWA ==================== --}}
                 <div class="tab-pane fade" id="pane-riwayat" role="tabpanel">
 
-                    {{-- Filter Bar --}}
-                    <div class="history-filter-bar">
-                        <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <span class="filter-label">
-                                <i class="fas fa-filter"></i> Periode:
-                            </span>
-                            <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="filter-form" id="filterPeriodeForm">
-                                <input type="hidden" name="tab" value="history">
-                                @if($search)
-                                    <input type="hidden" name="search" value="{{ $search }}">
-                                @endif
-                                <select name="periode" class="filter-select" onchange="this.form.submit()">
-                                    <option value="">-- Semua Periode --</option>
-                                    @foreach($periodeOptions as $opt)
-                                        <option value="{{ $opt->id_tahun_ajaran }}"
-                                            {{ $periodeId == $opt->id_tahun_ajaran ? 'selected' : '' }}>
-                                            {{ $opt->tahun_ajaran }}
+                    <div class="tab-toolbar">
+                        <div class="view-mode-wrapper">
+                            <button class="view-mode-btn active" data-view="grouped" data-target="riwayat">
+                                <i class="fas fa-th-large"></i> Per Kelompok
+                            </button>
+                            <button class="view-mode-btn" data-view="flat" data-target="riwayat">
+                                <i class="fas fa-list"></i> Seluruh Riwayat
+                            </button>
+                        </div>
+                        
+                        <div class="tab-toolbar-info">
+                            Menampilkan <strong>{{ $riwayatSiswas->count() }}</strong> riwayat siswa magang
+                        </div>
+
+                        {{-- Periode Filter --}}
+                        <div class="ms-auto" style="min-width: 200px;">
+                            <form action="{{ route('pimpinan.siswa') }}" method="GET" id="filterRiwayatForm" class="d-flex gap-2">
+                                <input type="hidden" name="search" value="{{ $search }}">
+                                <select name="periode" class="p-input small-select" onchange="this.form.submit()" style="padding: 0.5rem 1rem; height: auto;">
+                                    <option value="">Semua Periode</option>
+                                    @foreach($periodeOptions as $p)
+                                        <option value="{{ $p->id_tahun_ajaran }}" {{ $periodeId == $p->id_tahun_ajaran ? 'selected' : '' }}>
+                                            {{ $p->nama_tahun_ajaran }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @if($periodeId)
-                                    <a href="{{ route('admin.kelolaSiswa', ['tab' => 'history', 'search' => $search]) }}"
-                                        class="btn-reset-filter" title="Reset Filter">
-                                        <i class="fas fa-undo"></i>
-                                    </a>
-                                @endif
                             </form>
-                        </div>
-                        <div class="view-mode-wrapper">
-                            <button class="view-mode-btn" data-view="grouped" data-target="riwayat" title="Per Kelompok">
-                                <i class="fas fa-th-large"></i>
-                            </button>
-                            <button class="view-mode-btn active" data-view="flat" data-target="riwayat" title="Tampilan List">
-                                <i class="fas fa-list"></i>
-                            </button>
                         </div>
                     </div>
 
                     {{-- View: Riwayat Cards (Grouped) --}}
-                    <div class="view-container d-none" id="riwayat-grouped-view">
+                    <div class="view-container" id="riwayat-grouped-view">
                         <div class="row g-4">
                             @forelse($groupedRiwayat as $g)
                                 <div class="col-xl-4 col-md-6">
@@ -395,6 +334,7 @@
                                             @else
                                                 <button class="btn-action btn-detail-group btn-detail"
                                                     data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                    ... (Data Attributes Same as Active Tab) ...
                                                     data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
                                                     data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
                                                     data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
@@ -416,7 +356,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class="col-12">
+                                <div class="col-12 text-center py-5">
                                     <div class="empty-state">
                                         <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
                                         <p>Belum ada riwayat siswa.</p>
@@ -426,9 +366,8 @@
                         </div>
                     </div>
 
-
                     {{-- View: Riwayat Table (Flat) --}}
-                    <div class="view-container" id="riwayat-flat-view">
+                    <div class="view-container d-none" id="riwayat-flat-view">
                         <div class="data-table-wrapper">
                             <table class="main-table">
                                 <thead>
@@ -436,7 +375,7 @@
                                         <th>Siswa Magang</th>
                                         <th>Sekolah / Instansi</th>
                                         <th>Periode Magang</th>
-                                        <th class="text-end">Aksi Rekap</th>
+                                        <th class="text-end">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -452,39 +391,25 @@
                                             </td>
                                             <td>
                                                 <div class="cell-sub">
-                                                    <i class="fas fa-play-circle me-1 text-success"></i>
-                                                    {{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->translatedFormat('d M Y') : '-' }}
-                                                </div>
-                                                <div class="cell-sub">
-                                                    <i class="fas fa-flag-checkered me-1 text-danger"></i>
-                                                    {{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->translatedFormat('d M Y') : '-' }}
+                                                    <i class="fas fa-calendar-alt me-1 text-primary opacity-50"></i>
+                                                    {{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }} - 
+                                                    {{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="action-group justify-content-end">
-                                                    <button class="btn-history-action btn-absensi btn-preview-pdf"
-                                                        data-url="{{ route('admin.rekap.absensi', $rs->nisn) }}"
-                                                        title="Lihat Rekap Absensi">
-                                                        <i class="fas fa-calendar-check"></i>
-                                                    </button>
-                                                    <button class="btn-history-action btn-kegiatan btn-preview-pdf"
-                                                        data-url="{{ route('admin.rekap.jurnal', $rs->nisn) }}"
-                                                        title="Lihat Rekap Kegiatan">
-                                                        <i class="fas fa-book"></i>
-                                                    </button>
-                                                    <button class="btn-history-action btn-detail-h btn-detail"
+                                                <div class="action-group justify-content-end gap-2">
+                                                    <button class="btn-icon btn-detail-soft btn-detail"
                                                         data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                        data-nisn="{{ $rs->nisn }}" data-nama="{{ $rs->nama }}"
-                                                        data-email="{{ $rs->email }}" data-no_hp="{{ $rs->no_hp }}"
-                                                        data-kelas="{{ $rs->kelas }}" data-jurusan="{{ $rs->jurusan }}"
+                                                        data-nisn="{{ $rs->nisn }}" data-nama="{{ $rs->nama }}" data-email="{{ $rs->email }}"
+                                                        data-no_hp="{{ $rs->no_hp }}" data-kelas="{{ $rs->kelas }}" data-jurusan="{{ $rs->jurusan }}"
                                                         data-sekolah="{{ $rs->sekolah }}" data-perusahaan="{{ $rs->perusahaan }}"
                                                         data-mulai="{{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }}"
                                                         data-selesai="{{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}"
                                                         data-guru-nama="{{ $rs->guru->nama ?? '-' }}" data-guru-nip="{{ $rs->guru->id_guru ?? '-' }}"
                                                         data-pl-nama="{{ $rs->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $rs->pembimbing->id_pembimbing ?? '-' }}"
                                                         data-pl-hp="{{ $rs->pembimbing->no_telp ?? '-' }}"
-                                                        title="Detail Profil">
-                                                        <i class="fas fa-info-circle"></i>
+                                                        title="Lihat Detail">
+                                                        <i class="fas fa-eye text-primary"></i>
                                                     </button>
                                                 </div>
                                             </td>
@@ -502,184 +427,66 @@
                     </div>
                 </div>
 
-                {{-- ==================== TAB: LOKASI ABSENSI ==================== --}}
-                <div class="tab-pane fade" id="pane-lokasi" role="tabpanel">
-                    
-                    {{-- Toolbar Lokasi --}}
-                    <div class="tab-toolbar justify-content-between">
-                        <div class="tab-toolbar-info">
-                            <i class="fas fa-info-circle me-1 text-primary"></i>
-                            Menampilkan <strong>{{ $lokasis->count() }}</strong> titik lokasi absensi terdaftar
-                        </div>
-                        <button class="btn-primary-custom btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalTambahLokasi">
-                            <i class="fas fa-plus me-1"></i> Tambah Lokasi
-                        </button>
-                    </div>
-
-                    <div class="row g-4">
-                        @forelse($lokasis as $l)
-                            <div class="col-xl-4 col-md-6">
-                                <div class="student-card p-4"> {{-- Reuse student-card style for consistency --}}
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="card-avatar" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd; width: 45px; height: 45px;">
-                                            <i class="fas fa-map-marked-alt"></i>
-                                        </div>
-                                        <div class="card-actions position-static">
-                                            <button class="action-round btn-edit-loc" 
-                                                data-bs-toggle="modal" data-bs-target="#modalEditLokasi"
-                                                data-id="{{ $l->id }}"
-                                                data-nama="{{ $l->nama_lokasi }}"
-                                                data-lat="{{ $l->latitude }}"
-                                                data-lng="{{ $l->longitude }}"
-                                                data-radius="{{ $l->radius }}"
-                                                data-active="{{ $l->is_active }}"
-                                                title="Edit Lokasi">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="action-round btn-delete-loc"
-                                                data-bs-toggle="modal" data-bs-target="#modalHapusLokasi"
-                                                data-url="{{ route('admin.destroyLokasi', $l->id) }}"
-                                                title="Hapus Lokasi">
-                                                <i class="fas fa-trash text-danger"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <h6 class="fw-bold mb-1">{{ $l->nama_lokasi }}</h6>
-                                    <p class="text-muted small mb-3">ID Lokasi: #LOK-{{ $l->id }}</p>
-
-                                    <div class="card-info-list mb-3">
-                                        <div class="card-info-row">
-                                            <span class="card-info-label">Latitude</span>
-                                            <span class="card-info-value fw-mono">{{ $l->latitude }}</span>
-                                        </div>
-                                        <div class="card-info-row">
-                                            <span class="card-info-label">Longitude</span>
-                                            <span class="card-info-value fw-mono">{{ $l->longitude }}</span>
-                                        </div>
-                                        <div class="card-info-row">
-                                            <span class="card-info-label">Radius</span>
-                                            <span class="card-info-value"><i class="fas fa-bullseye me-1 opacity-50"></i> {{ $l->radius }}m</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        @if($l->is_active)
-                                            <span class="badge-status hadir" style="font-size: 0.75rem;">
-                                                <i class="fas fa-check-circle"></i> Status Aktif
-                                            </span>
-                                        @else
-                                            <span class="badge-status belum" style="font-size: 0.75rem;">
-                                                <i class="fas fa-times-circle"></i> Nonaktif
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-12">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon"><i class="fas fa-map-marker-slash"></i></div>
-                                    <p>Belum ada titik lokasi absensi yang terdaftar.</p>
-                                </div>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-
             </div>{{-- /tab-content --}}
         </div>{{-- /admin-content-wrapper --}}
     </div>{{-- /management-container --}}
 
-    {{-- ============================================================
-         MODAL: PREVIEW PDF
-    ============================================================ --}}
-    <div class="modal fade" id="previewPdfModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered" style="height: 90vh;">
-            <div class="modal-content h-100">
-                <div class="pdf-modal-header">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="pdf-modal-icon-wrap">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div>
-                            <p class="pdf-modal-title">Pratinjau Dokumen</p>
-                            <p class="pdf-modal-subtitle">Gunakan tombol di atas untuk cetak atau unduh.</p>
-                        </div>
-                    </div>
-                    <div class="pdf-modal-actions">
-                        <button type="button" id="printPdfBtn" class="btn-pdf-print">
-                            <i class="fas fa-print"></i> Cetak
-                        </button>
-                        <a id="downloadPdfBtn" href="#" class="btn-pdf-download" target="_blank">
-                            <i class="fas fa-download"></i> Unduh
-                        </a>
-                        <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                </div>
-                <div class="pdf-modal-body flex-grow-1">
-                    <iframe id="pdfIframe" src="" width="100%" height="100%" frameborder="0"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modals: Tambah, Edit, Detail, Hapus --}}
-    @include('admin.kelolaSiswaModals')
+    {{-- Modal Detail --}}
+    @include('pimpinan.siswa_modals')
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // ── View Mode Switching ────────────────────────────────────────
-            document.querySelectorAll('.view-mode-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const view   = this.dataset.view;
-                    const target = this.dataset.target;
-                    const pane   = this.closest('.tab-pane');
-
-                    pane.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-
-                    const grouped = pane.querySelector(`#${target}-grouped-view`);
-                    const flat    = pane.querySelector(`#${target}-flat-view`);
-
-                    if (view === 'grouped') {
-                        grouped.classList.remove('d-none');
-                        flat.classList.add('d-none');
-                    } else {
-                        grouped.classList.add('d-none');
-                        flat.classList.remove('d-none');
-                    }
-                });
-            });
-
-            // ── Tab Persistence from URL ───────────────────────────────────
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('tab') === 'history' || urlParams.get('periode')) {
-                const historyTabBtn = document.getElementById('history-tab');
-                if (historyTabBtn) {
-                    new bootstrap.Tab(historyTabBtn).show();
+            // ── Tab Persistence ───────────────────────────────────────────
+            const activeTab = localStorage.getItem('activeStudentTab_Pimpinan');
+            if (activeTab) {
+                const tabEl = document.querySelector(`button[data-bs-target="${activeTab}"]`);
+                if (tabEl) {
+                    bootstrap.Tab.getInstance(tabEl)?.show() || new bootstrap.Tab(tabEl).show();
                 }
             }
-
-            // ── Edit Modal ─────────────────────────────────────────────────
-            const editForm = document.getElementById('formEditSiswa');
-            document.querySelectorAll('.btn-edit').forEach(button => {
-                button.addEventListener('click', function () {
-                    editForm.action = `/admin/siswa/${this.dataset.id}`;
-                    document.getElementById('edit_nama').value          = this.dataset.nama;
-                    document.getElementById('edit_email').value         = this.dataset.email;
-                    document.getElementById('edit_nisn').value          = this.dataset.id;
-                    document.getElementById('edit_kelas').value         = this.dataset.kelas;
-                    document.getElementById('edit_jurusan').value       = this.dataset.jurusan;
-                    document.getElementById('edit_sekolah').value       = this.dataset.sekolah;
-                    document.getElementById('edit_perusahaan').value    = this.dataset.perusahaan || '';
-                    document.getElementById('edit_id_guru').value       = this.dataset.guruNip || '';
-                    document.getElementById('edit_id_pembimbing').value = this.dataset.plNip || '';
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('shown.bs.tab', event => {
+                    localStorage.setItem('activeStudentTab_Pimpinan', event.target.dataset.bsTarget);
                 });
             });
 
-            // ── Detail Modal ───────────────────────────────────────────────
+            // ── View Mode Switching ────────────────────────────────────────
+            function initViewMode() {
+                document.querySelectorAll('.view-mode-btn').forEach(btn => {
+                    const target = btn.dataset.target;
+                    const view   = btn.dataset.view;
+                    const savedView = localStorage.getItem(`viewMode_${target}_Pimpinan`);
+
+                    if (savedView === view) {
+                        btn.click();
+                    }
+
+                    btn.addEventListener('click', function () {
+                        const v = this.dataset.view;
+                        const t = this.dataset.target;
+                        const pane = this.closest('.tab-pane');
+
+                        pane.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const grouped = pane.querySelector(`#${t}-grouped-view`);
+                        const flat    = pane.querySelector(`#${t}-flat-view`);
+
+                        if (v === 'grouped') {
+                            grouped.classList.remove('d-none');
+                            flat.classList.add('d-none');
+                        } else {
+                            grouped.classList.add('d-none');
+                            flat.classList.remove('d-none');
+                        }
+                        localStorage.setItem(`viewMode_${t}_Pimpinan`, v);
+                    });
+                });
+            }
+            initViewMode();
+
+            // ── Detail Modal Handler ───────────────────────────────────────
             document.querySelectorAll('.btn-detail').forEach(button => {
                 button.addEventListener('click', function () {
                     document.getElementById('det_name').textContent         = this.dataset.nama;
@@ -703,34 +510,6 @@
                 });
             });
 
-            // ── Delete Modal ───────────────────────────────────────────────
-            const deleteForm = document.getElementById('formHapus');
-            document.querySelectorAll('.btn-delete-trigger').forEach(button => {
-                button.addEventListener('click', function () {
-                    deleteForm.action = this.dataset.url;
-                });
-            });
-
-            // ── Lokasi Modal Handlers ──────────────────────────────────────
-            const editLocForm = document.getElementById('formEditLokasi');
-            document.querySelectorAll('.btn-edit-loc').forEach(button => {
-                button.addEventListener('click', function () {
-                    editLocForm.action = `/admin/lokasi/${this.dataset.id}`;
-                    document.getElementById('edit_loc_nama').value   = this.dataset.nama;
-                    document.getElementById('edit_loc_lat').value    = this.dataset.lat;
-                    document.getElementById('edit_loc_lng').value    = this.dataset.lng;
-                    document.getElementById('edit_loc_radius').value = this.dataset.radius;
-                    document.getElementById('edit_loc_active').value = this.dataset.active;
-                });
-            });
-
-            const deleteLocForm = document.getElementById('formHapusLokasi');
-            document.querySelectorAll('.btn-delete-loc').forEach(button => {
-                button.addEventListener('click', function () {
-                    deleteLocForm.action = this.dataset.url;
-                });
-            });
-
             // ── Modal Group Members (Riwayat) ─────────────────────────────
             const groupModalEl     = document.getElementById('groupMembersModal');
             const groupModal        = groupModalEl ? new bootstrap.Modal(groupModalEl) : null;
@@ -745,7 +524,7 @@
                     modalNameEl.innerText = name;
                     modalBodyEl.innerHTML = '';
                     
-                    // Route patterns
+                    // Route patterns (Admin routes since they provide reports for Pimpinan)
                     const logDownloadBase = "{{ route('admin.rekap.jurnal', ['nisn' => ':nisn']) }}";
                     const absDownloadBase = "{{ route('admin.rekap.absensi', ['nisn' => ':nisn']) }}";
 
@@ -785,9 +564,7 @@
                         modalBodyEl.innerHTML += row;
                     });
                     
-                    // Re-init PDF preview listeners for the new buttons in the modal
                     initPdfPreviewListeners();
-                    
                     if (groupModal) groupModal.show();
                 });
             });
@@ -801,7 +578,6 @@
 
             function initPdfPreviewListeners() {
                 document.querySelectorAll('.btn-preview-pdf').forEach(button => {
-                    // Remove existing to avoid double listeners if re-calling init
                     button.onclick = null; 
                     button.addEventListener('click', function () {
                         const url = this.dataset.url;
@@ -812,33 +588,13 @@
                     });
                 });
             }
-
             initPdfPreviewListeners();
 
             if (pdfModalEl) {
                 printBtn.addEventListener('click', () => {
-                    pdfIframe.contentWindow.focus();
                     pdfIframe.contentWindow.print();
                 });
-                pdfModalEl.addEventListener('hidden.bs.modal', () => {
-                    pdfIframe.src = '';
-                });
             }
-
-            // ── Password Toggle Logic ──────────────────────────────────────
-            document.querySelectorAll('.toggle-password').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const input = this.closest('.input-group').querySelector('input');
-                    const icon = this.querySelector('i');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.replace('fa-eye', 'fa-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        icon.classList.replace('fa-eye-slash', 'fa-eye');
-                    }
-                });
-            });
         });
     </script>
 @endsection

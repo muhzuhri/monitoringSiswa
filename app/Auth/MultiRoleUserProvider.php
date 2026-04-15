@@ -6,6 +6,7 @@ use App\Models\Admin;
 use App\Models\Pembimbing;
 use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\Pimpinan;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Hashing\Hasher;
@@ -22,22 +23,24 @@ class MultiRoleUserProvider implements UserProvider
      */
     protected function parseIdentifier(string $identifier): ?array
     {
-        foreach (['siswa_', 'guru_', 'pembimbing_', 'admin_'] as $prefix) {
+        foreach (['siswa_', 'guru_', 'pembimbing_', 'admin_', 'pimpinan_'] as $prefix) {
             if (str_starts_with($identifier, $prefix)) {
                 $id = substr($identifier, strlen($prefix));
-                return [$prefix === 'siswa_' ? 'siswa' : rtrim($prefix, '_'), $id];
+                $role = rtrim($prefix, '_');
+                return [$role === 'siswa' ? 'siswa' : $role, $id];
             }
         }
         return null;
     }
 
-    protected function modelForRole(string $role): Siswa|Guru|Pembimbing|Admin
+    protected function modelForRole(string $role): Siswa|Guru|Pembimbing|Admin|Pimpinan
     {
         return match ($role) {
             'siswa' => new Siswa,
             'guru' => new Guru,
             'pembimbing' => new Pembimbing,
             'admin' => new Admin,
+            'pimpinan' => new Pimpinan,
             default => throw new \InvalidArgumentException("Unknown role: {$role}"),
         };
     }
@@ -81,7 +84,7 @@ class MultiRoleUserProvider implements UserProvider
             return null;
         }
 
-        $models = [Siswa::class, Guru::class, Pembimbing::class, Admin::class];
+        $models = [\App\Models\Siswa::class, \App\Models\Guru::class, \App\Models\Pembimbing::class, \App\Models\Admin::class, \App\Models\Pimpinan::class];
         foreach ($models as $modelClass) {
             $user = $modelClass::where('email', $email)->first();
             if ($user) {

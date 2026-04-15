@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/siswa/absensiKegiatan-siswa.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @section('body')
@@ -78,8 +79,7 @@
                             <div class="action-forms">
                                 @if (!$absensiHariIni)
                                     <!-- Check In Form -->
-                                    <form action="{{ route('siswa.absensi.store') }}" method="POST"
-                                        enctype="multipart/form-data">
+                                    <form id="formAbsensiMasuk" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="type" value="masuk">
                                         <div class="form-group">
@@ -130,8 +130,7 @@
                                     </form>
                                 @elseif(!$absensiHariIni->jam_pulang)
                                     <!-- Check Out Form -->
-                                    <form action="{{ route('siswa.absensi.store') }}" method="POST"
-                                        enctype="multipart/form-data">
+                                    <form id="formAbsensiPulang" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="type" value="pulang">
 
@@ -622,7 +621,127 @@
             return 'badge-ui badge-warning';
         }
 
-        // Auto fetch when modal opens
+        // --- KONFIGURASI ABSENSI LOKASI ---
+        const TARGET_LAT = -2.9847200554793494;
+        const TARGET_LNG = 104.73225951187132;
+        const MAX_RADIUS = 500; // meter
+
+        // Fungsi Hitung Jarak (Haversine)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // in metres
+        }
+
+        async function prosesAbsensi(type) {
+            const form = type === 'masuk' ? document.getElementById('formAbsensiMasuk') : document.getElementById('formAbsensiPulang');
+            const statusPilihan = form.querySelector('[name="status_pilihan"]')?.value || 'hadir';
+
+            // 1. Tampilkan Loading
+            Swal.fire({
+                title: 'Sedang Memproses...',
+                text: 'Mencoba mengambil lokasi Anda...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // 2. Minta Izin Lokasi
+            if (!navigator.geolocation) {
+                Swal.fire('Error', 'Browser Anda tidak mendukung fitur lokasi.', 'error');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = calculateDistance(userLat, userLng, TARGET_LAT, TARGET_LNG);
+
+                // 3. Validasi Geofencing di sisi client (Opsional untuk UX)
+                if (statusPilihan === 'hadir' && distance > MAX_RADIUS) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Di Luar Jangkauan',
+                        text: `Anda berada ${Math.round(distance)}m di luar radius Fasilkom. Silakan mendekat ke lokasi.`,
+                    });
+                    return;
+                }
+
+                // 4. Kirim Data via Fetch
+                const formData = new FormData(form);
+                formData.append('latitude', userLat);
+                formData.append('longitude', userLng);
+
+                try {
+                    const response = await fetch("{{ route('siswa.absensi.store') }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Gagal', result.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    Swal.fire('Error', 'Terjadi kesalahan sistem saat menghubungi server.', 'error');
+                }
+
+            }, (error) => {
+                console.error('Geolocation Error:', error);
+                let msg = 'Gagal mengambil lokasi.';
+                if (error.code === 1) msg = 'Mohon izinkan akses lokasi di browser Anda.';
+                else if (error.code === 2) msg = 'Lokasi tidak ditemukan.';
+                Swal.fire('Akses Lokasi Ditolak', msg, 'warning');
+            }, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        }
+
+        // Event Listeners for buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnMasuk = document.querySelector('#formAbsensiMasuk .btn-checkin');
+            const btnPulang = document.querySelector('#formAbsensiPulang .btn-checkout');
+
+            if (btnMasuk) {
+                btnMasuk.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    prosesAbsensi('masuk');
+                });
+            }
+
+            if (btnPulang) {
+                btnPulang.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    prosesAbsensi('pulang');
+                });
+            }
+        });
+
         var historyModal = document.getElementById('modalHistoryDetail');
         historyModal.addEventListener('shown.bs.modal', function() {
             fetchHistoryData();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absensi;
+use App\Models\LokasiAbsensi;
 use App\Models\LaporanAkhir;
 use App\Models\Logbook;
 use App\Models\PengajuanSiswa;
@@ -153,7 +154,7 @@ class SiswaController extends Controller
     }
 
     /**
-     * Simpan Absensi Siswa.
+     * Simpan Absensi Siswa dengan Validasi Lokasi.
      */
     public function storeAbsensi(Request $request)
     {
@@ -163,32 +164,93 @@ class SiswaController extends Controller
         $today = $now->toDateString();
         $currentTime = $now->format('H:i');
 
+        // Validasi input dasar
+        $request->validate([
+            'type' => 'required|in:masuk,pulang',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $lat = $request->latitude;
+        $lng = $request->longitude;
+
+        // Ambil semua lokasi absensi yang aktif
+        $lokasis = LokasiAbsensi::where('is_active', true)->get();
+        
+        $isValidLocation = false;
+        $jarak = 0;
+        $namaLokasi = "Lokasi Magang";
+
+        if ($lokasis->isEmpty()) {
+            // Fallback jika belum ada data di database (Fasilkom Default)
+            $targetLat = -2.9847200554793494;
+            $targetLng = 104.73225951187132;
+            $maxRadius = 500;
+            $jarak = $this->calculateDistance($lat, $lng, $targetLat, $targetLng);
+            $isValidLocation = ($jarak <= $maxRadius);
+            $namaLokasi = "Fasilkom";
+        } else {
+            $jarakTerdekat = null;
+            $lokasiTerdekat = null;
+
+            foreach ($lokasis as $lok) {
+                $d = $this->calculateDistance($lat, $lng, $lok->latitude, $lok->longitude);
+                
+                // Track lokasi terdekat untuk pesan error
+                if ($jarakTerdekat === null || $d < $jarakTerdekat) {
+                    $jarakTerdekat = $d;
+                    $lokasiTerdekat = $lok;
+                }
+
+                // Cek apakah di dalam radius salah satu lokasi
+                if ($d <= $lok->radius) {
+                    $isValidLocation = true;
+                    $jarak = $d;
+                    $namaLokasi = $lok->nama_lokasi;
+                    break;
+                }
+            }
+
+            if (!$isValidLocation) {
+                $jarak = $jarakTerdekat;
+                $namaLokasi = $lokasiTerdekat->nama_lokasi;
+            }
+        }
+
         // Cek apakah sudah absen hari ini
         $existing = $user->absensis()->whereDate('tanggal', $today)->first();
 
         if ($request->type === 'masuk') {
             if ($existing) {
-                return back()->with('error', 'Anda sudah melakukan absen masuk hari ini.');
+                return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absen masuk hari ini.'], 400);
             }
 
-            // Aturan Jam Masuk: 07:00 - 10:00
+            // Aturan Jam Masuk: 07:00 - 10:00 (Sesuai kode lama, tapi saya gunakan logic yang ada)
+            // Di kode sebelumnya: if ($currentTime < '07:00' || $currentTime > '24:00') -> sepertinya typo di kode asli user (24:00?)
+            // Saya akan tetap mengikuti logic asli namun memperbaiki jika itu krusial. 
+            // User bilang "Batas: 07:00 - 10:00" di UI, tapi di controller "07:00 - 24:00". Saya biarkan sesuai controller asli agar tidak merubah rule bisnis tanpa izin.
             if ($currentTime < '07:00' || $currentTime > '24:00') {
-                return back()->with('error', 'Maaf, absen masuk hanya diperbolehkan pukul 07:00 - 10:00.');
+                return response()->json(['success' => false, 'message' => 'Maaf, absen masuk hanya diperbolehkan pukul 07:00 - 10:00.'], 400);
             }
 
             // Tentukan Status Awal
             $pilihan = $request->status_pilihan ?? 'hadir';
+
+            // Pengecekan Radius hanya untuk status 'hadir'
+            if ($pilihan === 'hadir' && !$isValidLocation) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => "Anda berada di luar radius {$namaLokasi} (" . round($jarak) . "m). Silakan mendekat ke lokasi.",
+                    'distance' => round($jarak)
+                ], 403);
+            }
 
             if ($pilihan === 'hadir') {
                 $status = ($currentTime <= '08:00') ? 'hadir' : 'terlambat';
             } else {
                 $status = $pilihan; // izin atau sakit
             }
-
-            // Validasi Foto (Wajib untuk Hadir/Terlambat/Izin/Sakit)
-            $request->validate([
-                'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            ]);
 
             $path = $request->file('foto')->store('absensi/masuk', 'public');
 
@@ -197,28 +259,38 @@ class SiswaController extends Controller
                 'jam_masuk' => $now->toTimeString(),
                 'foto_masuk' => $path,
                 'status' => $status,
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'jarak_meter' => $jarak,
             ]);
 
-            $msg = 'Absen berhasil dicatat sebagai ' . ucfirst($status) . '!';
-            return back()->with('success', $msg);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Absen berhasil dicatat sebagai ' . ucfirst($status) . '!',
+                'distance' => round($jarak)
+            ]);
 
         } elseif ($request->type === 'pulang') {
             if (!$existing) {
-                return back()->with('error', 'Anda belum melakukan absen masuk hari ini.');
+                return response()->json(['success' => false, 'message' => 'Anda belum melakukan absen masuk hari ini.'], 400);
             }
             if ($existing->jam_pulang) {
-                return back()->with('error', 'Anda sudah melakukan absen pulang hari ini.');
+                return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absen pulang hari ini.'], 400);
             }
 
-            // Aturan Jam Pulang: 15:00 - 16:30
+            // Aturan Jam Pulang: 10:00 - 24:00 (Sesuai controller asli)
             if ($currentTime < '10:00' || $currentTime > '24:00') {
-                return back()->with('error', 'Maaf, absen pulang hanya diperbolehkan pukul 15:00 - 16:30.');
+                return response()->json(['success' => false, 'message' => 'Maaf, absen pulang belum diperbolehkan.'], 400);
             }
 
-            // Validasi Foto
-            $request->validate([
-                'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            ]);
+            // Pengecekan Radius untuk Pulang
+            if (!$isValidLocation) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => "Anda berada di luar radius {$namaLokasi} (" . round($jarak) . "m). Silakan mendekat ke lokasi.",
+                    'distance' => round($jarak)
+                ], 403);
+            }
 
             $path = $request->file('foto')->store('absensi/pulang', 'public');
 
@@ -226,12 +298,41 @@ class SiswaController extends Controller
             $existing->update([
                 'jam_pulang' => $now->toTimeString(),
                 'foto_pulang' => $path,
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'jarak_meter' => $jarak,
             ]);
 
-            return back()->with('success', 'Absen pulang berhasil!');
+            return response()->json([
+                'success' => true, 
+                'message' => 'Absen pulang berhasil!',
+                'distance' => round($jarak)
+            ]);
         }
 
-        return back()->with('error', 'Tipe absensi tidak valid.');
+        return response()->json(['success' => false, 'message' => 'Tipe absensi tidak valid.'], 400);
+    }
+
+    /**
+     * Hitung jarak antara dua koordinat (Haversine Formula).
+     * Hasil dalam satuan Meter.
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371000; // meter
+
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return $angle * $earthRadius;
     }
 
     /**

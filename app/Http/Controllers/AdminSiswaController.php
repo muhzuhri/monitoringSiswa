@@ -108,6 +108,7 @@ class AdminSiswaController extends Controller
         $gurus = \App\Models\Guru::orderBy('nama')->get();
         $pembimbings = \App\Models\Pembimbing::orderBy('nama')->get();
         $periodeOptions = TahunAjaran::orderBy('tgl_mulai', 'desc')->get();
+        $lokasis = \App\Models\LokasiAbsensi::orderBy('nama_lokasi')->get();
 
         return view('admin.kelolaSiswa', [
             'user' => $admin,
@@ -120,6 +121,7 @@ class AdminSiswaController extends Controller
             'groupedRiwayat' => $groupedRiwayat,
             'periodeId' => $periodeId,
             'periodeOptions' => $periodeOptions,
+            'lokasis' => $lokasis,
         ]);
     }
 
