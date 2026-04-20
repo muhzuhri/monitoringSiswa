@@ -41,6 +41,20 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="ui-alert ui-alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="ui-alert ui-alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ $errors->first() }}</span>
+            </div>
+        @endif
+
         {{-- ============================================================
              MODE DETAIL: Verifikasi satu laporan
         ============================================================ --}}
@@ -79,19 +93,68 @@
                             <hr class="divider">
 
                             {{-- Form Verifikasi --}}
-                            <form action="{{ route('guru.verifikasi.update', $laporan->id_laporan) }}" method="POST" class="verify-form">
+                            <form action="{{ route('guru.verifikasi.update', $laporan->id_laporan) }}" method="POST" class="verify-form" id="verifyForm">
                                 @csrf
+
+                                {{-- Info siswa summary --}}
+                                <div class="siswa-summary-box">
+                                    <div class="siswa-summary-avatar">
+                                        <i class="fas fa-user-graduate"></i>
+                                    </div>
+                                    <div>
+                                        <div class="siswa-summary-name">{{ $laporan->siswa->nama }}</div>
+                                        <div class="siswa-summary-meta">
+                                            <span><i class="fas fa-id-card"></i> {{ $laporan->siswa->nisn }}</span>
+                                            <span><i class="fas fa-building"></i> {{ $laporan->siswa->perusahaan ?? '-' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <label class="form-label">Keputusan Verifikasi</label>
                                 <div class="decision-group">
-                                    <input type="radio" class="decision-radio" name="status" id="approve" value="approved" required>
+                                    <input type="radio" class="decision-radio" name="status" id="approve" value="approved"
+                                        {{ old('status') == 'approved' ? 'checked' : '' }} required>
                                     <label class="decision-btn decision-approve" for="approve">
                                         <i class="fas fa-check-circle"></i>
-                                        <span>SETUJUI LAPORAN</span>
+                                        <span>SETUJUI</span>
                                     </label>
-                                </div>                         
+
+                                    <input type="radio" class="decision-radio" name="status" id="reject" value="rejected"
+                                        {{ old('status') == 'rejected' ? 'checked' : '' }}>
+                                    <label class="decision-btn decision-reject" for="reject">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>TOLAK</span>
+                                    </label>
+                                </div>
+
+                                {{-- Catatan (dinamis) --}}
+                                <div id="catatanWrapper" class="catatan-wrapper" style="display: none;">
+                                    <label class="form-label" for="catatan">
+                                        <i class="fas fa-exclamation-triangle" style="color:var(--danger);"></i>
+                                        Alasan Penolakan <span class="catatan-required-badge">WAJIB DIISI</span>
+                                    </label>
+                                    <textarea name="catatan" id="catatan" class="form-textarea" rows="4"
+                                        placeholder="Tuliskan alasan penolakan laporan secara jelas, agar siswa dapat melakukan perbaikan..."
+                                    >{{ old('catatan') }}</textarea>
+                                </div>
+
+                                {{-- Catatan opsional untuk approve --}}
+                                <div id="catatanApproveWrapper" class="catatan-wrapper" style="display: none;">
+                                    <label class="form-label" for="catatanApprove">
+                                        <i class="fas fa-comment-alt" style="color:var(--success);"></i>
+                                        Catatan / Komentar <span style="font-weight:500; text-transform: none; color: var(--text-muted);">(opsional)</span>
+                                    </label>
+                                    <textarea name="catatan" id="catatanApprove" class="form-textarea" rows="3"
+                                        placeholder="Tambahkan catatan atau apresiasi untuk siswa (opsional)..."
+                                    >{{ old('catatan') }}</textarea>
+                                </div>
+
                                 <div class="form-actions">
-                                    <button type="submit" class="btn-verify">
-                                        Simpan Verifikasi <i class="fas fa-save"></i>
+                                    <a href="{{ route('guru.verifikasi') }}" class="btn-back-list">
+                                        <i class="fas fa-arrow-left"></i> Kembali
+                                    </a>
+                                    <button type="submit" class="btn-verify" id="btnVerify" disabled>
+                                        <i class="fas fa-gavel"></i> Pilih Keputusan Dulu
                                     </button>
                                 </div>
                             </form>
@@ -266,7 +329,80 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Live Search Logic
+
+            // ═══════════════════════════════════
+            // FORM VERIFIKASI — Approve / Reject
+            // ═══════════════════════════════════
+            const approveRadio  = document.getElementById('approve');
+            const rejectRadio   = document.getElementById('reject');
+            const catatanWrapper        = document.getElementById('catatanWrapper');
+            const catatanApproveWrapper = document.getElementById('catatanApproveWrapper');
+            const catatanInput          = document.getElementById('catatan');
+            const catatanApproveInput   = document.getElementById('catatanApprove');
+            const btnVerify             = document.getElementById('btnVerify');
+
+            function handleDecisionChange() {
+                const approved = approveRadio && approveRadio.checked;
+                const rejected = rejectRadio  && rejectRadio.checked;
+
+                if (catatanWrapper)        catatanWrapper.style.display        = rejected  ? 'block' : 'none';
+                if (catatanApproveWrapper) catatanApproveWrapper.style.display = approved  ? 'block' : 'none';
+
+                // Lepas required dari keduanya
+                if (catatanInput)        catatanInput.removeAttribute('required');
+                if (catatanApproveInput) catatanApproveInput.removeAttribute('required');
+
+                // Pasang required saat TOLAK
+                if (rejected && catatanInput) catatanInput.setAttribute('required', 'required');
+
+                // Update tombol
+                if (btnVerify) {
+                    if (approved) {
+                        btnVerify.disabled = false;
+                        btnVerify.innerHTML = '<i class="fas fa-check-circle"></i> Setujui Laporan';
+                        btnVerify.className = 'btn-verify btn-verify-approve';
+                    } else if (rejected) {
+                        btnVerify.disabled = false;
+                        btnVerify.innerHTML = '<i class="fas fa-times-circle"></i> Tolak Laporan';
+                        btnVerify.className = 'btn-verify btn-verify-reject';
+                    } else {
+                        btnVerify.disabled = true;
+                        btnVerify.innerHTML = '<i class="fas fa-gavel"></i> Pilih Keputusan Dulu';
+                        btnVerify.className = 'btn-verify';
+                    }
+                }
+            }
+
+            if (approveRadio) approveRadio.addEventListener('change', handleDecisionChange);
+            if (rejectRadio)  rejectRadio.addEventListener('change', handleDecisionChange);
+
+            // Trigger on load (jika old() value ada)
+            handleDecisionChange();
+
+            // Konfirmasi sebelum kirim
+            const verifyForm = document.getElementById('verifyForm');
+            if (verifyForm) {
+                verifyForm.addEventListener('submit', function(e) {
+                    const isReject = rejectRadio && rejectRadio.checked;
+                    const catatan  = catatanInput ? catatanInput.value.trim() : '';
+
+                    if (isReject && catatan === '') {
+                        e.preventDefault();
+                        catatanInput.focus();
+                        catatanInput.style.borderColor = 'var(--danger)';
+                        return false;
+                    }
+
+                    const action = isReject ? 'MENOLAK' : 'MENYETUJUI';
+                    if (!confirm(`Apakah Anda yakin ingin ${action} laporan akhir siswa ini? Tindakan ini tidak dapat dibatalkan.`)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // ═══════════════════════════════════
+            // LIVE SEARCH — List View
+            // ═══════════════════════════════════
             const searchInput = document.getElementById('searchInput');
             const searchForm = document.getElementById('searchForm');
             const pendingCards = document.querySelectorAll('#pending .laporan-card');
@@ -287,7 +423,7 @@
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
                     const searchTerm = this.value.toLowerCase().trim();
-                    
+
                     // Filter Pending Cards
                     let pendingMatchFound = false;
                     pendingCards.forEach(card => {
@@ -297,15 +433,13 @@
                         if (isMatch) pendingMatchFound = true;
                     });
                     if (noResultsPending) {
-                        const isReallyEmpty = document.querySelector('#pending .laporan-grid').children.length === 1 && noResultsPending;
                         noResultsPending.style.display = (pendingMatchFound || searchTerm === '') ? 'none' : 'block';
                     }
 
                     // Filter History Table
                     let historyMatchFound = false;
                     historyRows.forEach(row => {
-                        if (row.querySelector('.td-siswa-name') === null) return; // Skip empty state row
-                        
+                        if (row.querySelector('.td-siswa-name') === null) return;
                         const text = row.innerText.toLowerCase();
                         const isMatch = text.includes(searchTerm);
                         row.style.display = isMatch ? '' : 'none';

@@ -157,6 +157,7 @@ Route::middleware('auth')->group(function () {
 
     // Manajemen Rekap Baru oleh admin
     Route::get('/admin/rekap', [App\Http\Controllers\AdminRekapController::class, 'index'])->name('admin.rekap');
+    Route::get('/admin/rekap/stats', [App\Http\Controllers\AdminRekapController::class, 'getStats'])->name('admin.rekap.stats');
     Route::get('/admin/rekap/siswa-aktif', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaAktif'])->name('admin.rekap.siswaAktif');
     Route::get('/admin/rekap/siswa-selesai', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaSelesai'])->name('admin.rekap.siswaSelesai');
     Route::get('/admin/rekap/siswa-total', [App\Http\Controllers\AdminRekapController::class, 'rekapSiswaTotal'])->name('admin.rekap.siswaTotal');
@@ -182,4 +183,5 @@ Route::middleware(['auth'])->prefix('pimpinan')->name('pimpinan.')->group(functi
     Route::get('/guru', [PimpinanController::class, 'guru'])->name('guru');
     Route::get('/pembimbing', [PimpinanController::class, 'pembimbing'])->name('pembimbing');
     Route::get('/rekap', [PimpinanController::class, 'rekap'])->name('rekap');
+    Route::get('/rekap/stats', [PimpinanController::class, 'rekapStats'])->name('rekap.stats');
 });

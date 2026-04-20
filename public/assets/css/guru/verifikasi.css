@@ -165,6 +165,12 @@ body{
     border-color: #bbf7d0;
 }
 
+.ui-alert-danger {
+    background: #fff5f5;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
 /* ── Kartu Dasar ── */
 .ui-card {
     background: #ffffff;
@@ -395,10 +401,8 @@ body{
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-}
+
+
 
 .btn-verify {
     display: inline-flex;
@@ -420,7 +424,123 @@ body{
 
 .btn-verify:hover { opacity: 0.88; transform: translateY(-1px); }
 
+.btn-verify:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 1;
+}
 
+/* ── Varian Tombol Submit ── */
+.btn-verify-approve {
+    background: var(--success) !important;
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3) !important;
+}
+
+.btn-verify-reject {
+    background: var(--danger) !important;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* ── Tombol Kembali ── */
+.btn-back-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.75rem 1.25rem;
+    background: #f1f5f9;
+    color: var(--text-muted);
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-back-list:hover {
+    background: #e2e8f0;
+    color: var(--text-main);
+}
+
+/* ── Siswa Summary Box ── */
+.siswa-summary-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(79,70,229,0.07) 0%, rgba(79,70,229,0.03) 100%);
+    border: 1.5px solid rgba(79,70,229,0.15);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+}
+
+.siswa-summary-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.siswa-summary-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.siswa-summary-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.siswa-summary-meta i {
+    margin-right: 4px;
+    color: var(--primary);
+    opacity: 0.7;
+}
+
+/* ── Catatan Wrapper (Animasi) ── */
+.catatan-wrapper {
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Badge "Wajib Diisi" ── */
+.catatan-required-badge {
+    display: inline-block;
+    background: rgba(220,53,69,0.1);
+    color: var(--danger);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── Form Actions ── */
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
 
 /* ═══════════════════════════════════════════
    LIST VIEW — Tab Navigation

@@ -27,6 +27,12 @@
                 <div>
                     <h2 class="rekap-title">Pusat Rekapitulasi Data</h2>
                     <p class="rekap-subtitle mb-0 text-muted">Pantau statistik dan unduh laporan data mahasiswa/siswa serta guru pembimbing.</p>
+                    <div id="activeFilterBadge" style="display:none; margin-top:8px;">
+                        <span style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="activeFilterLabel"></span>
+                        </span>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     <div class="filter-box" style="min-width: 250px;">
@@ -65,7 +71,7 @@
                             <div class="rekap-card-icon">
                                 <i class="fas fa-user-clock"></i>
                             </div>
-                            <div class="rekap-card-count">{{ $stats['siswa_aktif'] }}</div>
+                            <div class="rekap-card-count" id="statSiswaAktif">{{ $stats['siswa_aktif'] }}</div>
                             <h5 class="rekap-card-title">Mahasiswa/Siswa Aktif</h5>
                             <a href="javascript:void(0)" data-url="{{ route('admin.rekap.siswaAktif') }}" class="rekap-btn-download btn-preview-pdf">
                                 <i class="fas fa-file-pdf"></i>
@@ -78,7 +84,7 @@
                             <div class="rekap-card-icon" style="background: #ecfdf5; color: #10b981;">
                                 <i class="fas fa-user-check"></i>
                             </div>
-                            <div class="rekap-card-count">{{ $stats['siswa_selesai'] }}</div>
+                            <div class="rekap-card-count" id="statSiswaSelesai">{{ $stats['siswa_selesai'] }}</div>
                             <h5 class="rekap-card-title">Siswa Selesai Magang</h5>
                             <a href="javascript:void(0)" data-url="{{ route('admin.rekap.siswaSelesai') }}" class="rekap-btn-download btn-preview-pdf">
                                 <i class="fas fa-file-pdf"></i>
@@ -91,7 +97,7 @@
                             <div class="rekap-card-icon" style="background: #f1f5f9; color: #475569;">
                                 <i class="fas fa-users"></i>
                             </div>
-                            <div class="rekap-card-count">{{ $stats['total_siswa'] }}</div>
+                            <div class="rekap-card-count" id="statTotalSiswa">{{ $stats['total_siswa'] }}</div>
                             <h5 class="rekap-card-title">Total Keseluruhan Siswa</h5>
                             <a href="javascript:void(0)" data-url="{{ route('admin.rekap.siswaTotal') }}" class="rekap-btn-download btn-preview-pdf">
                                 <i class="fas fa-file-pdf"></i>
@@ -108,7 +114,7 @@
                             <div class="rekap-card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
                                 <i class="fas fa-user-tie"></i>
                             </div>
-                            <div class="rekap-card-count">{{ $stats['total_guru'] }}</div>
+                            <div class="rekap-card-count" id="statTotalGuru">{{ $stats['total_guru'] }}</div>
                             <h5 class="rekap-card-title">Total Guru Pembimbing</h5>
                             <a href="javascript:void(0)" data-url="{{ route('admin.rekap.guru') }}" class="rekap-btn-download btn-preview-pdf">
                                 <i class="fas fa-file-pdf"></i>
@@ -210,16 +216,70 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const previewButtons = document.querySelectorAll('.btn-preview-pdf');
-            const pdfModalElement = document.getElementById('previewPdfModal');
-            const pdfModal = new bootstrap.Modal(pdfModalElement);
-            const downloadBtn = document.getElementById('downloadPdfBtn');
+        // ── Animasi counter angka ──────────────────────────────────────────────
+        function animateCounter(el, targetVal) {
+            const start   = parseInt(el.textContent) || 0;
+            const end     = parseInt(targetVal)      || 0;
+            const dur     = 500;
+            const step    = 16;
+            const steps   = Math.ceil(dur / step);
+            const inc     = (end - start) / steps;
+            let   current = start;
+            let   count   = 0;
 
+            const timer = setInterval(function() {
+                count++;
+                current += inc;
+                el.textContent = Math.round(count >= steps ? end : current);
+                if (count >= steps) clearInterval(timer);
+            }, step);
+        }
+
+        // ── Fetch stats berdasarkan filter tahun ajaran ───────────────────────
+        function loadStats(periodeId) {
+            const statsUrl = '{{ route("pimpinan.rekap.stats") }}';
+            const url      = periodeId ? `${statsUrl}?periode=${periodeId}` : statsUrl;
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    animateCounter(document.getElementById('statSiswaAktif'),   data.siswa_aktif);
+                    animateCounter(document.getElementById('statSiswaSelesai'), data.siswa_selesai);
+                    animateCounter(document.getElementById('statTotalSiswa'),   data.total_siswa);
+                    animateCounter(document.getElementById('statTotalGuru'),    data.total_guru);
+                })
+                .catch(err => console.error('Gagal memuat statistik:', err));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterEl        = document.getElementById('filterPeriode');
+            const badgeEl         = document.getElementById('activeFilterBadge');
+            const badgeLabelEl    = document.getElementById('activeFilterLabel');
+            const previewButtons  = document.querySelectorAll('.btn-preview-pdf');
+            const pdfModalElement = document.getElementById('previewPdfModal');
+            const pdfModal        = new bootstrap.Modal(pdfModalElement);
+            const downloadBtn     = document.getElementById('downloadPdfBtn');
+
+            // ── Saat filter berubah ─────────────────────────────────────────
+            filterEl.addEventListener('change', function() {
+                const periodeId    = this.value;
+                const periodeLabel = this.options[this.selectedIndex].text;
+
+                if (periodeId) {
+                    badgeLabelEl.textContent = periodeLabel;
+                    badgeEl.style.display    = 'block';
+                } else {
+                    badgeEl.style.display    = 'none';
+                }
+
+                loadStats(periodeId);
+            });
+
+            // ── Tombol preview PDF (sertakan filter) ───────────────────────
             previewButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const url = this.getAttribute('data-url');
-                    const periode = document.getElementById('filterPeriode').value;
+                    const url    = this.getAttribute('data-url');
+                    const periode = filterEl.value;
                     if (!url) return;
 
                     let finalUrl = url;
