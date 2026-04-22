@@ -1,151 +1,317 @@
 :root {
-    --primary-color: #0d6efd;
-    --primary-light: rgba(13, 110, 253, 0.08);
-    --secondary-bg: #f8fafc;
-    --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    --border-radius-lg: 16px;
-    --border-radius-md: 12px;
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --secondary-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --surface-glass: rgba(255, 255, 255, 0.8);
+    --surface-glass-dark: rgba(255, 255, 255, 0.05);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.08);
+    --border-radius-xl: 16px;
+    --border-radius-lg: 12px;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+.dashboard-page{
+        background: #f1f5f9;
+}
+.admin-content-wrapper {
+    padding: 1.5rem 2rem;
+    animation: fadeIn 0.6s ease-out;
 }
 
-.rekap-container {
-    padding: 2rem 0;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.rekap-main-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(241, 245, 249, 1);
+    margin-top: 1rem;
 }
 
 .rekap-header {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-active-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-gradient);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+}
+
+.letter-spacing-1 {
+    letter-spacing: 0.5px;
+}
+
+.rekap-header::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 150px;
+    height: 150px;
+    background: var(--primary-gradient);
+    filter: blur(60px);
+    opacity: 0.08;
+    z-index: 0;
 }
 
 .rekap-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    color: #1e293b;
+    background: linear-gradient(to right, #1e293b, #4f46e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .rekap-subtitle {
-    color: #64748b;
-    font-size: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    max-width: 550px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Custom Filter Box */
+.filter-box {
+    position: relative;
+    z-index: 1;
+}
+
+.input-group-custom {
+    position: relative;
+    border-radius: 50px;
+    padding: 1px;
+    background: #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.input-group-custom:focus-within {
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+}
+
+.filter-box .form-select {
+    height: 42px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+    background-color: #fff;
+    border-radius: 50px;
+    padding-left: 1.25rem;
+    padding-right: 2.5rem;
 }
 
 /* Tabs Styling */
 .rekap-tabs-nav {
-    display: flex;
-    gap: 1rem;
-    background: #fff;
-    padding: 0.75rem;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--card-shadow);
+    display: inline-flex;
+    gap: 0.5rem;
     margin-bottom: 2rem;
+    padding: 0.5rem 0;
 }
 
 .rekap-tab-btn {
-    flex: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 10px;
+    padding: 0.6rem 1.25rem;
     border: none;
-    background: transparent;
-    border-radius: var(--border-radius-md);
+    background: #f8fafc;
+    border-radius: 12px;
     font-weight: 700;
-    color: #64748b;
+    font-size: 0.85rem;
+    color: var(--text-muted);
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .rekap-tab-btn i {
-    font-size: 1.25rem;
+    font-size: 1rem;
+    opacity: 0.8;
 }
 
 .rekap-tab-btn.active {
-    background: var(--primary-color);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+.rekap-tab-btn.active i {
+    opacity: 1;
+}
+
+.rekap-tab-btn:not(.active):hover {
+    background: #f1f5f9;
+    color: var(--text-main);
 }
 
 /* Card Grid */
 .rekap-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
 .rekap-card {
     background: #fff;
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
+    border-radius: var(--border-radius-xl);
+    padding: 1.5rem;
     box-shadow: var(--card-shadow);
-    border: 1px solid rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(241, 245, 249, 1);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.rekap-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .rekap-card:hover {
     transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: rgba(79, 70, 229, 0.1);
+}
+
+.rekap-card:hover::before {
+    opacity: 1;
 }
 
 .rekap-card-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--primary-light);
-    color: var(--primary-color);
-    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
+.rekap-card:hover .rekap-card-icon {
+    transform: scale(1.1) rotate(3deg);
+}
+
+.rekap-card-icon.icon-primary {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
+
+.rekap-card-icon.icon-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.rekap-card-icon.icon-info {
+    background: rgba(14, 165, 233, 0.1);
+    color: #0ea5e9;
+}
+
+.rekap-card-icon.icon-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.rekap-card:hover .rekap-card-icon.icon-primary { background: var(--primary-gradient); color: #fff; }
+.rekap-card:hover .rekap-card-icon.icon-success { background: var(--success-gradient); color: #fff; }
+.rekap-card:hover .rekap-card-icon.icon-info { background: var(--secondary-gradient); color: #fff; }
+.rekap-card:hover .rekap-card-icon.icon-warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; }
+
 .rekap-card-count {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: 800;
-    color: #1e293b;
+    color: var(--text-main);
     margin-bottom: 0.25rem;
+    letter-spacing: -1px;
 }
 
 .rekap-card-title {
-    font-size: 1.125rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: #475569;
+    color: var(--text-muted);
     margin-bottom: 1.5rem;
 }
 
 .rekap-btn-download {
     width: 100%;
-    padding: 0.875rem;
-    border-radius: var(--border-radius-md);
-    background: var(--secondary-bg);
-    color: #1e293b;
+    padding: 0.75rem;
+    border-radius: var(--border-radius-lg);
+    background: #f8fafc;
+    color: var(--text-main);
     font-weight: 700;
+    font-size: 0.85rem;
     text-decoration: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s ease;
+    border: 1.5px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.rekap-btn-download i {
+    font-size: 1rem;
+    color: #ef4444;
 }
 
 .rekap-btn-download:hover {
-    background: var(--primary-color);
+    background: var(--text-main);
     color: #fff;
-    border-color: var(--primary-color);
+    border-color: var(--text-main);
+}
+
+.rekap-btn-download:hover i {
+    color: #fff;
 }
 
 /* Modal Styling */
 .modal-pdf-viewer {
-    max-width: 950px;
+    max-width: 900px;
+}
+
+.modal-content {
+    border-radius: 20px;
+    overflow: hidden;
+    background: #0f172a;
 }
 
 .pdf-viewer-header {
-    background: #1e293b;
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(10px);
     color: #fff;
-    padding: 1.25rem 1.5rem;
-    border-bottom: none;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .pdf-viewer-title {
@@ -157,39 +323,46 @@
 .pdf-icon-wrapper {
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(239, 68, 68, 0.15);
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #f87171;
+    color: #ef4444;
+    font-size: 1.1rem;
 }
 
 .pdf-viewer-actions {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .btn-pdf-action {
-    color: #94a3b8;
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 0.6rem 1.25rem;
+    border-radius: 50px;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: color 0.2s;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border: none;
 }
 
 .btn-pdf-action:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     color: #fff;
 }
 
 .pdf-viewer-body {
-    background: #334155;
+    background: #1e293b;
     height: 80vh;
-    padding: 2rem;
+    padding: 1.5rem;
     overflow-y: auto;
 }
 
@@ -201,16 +374,30 @@
 }
 
 #pdfCanvasContainer canvas {
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
 }
 
-#pdfLoadingIndicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #fff;
-    gap: 1rem;
+/* Responsiveness */
+@media (max-width: 768px) {
+    .rekap-header {
+        padding: 1.25rem;
+        text-align: center;
+    }
+    
+    .rekap-tabs-nav {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        border-radius: 12px;
+    }
+    
+    .rekap-tab-btn {
+        flex: 1;
+    }
+    
+    .rekap-card-count {
+        font-size: 2rem;
+    }
 }
+

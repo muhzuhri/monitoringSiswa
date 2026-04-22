@@ -537,7 +537,10 @@ class SiswaController extends Controller
             'file_laporan' => 'required|file|mimes:pdf,doc,docx|max:5120', // Max 5MB
         ]);
 
-        $path = $request->file('file_laporan')->store('laporan_akhir', 'public');
+        $file = $request->file('file_laporan');
+        $filename = 'Laporan_Akhir_' . str_replace(' ', '_', $user->nama) . '_' . $user->nisn . '.' . $file->getClientOriginalExtension();
+        
+        $path = $file->storeAs('laporan_akhir', $filename, 'public');
 
         $user->laporanAkhirs()->create([
             'nisn' => $user->nisn,
@@ -547,6 +550,7 @@ class SiswaController extends Controller
 
         return back()->with('success', 'Laporan akhir berhasil diunggah.');
     }
+
 
     /**
      * Preview / Download Laporan Akhir.
@@ -723,6 +727,35 @@ class SiswaController extends Controller
         }
         return $pdf->stream($fileName);
     }
+
+    /**
+     * Cetak Sertifikat Magang Siswa.
+     */
+    public function cetakSertifikat(Request $request)
+    {
+        /** @var \App\Models\Siswa $user */
+        $user = Auth::user();
+        
+        // Status 'selesai' otomatis di model Siswa jika tgl_selesai sudah lewat
+        if ($user->status !== 'selesai') {
+            return back()->with('info', 'Sertifikat akan tersedia setelah masa magang Anda berakhir.');
+        }
+
+        $user->load(['pembimbing', 'tahunAjaran']);
+        
+        $fileName = "Sertifikat_Magang_{$user->nisn}.pdf";
+
+        $pdf = Pdf::loadView('siswa.sertifikat', compact('user'))
+            ->setPaper('a4', 'landscape');
+        
+        if ($request->has('download')) {
+            return $pdf->download($fileName);
+        }
+
+        return $pdf->stream($fileName);
+    }
+
+
 
 }
 

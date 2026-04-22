@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/siswa/laporan/download/rekap-individu', [SiswaController::class, 'downloadRekapAbsensiIndividu'])->name('siswa.rekap.individu');
     Route::get('/siswa/laporan/download/rekap-kelompok', [SiswaController::class, 'downloadRekapAbsensiKelompok'])->name('siswa.rekap.kelompok');
     Route::get('/siswa/penilaian/cetak', [SiswaController::class, 'cetakPenilaian'])->name('siswa.penilaian.cetak');
+    Route::get('/siswa/laporan/sertifikat', [SiswaController::class, 'cetakSertifikat'])->name('siswa.sertifikat.cetak');
+
 
 
     Route::get('/guru/guru', [GuruController::class, 'dashboard'])->name('guru.guru');

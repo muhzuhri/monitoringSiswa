@@ -196,7 +196,28 @@
                 <div class="laporan-grid" style="max-width: 900px; margin: 0 auto;">
                     <div class="ui-card">
                         <h5 class="page-title" style="margin-bottom: 1.5rem;">Rekap Penilaian Siswa</h5>
+                        
+                        @if($user->status == 'selesai')
+                            <div class="ui-alert ui-alert-success mb-4" style="padding: 1.5rem; border: 2px solid var(--primary);">
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <div style="background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div style="flex-grow: 1;">
+                                        <h5 style="margin: 0; font-weight: 800;">Selamat, Magang Telah Selesai!</h5>
+                                        <p style="margin: 0; opacity: 0.8;">Kamu telah menyelesaikan seluruh rangkaian kegiatan magang. Silakan unduh sertifikat kamu di bawah ini.</p>
+                                    </div>
+                                    <a href="javascript:void(0)" data-url="{{ route('siswa.sertifikat.cetak') }}" class="btn-unduh-sm btn-preview-pdf" style="background: var(--primary); color: white; padding: 10px 20px;">
+                                        <i class="fas fa-award"></i>
+                                        <span>Cetak Sertifikat</span>
+                                    </a>
+
+                                </div>
+                            </div>
+                        @endif
+
                         <p class="page-subtitle mb-4">Berikut adalah daftar penilaian yang telah diberikan oleh Pembimbing Lapangan dan Guru Pembimbing.</p>
+
 
                         <div class="assessment-list">
                             @forelse($penilaians as $penilaian)
