@@ -6,9 +6,29 @@
 @section('body')
     @push('styles')
         <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-guru.css') }}">
+        <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-modals.css') }}">
     @endpush
 
     <div class="management-container">
+        
+        <!-- Global Navigation Tabs: Siswa, Guru, Pembimbing -->
+        <div class="tabs-wrapper border-0 bg-transparent mb-4">
+            <div class="tabs-nav">
+                <a href="{{ route('admin.kelolaSiswa') }}" class="tab-button {{ Route::is('admin.kelolaSiswa') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Siswa</span>
+                </a>
+                <a href="{{ route('admin.kelolaGuru') }}" class="tab-button {{ Route::is('admin.kelolaGuru') ? 'active' : '' }}">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+                <a href="{{ route('admin.kelolaPembimbing') }}" class="tab-button {{ Route::is('admin.kelolaPembimbing') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Pembimbing</span>
+                </a>
+            </div>
+        </div>
+
         <div class="admin-content-wrapper">
             <!-- Header -->
             <div class="management-header">
@@ -34,12 +54,12 @@
                 <table class="main-table">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">#</th>
+                            <th class="col-w-50">#</th>
                             <th>Nama Lengkap</th>
                             <th>Email Resmi</th>
                             <th>NIP</th>
                             <th>Siswa Bimbingan</th>
-                            <th style="width: 160px;">Aksi</th>
+                            <th class="col-w-160">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,8 +71,7 @@
                                             <td data-label="NIP">{{ $item->id_guru }}</td>
                                             <td data-label="Siswa Bimbingan">
                                                 <span
-                                                    class="badge {{ $item->siswas->count() > 0 ? 'bg-success-soft text-success' : 'bg-secondary-soft text-muted' }}"
-                                                    style="border-radius: 8px; padding: 0.5rem 0.75rem; font-weight: 700;">
+                                                    class="badge-custom {{ $item->siswas->count() > 0 ? 'badge-success-soft' : 'badge-secondary-soft' }}">
                                                     {{ $item->siswas->count() }} Siswa
                                                 </span>
                                             </td>
@@ -82,8 +101,7 @@
                                         </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center-muted"
-                                    style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                <td colspan="7" class="text-muted text-center p-12">
                                     Belum ada data guru. Klik tombol <strong>Tambah Guru</strong> untuk membuat akun baru.
                                 </td>
                             </tr>
@@ -146,7 +164,7 @@
                                     <div class="input-group">
                                         <input type="password" name="password" class="p-input with-icon" required
                                             placeholder="Minimal 6 karakter">
-                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                        <button class="btn-light-custom toggle-password" type="button" style="padding: 0 1rem; border-radius: 0 12px 12px 0;">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -159,7 +177,7 @@
                                     <div class="input-group">
                                         <input type="password" name="password_confirmation" class="p-input with-icon" required
                                             placeholder="Ulangi kata sandi">
-                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                        <button class="btn-light-custom toggle-password" type="button" style="padding: 0 1rem; border-radius: 0 12px 12px 0;">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -196,8 +214,8 @@
                     </div>
 
                     <div class="modal-form-footer">
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-primary-custom rounded-pill px-5">Simpan Data Guru</button>
+                        <button type="button" class="btn-light-custom" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-primary-custom rounded-full px-5">Simpan Data Guru</button>
                     </div>
                 </form>
             </div>
@@ -290,8 +308,8 @@
                         </div>
                     </div>
                     <div class="modal-form-footer">
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold">Perbarui Profil</button>
+                        <button type="button" class="btn-light-custom" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-warning-custom">Perbarui Profil</button>
                     </div>
                 </form>
             </div>
@@ -358,15 +376,15 @@
     <div class="modal fade" id="modalHapus" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal-content">
-                <div class="modal-body-custom text-center" style="padding-top: 3.5rem;">
+                <div class="modal-body-custom text-center pt-14">
                     <div class="delete-confirm-icon">
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
-                    <h4 style="font-weight: 800; margin-bottom: 1rem;">Konfirmasi Hapus</h4>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Apakah Anda yakin ingin menghapus data ini?
+                    <h4 class="fw-800 mb-4-custom">Konfirmasi Hapus</h4>
+                    <p class="text-muted mb-8-custom">Apakah Anda yakin ingin menghapus data ini?
                         Tindakan ini tidak dapat dibatalkan.</p>
 
-                    <form id="formHapus" method="POST" style="display: flex; justify-content: center; gap: 1rem;">
+                    <form id="formHapus" method="POST" class="flex-center-gap">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn-danger-custom">Ya, Hapus Data</button>
@@ -377,89 +395,7 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Edit Logic
-            const editButtons = document.querySelectorAll('.btn-edit');
-            const editForm = document.getElementById('formEditGuru');
-
-            editButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const id = this.getAttribute('data-id');
-                    const nama = this.getAttribute('data-nama');
-                    const email = this.getAttribute('data-email');
-                    const id_guru = this.getAttribute('data-id_guru');
-                    const jabatan = this.getAttribute('data-jabatan');
-                    const sekolah = this.getAttribute('data-sekolah');
-
-                    editForm.action = `/admin/guru/${id}`;
-                    document.getElementById('edit_nama').value = nama;
-                    document.getElementById('edit_email').value = email;
-                    document.getElementById('edit_id_guru').value = id_guru;
-                    document.getElementById('edit_jabatan').value = jabatan;
-                    document.getElementById('edit_sekolah').value = sekolah;
-                });
-            });
-
-            // Preview Detail Logic
-            const detailButtons = document.querySelectorAll('.btn-detail');
-            detailButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    document.getElementById('det_nama').textContent = this.getAttribute('data-nama');
-                    document.getElementById('det_id_guru').textContent = this.getAttribute('data-id_guru');
-                    document.getElementById('det_email').textContent = this.getAttribute('data-email');
-                    document.getElementById('det_sekolah').textContent = this.getAttribute('data-sekolah');
-                    document.getElementById('det_jabatan').textContent = this.getAttribute('data-jabatan');
-
-                    // Populate supervised students list
-                    const siswas = JSON.parse(this.getAttribute('data-siswas'));
-                    const listContainer = document.getElementById('supervised_students_list');
-                    listContainer.innerHTML = '';
-
-                    if (siswas.length > 0) {
-                        siswas.forEach(s => {
-                            const studentDiv = document.createElement('div');
-                            studentDiv.className = 'student-card-mini';
-                            studentDiv.innerHTML = `
-                                                <div class="student-info">
-                                                    <div class="nama">${s.nama}</div>
-                                                    <div class="meta">NISN: ${s.nisn}</div>
-                                                </div>
-                                                <i class="fas fa-user-graduate"></i>
-                                            `;
-                            listContainer.appendChild(studentDiv);
-                        });
-                    } else {
-                        listContainer.innerHTML = '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan.</div>';
-                    }
-                });
-            });
-
-            // Delete Logic
-            const deleteButtons = document.querySelectorAll('.btn-delete-trigger');
-            const deleteForm = document.getElementById('formHapus');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const url = this.getAttribute('data-url');
-                    deleteForm.action = url;
-                });
-            });
-
-            // Password Toggle Logic
-            document.querySelectorAll('.toggle-password').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const input = this.closest('.input-group').querySelector('input');
-                    const icon = this.querySelector('i');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.replace('fa-eye', 'fa-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        icon.classList.replace('fa-eye-slash', 'fa-eye');
-                    }
-                });
-            });
-        });
-    </script>
+    @push('scripts')
+        <script src="{{ asset('assets/js/admin/kelola-guru.js') }}"></script>
+    @endpush
 @endsection

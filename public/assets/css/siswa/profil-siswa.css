@@ -3,27 +3,19 @@
    =================================== */
 
 :root {
-    --primary: #4e73df;
-    --primary-dark: #224abe;
+    --primary: #0d6efd;
+    --primary-dark: #005ce6;
     --success: #1cc88a;
     --warning: #f6c23e;
     --danger: #e74a3b;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --bg-light: #f8fafc;
     --border: #e2e8f0;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --radius-sm: 10px;
-    --shadow: 0 10px 30px rgba(0,0,0,0.06);
-    --shadow-card: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 /* ── Tata Letak Halaman ── */
 .profil-wrapper {
     max-width: 1200px;
     margin: 0 auto;
-    padding: clamp(1rem, 4vw, 2.5rem) 1rem;
+    padding: clamp(1rem, 4vw, 2rem) 1rem;
     box-sizing: border-box;
     width: 100%;
 }
@@ -43,10 +35,10 @@
 
 /* ── Kartu Dasar ── */
 .profile-card {
-    background: #ffffff;
+    background: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     transition: box-shadow 0.3s ease;
     width: 100%;
@@ -54,7 +46,7 @@
 }
 
 .profile-card:hover {
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
 }
 
 /* ── Header Gambar Profil ── */
@@ -77,7 +69,7 @@
     padding: 4px;
     background: #ffffff;
     position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
 }
 
 .profile-img-wrapper img {
@@ -102,7 +94,7 @@
     justify-content: center;
     cursor: pointer;
     border: 2px solid #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     font-size: 0.8rem;
     transition: background 0.2s;
 }
@@ -280,11 +272,11 @@
 }
 
 /* ── Visibilitas Tab ── */
-.tab-content > .tab-pane {
+.tab-content>.tab-pane {
     display: none;
 }
 
-.tab-content > .tab-pane.show.active {
+.tab-content>.tab-pane.show.active {
     display: block;
 }
 
@@ -443,8 +435,15 @@
 
 /* ── Animasi Masuk ── */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .profile-card {
@@ -478,6 +477,7 @@
         justify-content: stretch;
     }
 }
+
 /* ── Supervisor Cards (Tab Pembimbing) ── */
 .supervisor-grid {
     display: grid;
@@ -590,7 +590,7 @@
     justify-content: center;
     color: var(--primary);
     font-size: 0.9rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 .field-supervisor .s-contact-item i {
@@ -618,9 +618,17 @@
     font-weight: 500;
 }
 
-/* ── Responsif Tambahan ── */
 @media (max-width: 576px) {
     .supervisor-card {
         padding: 2.5rem 1rem 1.5rem;
     }
+}
+
+/* Additional Utility Classes */
+.mt-1 {
+    margin-top: 1rem !important;
+}
+
+.hidden {
+    display: none !important;
 }

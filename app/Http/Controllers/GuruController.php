@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absensi;
+use App\Models\InformasiDashboard;
 use App\Models\LaporanAkhir;
 use App\Models\Logbook;
 use App\Models\Penilaian;
+use App\Models\ProgramStudi;
 use App\Models\Siswa;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -84,6 +86,10 @@ class GuruController extends Controller
             }
         ])->limit(5)->get();
 
+        // Informasi Dashboard
+        $informasi     = InformasiDashboard::getInstance();
+        $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
+
         return view('guru.guru', compact(
             'user',
             'totalSiswa',
@@ -95,7 +101,9 @@ class GuruController extends Controller
             'statsPresensi',
             'avgNilaiTeknis',
             'avgNilaiNonTeknis',
-            'siswaPreviews'
+            'siswaPreviews',
+            'informasi',
+            'programStudis'
         ));
     }
 

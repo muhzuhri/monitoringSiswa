@@ -108,7 +108,6 @@
             </table>
             <div class="divider"></div>
             <h1 class="main-title">SERTIFIKAT</h1>
-            <div class="cert-number">NOMOR : 00{{ $user->nisn }}/UN.9.1.9/LL/{{ date('Y') }}</div>
             <div class="given-text">DIBERIKAN KEPADA :</div>
             <div class="student-name">{{ $user->nama }}</div>
             <div class="description">

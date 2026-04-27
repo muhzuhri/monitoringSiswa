@@ -1,0 +1,416 @@
+/* 
+   Admin Kelola Siswa - Core Management System
+   Fokus: Manajemen Siswa Magang & Riwayat
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* UI Palette */
+    --p-primary: #3b82f6;
+    --p-primary-hover: #2563eb;
+    --p-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+
+    /* Semantic */
+    --p-success: #10b981;
+    --p-danger: #ef4444;
+    --p-warning: #f59e0b;
+    --p-info: #0ea5e9;
+
+    /* Backgrounds */
+    --p-bg-soft: #f8fbff;
+    --p-card-bg: #ffffff;
+
+    /* Text */
+    --p-text-main: #1e293b;
+    --p-text-muted: #64748b;
+    --p-accent: #0f172a;
+
+    /* Spacing & Borders */
+    --p-radius-xl: 24px;
+    --p-radius-lg: 18px;
+    --p-radius-md: 12px;
+    --p-radius-sm: 8px;
+    --p-shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --p-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --p-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
+    --p-transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.admin-page {
+    background: #f1f5f9;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.05) 0px, transparent 50%);
+    font-family: 'Outfit', sans-serif;
+    color: var(--p-text-main);
+}
+
+/* Layout Containers */
+.management-container {
+    max-width: 1500px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.admin-content-wrapper {
+    background: var(--p-card-bg);
+    border-radius: var(--p-radius-xl);
+    box-shadow: var(--p-shadow-lg);
+    padding: 2.5rem;
+    border: 1px solid #fff;
+}
+
+/* Header Section */
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.header-title h5 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--p-accent);
+    margin: 0;
+}
+
+.header-title p {
+    color: var(--p-text-muted);
+    font-size: 0.95rem;
+    margin: 0.25rem 0 0;
+}
+
+/* Global Navigation Tabs */
+.tabs-wrapper {
+    margin-bottom: 2rem;
+}
+
+.tabs-nav {
+    background: rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(10px);
+    padding: 8px;
+    border-radius: 20px;
+    display: flex;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 14px;
+    border: none;
+    background: transparent;
+    color: var(--p-text-muted);
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: var(--p-transition);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(59, 130, 246, 0.05);
+    color: var(--p-primary);
+}
+
+.tab-button.active {
+    background: white;
+    color: var(--p-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.tab-button i {
+    font-size: 1.1rem;
+}
+
+/* Toolbars */
+.tab-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.view-mode-wrapper {
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    display: flex;
+    gap: 4px;
+}
+
+.view-mode-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--p-text-muted);
+    transition: var(--p-transition);
+}
+
+.view-mode-btn.active {
+    background: white;
+    color: var(--p-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Student Cards */
+.student-card {
+    background: white;
+    border-radius: var(--p-radius-lg);
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    transition: var(--p-transition);
+    position: relative;
+    height: 100%;
+}
+
+.student-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--p-shadow-md);
+    border-color: var(--p-primary);
+}
+
+.card-identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.card-avatar {
+    width: 52px;
+    height: 52px;
+    background: var(--p-bg-soft);
+    color: var(--p-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.badge-kelompok {
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 50px;
+    text-transform: uppercase;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.status-badge.hadir {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status-badge.belum {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Table System */
+.data-table-wrapper {
+    background: white;
+    border-radius: var(--p-radius-lg);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.main-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.main-table thead th {
+    background: #f8fafc;
+    color: var(--p-text-muted);
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    padding: 1.25rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.main-table tbody td {
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f8fafc;
+    vertical-align: middle;
+}
+
+.cell-name {
+    font-weight: 700;
+    color: var(--p-accent);
+    margin-bottom: 2px;
+}
+
+.cell-sub {
+    font-size: 0.8rem;
+    color: var(--p-text-muted);
+}
+
+/* History Action Icons (The 3 Specialized Buttons) */
+.action-group {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-history-action {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: var(--p-text-muted);
+    transition: var(--p-transition);
+    cursor: pointer;
+}
+
+.btn-history-action.btn-absensi:hover {
+    background: #ecfdf5;
+    color: var(--p-success);
+    border-color: var(--p-success);
+}
+
+.btn-history-action.btn-kegiatan:hover {
+    background: #f0f9ff;
+    color: var(--p-primary);
+    border-color: var(--p-primary);
+}
+
+.btn-history-action.btn-detail-h:hover {
+    background: #fff7ed;
+    color: var(--p-warning);
+    border-color: var(--p-warning);
+}
+
+/* Primary Action Button */
+.btn-primary-custom {
+    background: var(--p-gradient);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--p-transition);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    color: white;
+}
+
+/* Group Content Styles */
+.group-header-info {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.action-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btn-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.75rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: var(--p-text-main);
+    transition: var(--p-transition);
+}
+
+.btn-action:hover {
+    background: #f8fafc;
+    color: var(--p-primary);
+    border-color: var(--p-primary);
+}
+
+/* Search Form */
+.search-form .p-input-wrapper {
+    position: relative;
+    width: 300px;
+}
+
+.search-form .input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--p-text-muted);
+}
+
+.p-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border-radius: 50px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.9rem;
+    transition: var(--p-transition);
+}
+
+.p-input:focus {
+    outline: none;
+    border-color: var(--p-primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.pimpinan-read-only-badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.management-header {
+    margin-bottom: 1.5rem;
+}

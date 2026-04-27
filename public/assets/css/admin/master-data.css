@@ -1,0 +1,115 @@
+/* 
+   Admin Master Data - Design System
+   Khusus untuk halaman Master Sekolah & Periode
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --p-primary: #3b82f6;
+    --p-primary-hover: #2563eb;
+    --p-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --p-success: #10b981;
+    --p-danger: #ef4444;
+    --p-warning: #f59e0b;
+    --p-text-main: #1e293b;
+    --p-text-muted: #64748b;
+    --p-accent: #0f172a;
+    --p-radius-xl: 24px;
+    --p-radius-lg: 18px;
+    --p-radius-md: 12px;
+    --p-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
+    --p-transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.admin-page {
+    background: #f1f5f9;
+    font-family: 'Outfit', sans-serif;
+    color: var(--p-text-main);
+}
+
+.management-container { max-width: 1500px; margin: 2rem auto; padding: 0 2rem; }
+.admin-content-wrapper { background: #fff; border-radius: var(--p-radius-xl); box-shadow: var(--p-shadow-lg); padding: 2.5rem; border: 1px solid #fff; }
+
+.management-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.header-title h5 { font-size: 1.8rem; font-weight: 800; color: var(--p-accent); }
+.header-title p { color: var(--p-text-muted); font-size: 0.95rem; }
+
+/* Tabs Master */
+.nav-pills .nav-link {
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 700;
+    color: var(--p-text-muted);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.nav-pills .nav-link.active {
+    background: var(--p-primary);
+    color: #fff;
+    border-color: var(--p-primary);
+    box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2);
+}
+
+.nav-pills .nav-link i { margin-right: 8px; }
+
+/* Data Table Wrapper */
+.data-table-wrapper {
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.table thead th {
+    background: #f8fafc;
+    color: var(--p-text-muted);
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1.25rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.table tbody td {
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f8fafc;
+}
+
+/* Badges */
+.badge {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.bg-success-subtle { background: #ecfdf5 !important; color: #059669 !important; }
+.bg-info-subtle { background: #f0f9ff !important; color: #0369a1 !important; }
+.bg-warning-subtle { background: #fffbeb !important; color: #b45309 !important; }
+
+/* Action Buttons in Table */
+.btn-edit-sekolah, .btn-edit-periode {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9 !important;
+    transition: var(--p-transition);
+}
+
+.btn-edit-sekolah:hover, .btn-edit-periode:hover {
+    background: #dbeafe !important;
+    color: var(--p-primary) !important;
+    transform: translateY(-2px);
+}

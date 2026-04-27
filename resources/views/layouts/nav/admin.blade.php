@@ -41,19 +41,16 @@
                         <a class="nav-link {{ Route::is('admin.admin') ? 'active' : '' }}" href="{{ route('admin.admin') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaSiswa') ? 'active' : '' }}" href="{{ route('admin.kelolaSiswa') }}">Siswa</a>
+                        <a class="nav-link {{ Route::is('admin.kelolaSiswa') || Route::is('admin.kelolaGuru') || Route::is('admin.kelolaPembimbing') ? 'active' : '' }}" href="{{ route('admin.kelolaSiswa') }}">Kelola Akun</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaGuru') ? 'active' : '' }}" href="{{ route('admin.kelolaGuru') }}">Guru</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('admin.kelolaPembimbing') ? 'active' : '' }}" href="{{ route('admin.kelolaPembimbing') }}">Pembimbing</a>
-                    </li>                    
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('admin.rekap') ? 'active' : '' }}" href="{{ route('admin.rekap') }}">Rekap</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('admin.masterData') ? 'active' : '' }}" href="{{ route('admin.masterData') }}">Data Master</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('admin.profil') ? 'active' : '' }}" href="{{ route('admin.profil') }}">Profil</a>
                     </li>
                 </ul>
                 <form action="{{ route('logout') }}" method="post">

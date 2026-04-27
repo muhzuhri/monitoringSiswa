@@ -1,0 +1,172 @@
+/* 
+   Admin Kelola Lokasi - Design System
+   Khusus untuk halaman Manajemen Lokasi Absensi
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --p-primary: #3b82f6;
+    --p-primary-hover: #2563eb;
+    --p-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --p-success: #10b981;
+    --p-danger: #ef4444;
+    --p-warning: #f59e0b;
+    --p-bg-soft: #f8fbff;
+    --p-text-main: #1e293b;
+    --p-text-muted: #64748b;
+    --p-accent: #0f172a;
+    --p-radius-xl: 24px;
+    --p-radius-lg: 18px;
+    --p-radius-md: 12px;
+    --p-radius-sm: 8px;
+    --p-transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --p-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+body.admin-page {
+    background: #f1f5f9;
+    font-family: 'Outfit', sans-serif;
+    color: var(--p-text-main);
+}
+
+.management-container {
+    max-width: 1500px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+.admin-content-wrapper {
+    background: #fff;
+    border-radius: var(--p-radius-xl);
+    box-shadow: var(--p-shadow-lg);
+    padding: 2.5rem;
+    border: 1px solid #fff;
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header-title h5 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--p-accent);
+}
+
+.header-title p {
+    color: var(--p-text-muted);
+    font-size: 0.95rem;
+}
+
+/* Location Card Styles */
+.location-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: var(--p-transition);
+    height: 100%;
+    border: 1px solid #eef2f7;
+    position: relative;
+    overflow: hidden;
+}
+
+.location-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.12);
+    border-color: var(--p-primary);
+}
+
+.location-icon {
+    width: 54px;
+    height: 54px;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--p-primary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.location-status {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+}
+
+.coord-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--p-text-muted);
+}
+
+.coord-item i {
+    width: 20px;
+    color: var(--p-primary);
+}
+
+.radius-badge {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--p-text-main);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem;
+    color: var(--p-text-muted);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.2;
+    margin-bottom: 1rem;
+}
+
+/* Badges */
+.bg-success-subtle {
+    background: #ecfdf5 !important;
+    color: #059669 !important;
+}
+
+.bg-danger-subtle {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+}
+
+.btn-primary-custom {
+    background: var(--p-gradient);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: var(--p-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    color: #fff;
+}

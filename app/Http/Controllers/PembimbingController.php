@@ -330,23 +330,49 @@ class PembimbingController extends Controller
                     $statusHadir = 'terlambat';
                 }
 
-                \App\Models\Absensi::create([
-                    'nisn' => $pengajuan->nisn,
-                    'tanggal' => $pengajuan->tanggal,
-                    'jam_masuk' => $pengajuan->jam_masuk,
-                    'jam_pulang' => $pengajuan->jam_pulang,
-                    'status' => $statusHadir,
-                    'verifikasi' => 'verified',
-                    'keterangan' => 'Validasi Lupa Absensi',
-                ]);
+                $existingAbsensi = \App\Models\Absensi::where('nisn', $pengajuan->nisn)
+                    ->where('tanggal', $pengajuan->tanggal)
+                    ->first();
+
+                if ($existingAbsensi) {
+                    $existingAbsensi->update([
+                        'jam_masuk' => $pengajuan->jam_masuk ? $pengajuan->jam_masuk : $existingAbsensi->jam_masuk,
+                        'jam_pulang' => $pengajuan->jam_pulang ? $pengajuan->jam_pulang : $existingAbsensi->jam_pulang,
+                        'status' => $statusHadir,
+                        'verifikasi' => 'verified',
+                        'keterangan' => 'Validasi Lupa Absensi',
+                    ]);
+                } else {
+                    \App\Models\Absensi::create([
+                        'nisn' => $pengajuan->nisn,
+                        'tanggal' => $pengajuan->tanggal,
+                        'jam_masuk' => $pengajuan->jam_masuk,
+                        'jam_pulang' => $pengajuan->jam_pulang,
+                        'status' => $statusHadir,
+                        'verifikasi' => 'verified',
+                        'keterangan' => 'Validasi Lupa Absensi',
+                    ]);
+                }
             } else if ($pengajuan->jenis === 'kegiatan') {
-                Logbook::create([
-                    'nisn' => $pengajuan->nisn,
-                    'tanggal' => $pengajuan->tanggal,
-                    'kegiatan' => $pengajuan->deskripsi,
-                    'status' => 'verified',
-                    'catatan_pembimbing' => 'Validasi Lupa Kegiatan'
-                ]);
+                $existingLogbook = Logbook::where('nisn', $pengajuan->nisn)
+                    ->where('tanggal', $pengajuan->tanggal)
+                    ->first();
+                    
+                if ($existingLogbook) {
+                    $existingLogbook->update([
+                        'kegiatan' => $pengajuan->deskripsi,
+                        'status' => 'verified',
+                        'catatan_pembimbing' => 'Validasi Lupa Kegiatan'
+                    ]);
+                } else {
+                    Logbook::create([
+                        'nisn' => $pengajuan->nisn,
+                        'tanggal' => $pengajuan->tanggal,
+                        'kegiatan' => $pengajuan->deskripsi,
+                        'status' => 'verified',
+                        'catatan_pembimbing' => 'Validasi Lupa Kegiatan'
+                    ]);
+                }
             }
 
             $message = 'Pengajuan berhasil disetujui dan data otomatis ditambahkan ke sistem.';

@@ -137,7 +137,7 @@
                     </p>
                 </div>
                 <div class="table-responsive px-4 pb-4">
-                    <table class="data-table">
+                    <table class="modal-table-premium">
                         <thead>
                             <tr>
                                 <th>Identitas Siswa</th>
@@ -159,36 +159,38 @@
 </div>
 
 {{-- ============================================================
-     MODAL: PREVIEW PDF
+     MODAL: PREVIEW PDF PREMIUM (MATCHED WITH REKAP)
 ============================================================ --}}
-<div class="modal fade" id="previewPdfModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white py-3 px-4">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="modal-header-icon on-dark">
+<div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-pdf-viewer modal-dialog-centered">
+        <div class="modal-content">
+            <div class="pdf-viewer-header">
+                <div class="pdf-viewer-title">
+                    <div class="pdf-icon-wrapper">
                         <i class="fas fa-file-pdf"></i>
                     </div>
-                    <h5 class="modal-title fw-bold mb-0">Pratinjau Laporan</h5>
+                    <h5 class="modal-title mb-0">Preview Laporan</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0 bg-secondary bg-opacity-10" style="height: 80vh;">
-                <iframe id="pdfIframe" src="" width="100%" height="100%" frameborder="0"></iframe>
-            </div>
-            <div class="modal-footer bg-white py-3 px-4">
-                <div class="d-flex w-100 justify-content-between align-items-center">
-                    <p class="text-muted small mb-0 d-none d-md-block">
-                        <i class="fas fa-info-circle me-1"></i> Gunakan panel kontrol di atas untuk navigasi PDF.
-                    </p>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Tutup</button>
-                        <a id="downloadPdfBtn" href="#" class="btn btn-primary rounded-pill px-4 fw-bold">
-                            <i class="fas fa-download me-2"></i>Download PDF
+                
+                <div class="pdf-viewer-actions">
+                    <div class="pdf-desktop-actions">
+                        <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File" target="_blank">
+                            <i class="fas fa-download"></i> <span>Unduh Laporan</span>
                         </a>
-                        <button id="printPdfBtn" class="btn btn-dark rounded-pill px-4 fw-bold">
-                            <i class="fas fa-print me-2"></i>Cetak
-                        </button>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body pdf-viewer-body">
+                <div id="pdfCanvasContainer">
+                    <div id="pdfLoadingIndicator">
+                        <i class="fas fa-spinner fa-spin fa-3x"></i>
+                        <p class="mt-3">Sedang memuat dokumen...</p>
+                    </div>
+                    <div id="pdfErrorMsg" style="display:none; color: #fff; text-align: center;">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                        <h5>Gagal memuat file PDF</h5>
+                        <p>Maaf, terjadi kesalahan saat memuat dokumen. Anda tetap bisa langsung mengunduh file menggunakan tombol di atas.</p>
                     </div>
                 </div>
             </div>

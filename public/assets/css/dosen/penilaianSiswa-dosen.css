@@ -345,11 +345,11 @@ textarea.form-control {
     box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
 }
 
-.tab-content > .tab-pane {
+.tab-content>.tab-pane {
     display: none;
 }
 
-.tab-content > .tab-pane.active {
+.tab-content>.tab-pane.active {
     display: block;
 }
 
@@ -358,6 +358,7 @@ textarea.form-control {
     max-width: 380px;
     flex-shrink: 0;
 }
+
 @media (max-width: 767px) {
     .search-section {
         max-width: 100%;
@@ -414,20 +415,24 @@ textarea.form-control {
     align-items: center;
     margin-bottom: 1.5rem;
 }
+
 .kriteria-title {
     font-weight: 700;
     color: var(--primary-color);
     margin-bottom: 0.25rem;
     font-size: 1.25rem;
 }
+
 .kriteria-title i {
     color: var(--primary-color);
 }
+
 .kriteria-subtitle {
     font-size: 0.875rem;
     color: var(--text-muted);
     margin: 0;
 }
+
 .badge-type-1 {
     background-color: #e0f2fe;
     color: #0369a1;
@@ -437,6 +442,7 @@ textarea.form-control {
     display: inline-block;
     font-size: 0.85rem;
 }
+
 .badge-type-2 {
     background-color: #fef3c7;
     color: #b45309;
@@ -446,46 +452,56 @@ textarea.form-control {
     display: inline-block;
     font-size: 0.85rem;
 }
+
 .btn-table-action {
     border-radius: 8px;
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
 }
+
 .custom-modal-content {
     border: none;
     border-radius: 1rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
+
 .custom-modal-header {
     border-bottom: none;
     padding-bottom: 0;
     padding: 1.5rem 1.5rem 0 1.5rem;
 }
+
 .custom-modal-title {
     font-weight: 700;
     font-size: 1.25rem;
     color: var(--text-main);
 }
+
 .custom-modal-body {
     padding: 1.5rem;
 }
+
 .custom-form-label {
     font-weight: 700;
     margin-bottom: 0.5rem;
     display: block;
     color: var(--text-main);
 }
+
 .custom-form-group {
     margin-bottom: 1rem;
 }
+
 .custom-form-group-last {
     margin-bottom: 1.5rem;
 }
+
 .custom-modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
 }
+
 .btn-modal {
     border-radius: 9999px;
     padding: 0.5rem 1.5rem;
@@ -494,21 +510,26 @@ textarea.form-control {
     cursor: pointer;
     transition: all 0.2s;
 }
+
 .btn-modal-cancel {
     background-color: #f3f4f6;
     color: #374151;
 }
+
 .btn-modal-cancel:hover {
     background-color: #e5e7eb;
 }
+
 .col-urutan {
     text-align: center;
 }
+
 .table-aksi-flex {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
 }
+
 .margin-b-4 {
     margin-bottom: 1.5rem;
 }

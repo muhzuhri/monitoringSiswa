@@ -16,7 +16,7 @@
                     <div class="profile-header-gradient"></div>
                     <div class="profile-img-container">
                         <div class="profile-img-wrapper">
-                            <img src="{{ $user->foto_profil ? asset('storage/' . $user->foto_profil) : asset('assets/img/default-avatar.png') }}"
+                            <img src="{{ $user->foto_profil ? asset('storage/' . $user->foto_profil) : 'https://ui-avatars.com/api/?name=' . urlencode($user->nama) . '&background=4e73df&color=fff' }}"
                                 alt="Avatar" id="profile-preview">
                             <label for="foto_profil" class="btn-edit-photo" title="Ubah Foto">
                                 <i class="fas fa-camera"></i>
@@ -106,8 +106,8 @@
                                     enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
-                                    <input type="file" name="foto_profil" id="foto_profil" style="display:none"
-                                        accept="image/*" onchange="previewImage(event)">
+                                    <input type="file" name="foto_profil" id="foto_profil" class="hidden"
+                                        accept="image/*">
 
                                     <div class="form-grid">
                                         <div class="form-group">
@@ -215,7 +215,7 @@
                                             <div class="input-wrapper">
                                                 <span class="input-icon input-icon-muted"><i class="fas fa-clock"></i></span>
                                                 <input type="text" class="form-field form-field-readonly"
-                                                    value="{{ $user->tahunAjaran ? \Carbon\Carbon::parse($user->tahunAjaran->tgl_mulai)->format('d M Y') : '-' }}" readonly>
+                                                    value="{{ $user->tgl_mulai_magang ? \Carbon\Carbon::parse($user->tgl_mulai_magang)->format('d M Y') : '-' }}" readonly>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -223,7 +223,7 @@
                                             <div class="input-wrapper">
                                                 <span class="input-icon input-icon-muted"><i class="fas fa-calendar-check"></i></span>
                                                 <input type="text" class="form-field form-field-readonly"
-                                                    value="{{ $user->tahunAjaran ? \Carbon\Carbon::parse($user->tahunAjaran->tgl_selesai)->format('d M Y') : '-' }}" readonly>
+                                                    value="{{ $user->tgl_selesai_magang ? \Carbon\Carbon::parse($user->tgl_selesai_magang)->format('d M Y') : '-' }}" readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -326,7 +326,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-grid" style="margin-top: 1rem;">
+                                    <div class="form-grid mt-1">
                                         <div class="form-group">
                                             <label class="form-label">Password Baru</label>
                                             <div class="input-wrapper">
@@ -359,15 +359,8 @@
 
         </div>
     </div>
-
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function () {
-                const output = document.getElementById('profile-preview');
-                output.src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('assets/js/siswa/profil-siswa.js') }}"></script>
+@endpush

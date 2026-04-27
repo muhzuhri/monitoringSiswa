@@ -7,9 +7,13 @@ use App\Models\Guru;
 use App\Models\Pembimbing;
 use App\Models\Pimpinan;
 use App\Models\TahunAjaran;
+use App\Models\InformasiDashboard;
+use App\Models\ProgramStudi;
+use App\Models\Admin;
 use App\Contracts\HasRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class PimpinanController extends Controller
 {
@@ -33,7 +37,74 @@ class PimpinanController extends Controller
             'total_pembimbing' => Pembimbing::count(),
         ];
 
-        return view('pimpinan.home', compact('user', 'stats'));
+        $informasi = InformasiDashboard::getInstance();
+        $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan', 'asc')->get();
+
+        return view('pimpinan.home', compact('user', 'stats', 'informasi', 'programStudis'));
+    }
+
+    public function kelolaAdmin(Request $request)
+    {
+        $user = $this->authorizePimpinan();
+        $search = $request->input('search');
+        
+        $query = Admin::query();
+        if ($search) {
+            $query->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+        }
+        $admins = $query->orderBy('nama', 'asc')->paginate(10);
+        
+        return view('pimpinan.admin', compact('user', 'admins', 'search'));
+    }
+
+    public function storeAdmin(Request $request)
+    {
+        $this->authorizePimpinan();
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:admin,email',
+            'password' => 'required|min:6',
+        ]);
+
+        Admin::create([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'admin',
+        ]);
+
+        return back()->with('success', 'Akun admin berhasil ditambahkan.');
+    }
+
+    public function updateAdmin(Request $request, $id)
+    {
+        $this->authorizePimpinan();
+        $admin = Admin::findOrFail($id);
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:admin,email,' . $id . ',id_admin',
+            'password' => 'nullable|min:6',
+        ]);
+
+        $admin->nama = $request->nama;
+        $admin->email = $request->email;
+        if ($request->filled('password')) {
+            $admin->password = Hash::make($request->password);
+        }
+        $admin->save();
+
+        return back()->with('success', 'Data admin berhasil diperbarui.');
+    }
+
+    public function destroyAdmin($id)
+    {
+        $this->authorizePimpinan();
+        $admin = Admin::findOrFail($id);
+        $admin->delete();
+
+        return back()->with('success', 'Akun admin berhasil dihapus.');
     }
 
     public function siswa(Request $request)
@@ -68,7 +139,7 @@ class PimpinanController extends Controller
             });
         });
 
-        $siswa = $query->orderBy('nama')->paginate(100);
+        $siswa = $query->orderBy('nama', 'asc')->paginate(100);
 
         // Grouping logic for Siswa Aktif
         $groupedSiswas = $siswa->groupBy('nisn_ketua')->map(function ($group) {
@@ -117,7 +188,7 @@ class PimpinanController extends Controller
         });
 
         $periodeOptions = TahunAjaran::orderBy('tgl_mulai', 'desc')->get();
-        $lokasis = \App\Models\LokasiAbsensi::orderBy('nama_lokasi')->get();
+        $lokasis = \App\Models\LokasiAbsensi::orderBy('nama_lokasi', 'asc')->get();
 
         return view('pimpinan.siswa', compact(
             'user',
@@ -135,7 +206,7 @@ class PimpinanController extends Controller
     public function guru()
     {
         $user = $this->authorizePimpinan();
-        $guru = Guru::with('siswas')->orderBy('nama')->paginate(10);
+        $guru = Guru::with('siswas')->orderBy('nama', 'asc')->paginate(10);
 
         return view('pimpinan.guru', compact('user', 'guru'));
     }
@@ -143,7 +214,7 @@ class PimpinanController extends Controller
     public function pembimbing()
     {
         $user = $this->authorizePimpinan();
-        $pembimbing = Pembimbing::with('siswas')->orderBy('nama')->paginate(10);
+        $pembimbing = Pembimbing::with('siswas')->orderBy('nama', 'asc')->paginate(10);
 
         return view('pimpinan.pembimbing', compact('user', 'pembimbing'));
     }
@@ -206,5 +277,52 @@ class PimpinanController extends Controller
             'total_siswa'   => $queryTotal->count(),
             'total_guru'    => $queryGuru->count(),
         ]);
+    }
+
+    public function profil()
+    {
+        $user = $this->authorizePimpinan();
+        return view('pimpinan.profil', compact('user'));
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $user = $this->authorizePimpinan();
+        
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:pimpinan,email,' . $user->id_pimpinan . ',id_pimpinan',
+            'no_hp' => 'required|string|max:20',
+            'jabatan' => 'required|string|max:100',
+        ]);
+
+        \App\Models\Pimpinan::query()->where('id_pimpinan', $user->id_pimpinan)->update([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'no_hp' => $request->no_hp,
+            'jabatan' => $request->jabatan,
+        ]);
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = $this->authorizePimpinan();
+        
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini salah.']);
+        }
+
+        \App\Models\Pimpinan::query()->where('id_pimpinan', $user->id_pimpinan)->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password)
+        ]);
+
+        return back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
 }

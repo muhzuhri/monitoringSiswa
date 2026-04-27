@@ -80,55 +80,56 @@
                                 <input type="date" class="custom-input" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" max="{{ date('Y-m-d') }}" required>
                             </div>
 
-                            <!-- Fields for Absensi -->
-                            <div id="fields_absensi" class="nested-fields" @if(old('jenis') != 'absensi') style="display: none;" @endif>
-                                <div class="field-row">
-                                    <div class="field-half">
-                                        <label class="field-label">Jam Masuk</label>
-                                        <input type="time" class="custom-input" name="jam_masuk" value="{{ old('jam_masuk') }}">
-                                        <small class="field-hint">Kosongkan jika hanya lupa pulang</small>
-                                    </div>
-                                    <div class="field-half">
-                                        <label class="field-label">Jam Pulang</label>
-                                        <input type="time" class="custom-input" name="jam_pulang" value="{{ old('jam_pulang') }}">
-                                        <small class="field-hint">Kosongkan jika hanya lupa masuk</small>
-                                    </div>
-                                </div>
-                            </div>
+                             <!-- Fields for Absensi -->
+                             <div id="fields_absensi" class="nested-fields {{ old('jenis') != 'absensi' ? 'hidden' : '' }}">
+                                 <div class="field-row">
+                                     <div class="field-half">
+                                         <label class="field-label">Jam Masuk</label>
+                                         <input type="time" class="custom-input" name="jam_masuk" value="{{ old('jam_masuk') }}">
+                                         <small class="field-hint">Kosongkan jika hanya lupa pulang</small>
+                                     </div>
+                                     <div class="field-half">
+                                         <label class="field-label">Jam Pulang</label>
+                                         <input type="time" class="custom-input" name="jam_pulang" value="{{ old('jam_pulang') }}">
+                                         <small class="field-hint">Kosongkan jika hanya lupa masuk</small>
+                                     </div>
+                                 </div>
+                             </div>
+ 
+                             <!-- Fields for Kegiatan -->
+                             <div id="fields_kegiatan" class="nested-fields-kegiatan {{ old('jenis') != 'kegiatan' ? 'hidden' : '' }}">
+                                 <div class="form-field">
+                                     <label class="field-label">Deskripsi Kegiatan <span class="required-mark">*</span></label>
+                                     <textarea class="custom-textarea" name="deskripsi" rows="3" placeholder="Jelaskan secara singkat kegiatan yang Anda lakukan hari itu...">{{ old('deskripsi') }}</textarea>
+                                 </div>
+                             </div>
+ 
+                             <div class="form-field">
+                                 <label class="field-label">Alasan Keterlambatan Pengisian <span class="required-mark">*</span></label>
+                                 <textarea class="custom-textarea" name="alasan_terlambat" rows="2" required placeholder="Mengapa Anda baru mengisi sekarang?">{{ old('alasan_terlambat') }}</textarea>
+                             </div>
+ 
+                             <div class="form-field">
+                                 <label class="field-label">Foto / Bukti Lampiran <span class="hint-mark">(Opsional)</span></label>
+                                 <div class="custom-upload-area">
+                                     <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                     <p class="upload-text">Klik atau Drag file kesini</p>
+                                     <p class="upload-detail">Maksimal 2MB (JPG, PNG, PDF)</p>
+                                     <input type="file" class="hidden-file-input" name="bukti" accept=".jpg,.jpeg,.png,.pdf">
+                                 </div>
+                                 <div id="file-name-display" class="file-chosen-info hidden"></div>
+                             </div>
+ 
+                             <div class="form-actions">
+                                 <button type="submit" class="premium-submit-btn">
+                                     <i class="fas fa-paper-plane"></i>Kirim Pengajuan
+                                 </button>
+                             </div>
+                         </form>
+                     </div>
+                 </div>
+             </div>
 
-                            <!-- Fields for Kegiatan -->
-                            <div id="fields_kegiatan" class="nested-fields-kegiatan" @if(old('jenis') != 'kegiatan') style="display: none;" @endif>
-                                <div class="form-field">
-                                    <label class="field-label">Deskripsi Kegiatan <span class="required-mark">*</span></label>
-                                    <textarea class="custom-textarea" name="deskripsi" rows="3" placeholder="Jelaskan secara singkat kegiatan yang Anda lakukan hari itu...">{{ old('deskripsi') }}</textarea>
-                                </div>
-                            </div>
-
-                            <div class="form-field">
-                                <label class="field-label">Alasan Keterlambatan Pengisian <span class="required-mark">*</span></label>
-                                <textarea class="custom-textarea" name="alasan_terlambat" rows="2" required placeholder="Mengapa Anda baru mengisi sekarang?">{{ old('alasan_terlambat') }}</textarea>
-                            </div>
-
-                            <div class="form-field">
-                                <label class="field-label">Foto / Bukti Lampiran <span class="hint-mark">(Opsional)</span></label>
-                                <div class="custom-upload-area">
-                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                    <p class="upload-text">Klik atau Drag file kesini</p>
-                                    <p class="upload-detail">Maksimal 2MB (JPG, PNG, PDF)</p>
-                                    <input type="file" class="hidden-file-input" name="bukti" accept=".jpg,.jpeg,.png,.pdf" onchange="updateFileName(this)">
-                                </div>
-                                <div id="file-name-display" class="file-chosen-info" style="display:none;"></div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="premium-submit-btn">
-                                    <i class="fas fa-paper-plane"></i>Kirim Pengajuan
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
             <!-- Riwayat Pengajuan -->
             <div class="history-column">
@@ -230,63 +231,6 @@
 </div>
 
 @push('scripts')
-<script>
-    function updateFileName(input) {
-        const display = document.getElementById('file-name-display');
-        if (input.files && input.files[0]) {
-            display.style.display = 'block';
-            display.innerHTML = '<i class="fas fa-file-alt me-1"></i> Terpilih: ' + input.files[0].name;
-            input.parentElement.classList.add('border-primary', 'bg-primary', 'bg-opacity-10');
-            input.parentElement.classList.remove('bg-light', 'border-light');
-            
-            // Ubah icon
-            const icon = input.parentElement.querySelector('i');
-            icon.classList.remove('fa-cloud-upload-alt', 'text-muted');
-            icon.classList.add('fa-check-circle', 'text-primary');
-        } else {
-            display.style.display = 'none';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const jenisSelect = document.getElementById('jenis_pengajuan');
-        const fieldsAbsensi = document.getElementById('fields_absensi');
-        const fieldsKegiatan = document.getElementById('fields_kegiatan');
-        
-        // Remove 'required' from non-visible fields initially based on select value
-        function toggleRequired() {
-            if (jenisSelect.value === 'kegiatan') {
-                document.querySelector('textarea[name="deskripsi"]').setAttribute('required', 'required');
-            } else {
-                const desc = document.querySelector('textarea[name="deskripsi"]');
-                if(desc) desc.removeAttribute('required');
-            }
-        }
-        
-        toggleRequired();
-
-        jenisSelect.addEventListener('change', function() {
-            if (this.value === 'absensi') {
-                // Show/hide with tiny animation via css
-                fieldsAbsensi.style.opacity = '0';
-                fieldsAbsensi.style.display = 'block';
-                setTimeout(() => fieldsAbsensi.style.opacity = '1', 10);
-                
-                fieldsKegiatan.style.display = 'none';
-                
-            } else if (this.value === 'kegiatan') {
-                fieldsKegiatan.style.opacity = '0';
-                fieldsKegiatan.style.display = 'block';
-                setTimeout(() => fieldsKegiatan.style.opacity = '1', 10);
-                
-                fieldsAbsensi.style.display = 'none';
-            } else {
-                fieldsAbsensi.style.display = 'none';
-                fieldsKegiatan.style.display = 'none';
-            }
-            toggleRequired();
-        });
-    });
-</script>
+    <script src="{{ asset('assets/js/siswa/pengajuan-siswa.js') }}"></script>
 @endpush
 @endsection

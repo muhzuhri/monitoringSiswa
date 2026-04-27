@@ -8,6 +8,8 @@ use App\Models\Admin;
 use App\Models\Pembimbing;
 use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\InformasiDashboard;
+use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -226,7 +228,11 @@ class AuthController extends Controller
         $user = Auth::user();
         $role = $user instanceof HasRole ? $user->getRole() : null;
         abort_unless($user && $role === 'pembimbing', 403);
-        return view('pembimbing.pembimbing', ['user' => $user]);
+        
+        $informasi = InformasiDashboard::getInstance();
+        $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
+
+        return view('pembimbing.pembimbing', compact('user', 'informasi', 'programStudis'));
     }
 
     public function admin()
@@ -234,6 +240,56 @@ class AuthController extends Controller
         $user = Auth::user();
         $role = $user instanceof HasRole ? $user->getRole() : null;
         abort_unless($user && $role === 'admin', 403);
-        return view('admin.admin', ['user' => $user]);
+
+        $informasi = InformasiDashboard::getInstance();
+        $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
+
+        return view('admin.admin', compact('user', 'informasi', 'programStudis'));
+    }
+
+    public function adminProfil()
+    {
+        $user = Auth::user();
+        abort_unless($user && $user->getRole() === 'admin', 403);
+        return view('admin.profil', compact('user'));
+    }
+
+    public function updateAdminProfil(Request $request)
+    {
+        $user = Auth::user();
+        abort_unless($user && $user->getRole() === 'admin', 403);
+        
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:admin,email,' . $user->id_admin . ',id_admin',
+        ]);
+
+        \App\Models\Admin::query()->where('id_admin', $user->id_admin)->update([
+            'nama' => $request->nama,
+            'email' => $request->email,
+        ]);
+
+        return back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function updateAdminPassword(Request $request)
+    {
+        $user = Auth::user();
+        abort_unless($user && $user->getRole() === 'admin', 403);
+        
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini salah.']);
+        }
+
+        \App\Models\Admin::query()->where('id_admin', $user->id_admin)->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password)
+        ]);
+
+        return back()->with('success', 'Kata sandi berhasil diperbarui.');
     }
 }

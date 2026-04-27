@@ -80,6 +80,16 @@ class Siswa extends Authenticatable implements HasRole
         ];
     }
 
+    public function getTglMulaiMagangAttribute($value)
+    {
+        return $value ?? ($this->tahunAjaran->tgl_mulai ?? null);
+    }
+
+    public function getTglSelesaiMagangAttribute($value)
+    {
+        return $value ?? ($this->tahunAjaran->tgl_selesai ?? null);
+    }
+
     public function getStatusAttribute($value)
     {
         if ($this->tgl_selesai_magang && \Carbon\Carbon::now()->greaterThan($this->tgl_selesai_magang)) {

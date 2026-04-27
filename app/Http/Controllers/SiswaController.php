@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absensi;
+use App\Models\InformasiDashboard;
 use App\Models\LokasiAbsensi;
 use App\Models\LaporanAkhir;
 use App\Models\Logbook;
 use App\Models\PengajuanSiswa;
+use App\Models\ProgramStudi;
 use App\Models\Siswa;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -54,6 +56,10 @@ class SiswaController extends Controller
         $absensiHariIni = $user->absensis()->whereDate('tanggal', $todayString)->first();
         $logbookHariIni = $user->logbooks()->whereDate('tanggal', $todayString)->first();
 
+        // Informasi Dashboard
+        $informasi = InformasiDashboard::getInstance();
+        $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
+
         return view('siswa.siswa', compact(
             'user',
             'progress',
@@ -62,7 +68,9 @@ class SiswaController extends Controller
             'logbookVerified',
             'absensiHariIni',
             'logbookHariIni',
-            'totalHadir'
+            'totalHadir',
+            'informasi',
+            'programStudis'
         ));
     }
 
@@ -74,16 +82,17 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
         
-        // LIMIT: 7 days for attendance on main page
-        $absensis = $user->absensis()->orderBy('tanggal', 'desc')->limit(7)->get();
+        // LIMIT: 5 days for attendance on main page
+        $absensis = $user->absensis()->orderBy('tanggal', 'desc')->limit(5)->get();
         
-        // LIMIT: 3 entries for logbooks on main page
-        $logbooks = $user->logbooks()->orderBy('tanggal', 'desc')->limit(3)->get();
+        // LIMIT: 5 entries for logbooks on main page
+        $logbooks = $user->logbooks()->orderBy('tanggal', 'desc')->limit(5)->get();
 
         $today = Carbon::now()->toDateString();
         $absensiHariIni = $user->absensis()->whereDate('tanggal', $today)->first();
+        $logbookHariIni = $user->logbooks()->whereDate('tanggal', $today)->first();
 
-        return view('siswa.absensiKegiatan', compact('user', 'absensis', 'logbooks', 'absensiHariIni'));
+        return view('siswa.absensiKegiatan', compact('user', 'absensis', 'logbooks', 'absensiHariIni', 'logbookHariIni'));
     }
 
     /**
@@ -94,7 +103,7 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
         
-        $perPage = 10;
+        $perPage = 5;
         $page = $request->query('page', 1);
 
         $data = $user->absensis()
@@ -104,7 +113,8 @@ class SiswaController extends Controller
             ->get()
             ->map(function($item) {
                 return [
-                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('l, d F Y'),
+                    'day' => Carbon::parse($item->tanggal)->translatedFormat('l'),
+                    'date' => Carbon::parse($item->tanggal)->translatedFormat('d M Y'),
                     'jam_masuk' => $item->jam_masuk ? Carbon::parse($item->jam_masuk)->format('H:i') : '-',
                     'jam_pulang' => $item->jam_pulang ? Carbon::parse($item->jam_pulang)->format('H:i') : '-',
                     'status' => ucfirst($item->status),
@@ -139,7 +149,9 @@ class SiswaController extends Controller
             ->get()
             ->map(function($item) {
                 return [
-                    'tanggal' => Carbon::parse($item->tanggal)->translatedFormat('l, d F Y'),
+                    'day' => Carbon::parse($item->tanggal)->translatedFormat('l'),
+                    'date' => Carbon::parse($item->tanggal)->translatedFormat('d M Y'),
+                    'jam' => $item->created_at ? $item->created_at->format('H:i') : '-',
                     'kegiatan' => $item->kegiatan,
                     'status' => $item->status,
                     'catatan' => $item->catatan_pembimbing
@@ -343,11 +355,21 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
 
+        $todayString = Carbon::now()->toDateString();
+        
+        // Check if already filled today
+        $existing = $user->logbooks()->whereDate('tanggal', $todayString)->first();
+        if ($existing) {
+            return back()->with('error', 'Anda sudah mengisi kegiatan untuk hari ini.')->with('active_tab', 'logbook');
+        }
+
         $validated = $request->validate([
-            'tanggal' => ['required', 'date'],
+            'tanggal' => ['nullable', 'date'],
             'kegiatan' => ['required', 'string'],
             'foto' => ['nullable', 'image', 'max:2048'], // Max 2MB
         ]);
+
+        $tanggal = $validated['tanggal'] ?? $todayString;
 
         $fotoPath = null;
         if ($request->hasFile('foto')) {
@@ -355,13 +377,13 @@ class SiswaController extends Controller
         }
 
         $user->logbooks()->create([
-            'tanggal' => $validated['tanggal'],
+            'tanggal' => $tanggal,
             'kegiatan' => $validated['kegiatan'],
             'foto' => $fotoPath,
             'status' => 'pending',
         ]);
 
-        return back()->with('success', 'Logbook berhasil disimpan.');
+        return back()->with('success', 'Logbook berhasil disimpan.')->with('active_tab', 'logbook');
     }
 
     /**
@@ -400,11 +422,11 @@ class SiswaController extends Controller
 
         // Validasi khusus jenis
         if ($validated['jenis'] === 'absensi' && empty($validated['jam_masuk']) && empty($validated['jam_pulang'])) {
-            return back()->with('error', 'Untuk jenis absensi, minimal Jam Masuk atau Jam Pulang harus diisi.');
+            return back()->with('error', 'Untuk jenis absensi, minimal Jam Masuk atau Jam Pulang harus diisi.')->withInput();
         }
 
         if ($validated['jenis'] === 'kegiatan' && empty($validated['deskripsi'])) {
-            return back()->with('error', 'Untuk jenis kegiatan, Deskripsi Kegiatan wajib diisi.');
+            return back()->with('error', 'Untuk jenis kegiatan, Deskripsi Kegiatan wajib diisi.')->withInput();
         }
 
         $buktiPath = null;

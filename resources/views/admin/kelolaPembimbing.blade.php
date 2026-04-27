@@ -6,9 +6,29 @@
 @section('body')
     @push('styles')
         <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-dosen.css') }}">
+        <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-modals.css') }}">
     @endpush
 
     <div class="management-container">
+        
+        <!-- Global Navigation Tabs: Siswa, Guru, Pembimbing -->
+        <div class="tabs-wrapper border-0 bg-transparent mb-4">
+            <div class="tabs-nav d-flex w-100 gap-3">
+                <a href="{{ route('admin.kelolaSiswa') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaSiswa') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Siswa</span>
+                </a>
+                <a href="{{ route('admin.kelolaGuru') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaGuru') ? 'active' : '' }}">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+                <a href="{{ route('admin.kelolaPembimbing') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaPembimbing') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Pembimbing</span>
+                </a>
+            </div>
+        </div>
+
         <div class="admin-content-wrapper">
             <!-- Header -->
             <div class="management-header">

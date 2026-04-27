@@ -99,7 +99,7 @@
     <table>
         <thead>
             <tr>
-                <th width="30">No</th>
+                <th width="30">Noo</th>
                 <th width="80">NISN</th>
                 <th>Nama Lengkap</th>
                 <th>Asal Sekolah / Instansi</th>

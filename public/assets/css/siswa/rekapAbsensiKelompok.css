@@ -57,7 +57,8 @@ body {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto; /* Allow columns to size based on content */
+    table-layout: auto;
+    /* Allow columns to size based on content */
 }
 
 .data-table th,
@@ -76,7 +77,8 @@ body {
 
 .data-table td.name-cell {
     text-align: left;
-    white-space: nowrap; /* Prevent name from wrapping to next line */
+    white-space: nowrap;
+    /* Prevent name from wrapping to next line */
     padding: 4px 6px;
     font-size: 9px;
 }

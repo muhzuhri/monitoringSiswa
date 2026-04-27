@@ -1,15 +1,21 @@
-/* Custom Navbar Siswa - Final Fixed Version */
-
-/* Global Font */
-html, body {
-    margin: 0;
-    padding: 0;
+:root {
+    --primary: #0d6efd;
+    --primary-light: rgba(13, 110, 253, 0.08);
+    --bg-page: #ebebeb;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 body {
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    /* background: url('/images/unsri.jpg') center/cover no-repeat fixed; */
+    background-color: var(--bg-page) !important;
+    color: var(--text-main);
 }
 
 .container {

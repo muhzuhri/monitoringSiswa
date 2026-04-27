@@ -174,6 +174,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/periode', [AdminMasterDataController::class, 'storePeriode'])->name('admin.storePeriode');
     Route::put('/admin/periode/{id}', [AdminMasterDataController::class, 'updatePeriode'])->name('admin.updatePeriode');
     Route::delete('/admin/periode/{id}', [AdminMasterDataController::class, 'destroyPeriode'])->name('admin.destroyPeriode');
+
+    // Informasi Dashboard
+    Route::put('/admin/informasi', [AdminMasterDataController::class, 'updateInformasi'])->name('admin.updateInformasi');
+
+    // Program Studi
+    Route::post('/admin/prodi', [AdminMasterDataController::class, 'storeProdi'])->name('admin.storeProdi');
+    Route::put('/admin/prodi/{id}', [AdminMasterDataController::class, 'updateProdi'])->name('admin.updateProdi');
+    Route::delete('/admin/prodi/{id}', [AdminMasterDataController::class, 'destroyProdi'])->name('admin.destroyProdi');
+    
+    // Profil Admin
+    Route::get('/admin/profil', [AuthController::class, 'adminProfil'])->name('admin.profil');
+    Route::put('/admin/profil/update', [AuthController::class, 'updateAdminProfil'])->name('admin.profil.update');
+    Route::put('/admin/profil/password', [AuthController::class, 'updateAdminPassword'])->name('admin.profil.password');
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -181,9 +194,22 @@ Route::middleware('auth')->group(function () {
 // ─────────────────────────────────────────────────────────────────────────
 Route::middleware(['auth'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
     Route::get('/home', [PimpinanController::class, 'index'])->name('home');
+    
+    // Kelola Akun (Admin, Siswa, Guru, Pembimbing)
+    Route::get('/admin', [PimpinanController::class, 'kelolaAdmin'])->name('admin');
+    Route::post('/admin', [PimpinanController::class, 'storeAdmin'])->name('storeAdmin');
+    Route::put('/admin/{id}', [PimpinanController::class, 'updateAdmin'])->name('updateAdmin');
+    Route::delete('/admin/{id}', [PimpinanController::class, 'destroyAdmin'])->name('destroyAdmin');
+
     Route::get('/siswa', [PimpinanController::class, 'siswa'])->name('siswa');
     Route::get('/guru', [PimpinanController::class, 'guru'])->name('guru');
     Route::get('/pembimbing', [PimpinanController::class, 'pembimbing'])->name('pembimbing');
+    
     Route::get('/rekap', [PimpinanController::class, 'rekap'])->name('rekap');
     Route::get('/rekap/stats', [PimpinanController::class, 'rekapStats'])->name('rekap.stats');
+    
+    // Profil Pimpinan
+    Route::get('/profil', [PimpinanController::class, 'profil'])->name('profil');
+    Route::put('/profil/update', [PimpinanController::class, 'updateProfil'])->name('profil.update');
+    Route::put('/profil/password', [PimpinanController::class, 'updatePassword'])->name('profil.password');
 });

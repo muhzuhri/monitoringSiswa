@@ -5,19 +5,44 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-siswa.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-modals.css') }}">
 @endpush
 
 @section('body')
     <div class="management-container">
+        
+        <!-- Global Navigation Tabs: Siswa, Guru, Pembimbing -->
+        <div class="tabs-wrapper border-0 bg-transparent mb-4">
+            <div class="tabs-nav d-flex w-100 gap-3">
+                <a href="{{ route('admin.kelolaSiswa') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaSiswa') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Siswa</span>
+                </a>
+                <a href="{{ route('admin.kelolaGuru') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaGuru') ? 'active' : '' }}">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+                <a href="{{ route('admin.kelolaPembimbing') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('admin.kelolaPembimbing') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Pembimbing</span>
+                </a>
+            </div>
+        </div>
+
         <div class="admin-content-wrapper">
 
             {{-- ============================================================
                  HEADER
             ============================================================ --}}
             <div class="management-header">
-                <div class="header-title">
-                    <h5>Manajemen Siswa</h5>
-                    <p>Kelola data seluruh siswa magang dan riwayat mereka.</p>
+                <div class="header-title d-flex align-items-center gap-3">
+                    <div class="header-logo-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div>
+                        <h5>Manajemen Siswa</h5>
+                        <p>Kelola data seluruh siswa magang dan riwayat mereka.</p>
+                    </div>
                 </div>
                 <div class="header-actions">
                     <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="search-form" id="searchForm">
@@ -32,11 +57,7 @@
                                 onchange="this.form.submit()"
                             >
                         </div>
-                    </form>
-                    <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
-                        <i class="fas fa-plus"></i>
-                        <span>Tambah Siswa</span>
-                    </button>
+                    </form>                    
                 </div>
             </div>
 
@@ -83,6 +104,12 @@
 
                 {{-- ==================== TAB: SISWA AKTIF ==================== --}}
                 <div class="tab-pane fade show active" id="pane-siswa" role="tabpanel">
+                    <div class="d-flex justify-content-end mb-3">
+                        <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+                            <i class="fas fa-plus"></i>
+                            <span>Tambah Siswa</span>
+                        </button>
+                    </div>
 
                     {{-- Toolbar --}}
                     <div class="tab-toolbar">
@@ -128,35 +155,18 @@
                                                 title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button class="action-round btn-edit"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditSiswa"
-                                                data-id="{{ $g['leader']->nisn }}"
-                                                data-nama="{{ $g['leader']->nama }}"
-                                                data-email="{{ $g['leader']->email }}"
-                                                data-kelas="{{ $g['leader']->kelas }}"
-                                                data-jurusan="{{ $g['leader']->jurusan }}"
-                                                data-sekolah="{{ $g['leader']->sekolah }}"
-                                                data-perusahaan="{{ $g['leader']->perusahaan }}"
-                                                data-guru-nip="{{ $g['leader']->id_guru }}"
-                                                data-pl-nip="{{ $g['leader']->id_pembimbing }}"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="action-round btn-delete-trigger"
-                                                data-bs-toggle="modal" data-bs-target="#modalHapus"
-                                                data-url="{{ route('admin.destroySiswa', $g['leader']->nisn) }}"
-                                                title="Hapus">
-                                                <i class="fas fa-trash text-danger"></i>
-                                            </button>
+                                            
                                         </div>
 
                                         {{-- Identity --}}
                                         <div class="card-identity">
                                             <div class="card-avatar">
                                                 @if($g['is_group'])
-                                                    <i class="fas fa-users"></i>
+                                                    <div class="avatar-group-icon">
+                                                        <i class="fas fa-user-friends"></i>
+                                                    </div>
                                                 @else
-                                                    {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
+                                                    <span>{{ strtoupper(substr($g['leader']->nama, 0, 1)) }}</span>
                                                 @endif
                                             </div>
                                             <div class="card-identity-info">
@@ -168,19 +178,17 @@
                                             </div>
                                         </div>
 
-                                        {{-- Info List --}}
                                         <div class="card-info-list">
                                             <div class="card-info-row">
                                                 <span class="card-info-label">Sekolah</span>
-                                                <span class="card-info-value">{{ $g['leader']->sekolah }}</span>
+                                                <span class="card-info-value">{{ Str::limit($g['leader']->sekolah, 22) }}</span>
                                             </div>
                                             <div class="card-info-row">
                                                 <span class="card-info-label">Penempatan</span>
-                                                <span class="card-info-value">{{ $g['leader']->perusahaan ?? 'Belum ada' }}</span>
+                                                <span class="card-info-value">{{ Str::limit($g['leader']->perusahaan ?? 'Belum ada', 22) }}</span>
                                             </div>
                                         </div>
 
-                                        {{-- Footer --}}
                                         <div class="card-footer-bar">
                                             @if($g['leader']->absen_hari_ini)
                                                 <span class="status-label hadir">
@@ -193,8 +201,19 @@
                                             @endif
                                             <span class="card-guru-info">
                                                 <i class="fas fa-chalkboard-teacher me-1"></i>
-                                                {{ Str::limit($g['leader']->guru->nama ?? '-', 18) }}
+                                                {{ Str::limit($g['leader']->guru->nama ?? '-', 15) }}
                                             </span>
+                                        </div>
+
+                                        <div class="action-grid">
+                                            @if($g['is_group'])
+                                                <button class="btn-action btn-show-members" 
+                                                        data-name="{{ $g['leader']->nama }}"
+                                                        data-members="{{ $g['members']->toJson() }}"
+                                                        data-show-actions="false">
+                                                    <i class="fas fa-users-viewfinder"></i> Anggota
+                                                </button>
+                                            @endif
                                         </div>
 
                                     </div>
@@ -360,13 +379,13 @@
                                                 </h6>
                                                 <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
                                                 <div class="mt-1">
-                                                    <span class="badge-status hadir" style="background: var(--p-bg-primary-light); color: var(--p-primary); font-size: 0.65rem; padding: 2px 10px;">
-                                                        <i class="fas fa-flag-checkered me-1"></i> SELESAI
+                                                    <span class="badge-completed">
+                                                        <i class="fas fa-flag-checkered"></i> SELESAI
                                                     </span>
                                                 </div>
                                             </div>
                                             <div class="status-wrapper">
-                                                <span class="status-badge status-hadir" style="background: rgba(100, 116, 139, 0.1); color: #64748b;">
+                                                <span class="badge-archive">
                                                     <i class="fas fa-archive"></i> Arsip
                                                 </span>
                                             </div>
@@ -389,7 +408,8 @@
                                             @if($g['is_group'])
                                                 <button class="btn-action btn-detail-group btn-show-members" 
                                                         data-name="{{ $g['leader']->nama }}"
-                                                        data-members="{{ $g['members']->toJson() }}">
+                                                        data-members="{{ $g['members']->toJson() }}"
+                                                        data-show-actions="true">
                                                     <i class="fas fa-users-viewfinder"></i> Anggota Kelompok
                                                 </button>
                                             @else
@@ -406,11 +426,10 @@
                                                     data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}">
                                                     <i class="fas fa-user-circle"></i> Detail Profil
                                                 </button>
-                                            @endif
-                                            
-                                            <button class="btn-action btn-absensi-group btn-preview-pdf" 
+                                            @endif                                                                                        
+                                            <button class="btn-action btn-detail-group btn-preview-pdf" 
                                                     data-url="{{ route('admin.rekap.kelompok', $g['leader']->nisn) }}">
-                                                <i class="fas fa-file-signature"></i> Rekap Absensi Kelompok
+                                                <i class="fas fa-users"></i> Rekap Kelompok bulanan
                                             </button>
                                         </div>
                                     </div>
@@ -469,9 +488,9 @@
                                                     </button>
                                                     <button class="btn-history-action btn-kegiatan btn-preview-pdf"
                                                         data-url="{{ route('admin.rekap.jurnal', $rs->nisn) }}"
-                                                        title="Lihat Rekap Kegiatan">
+                                                        title="Lihat Rekap Jurnal">
                                                         <i class="fas fa-book"></i>
-                                                    </button>
+                                                    </button>                                
                                                     <button class="btn-history-action btn-detail-h btn-detail"
                                                         data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
                                                         data-nisn="{{ $rs->nisn }}" data-nama="{{ $rs->nama }}"
@@ -592,33 +611,41 @@
     </div>{{-- /management-container --}}
 
     {{-- ============================================================
-         MODAL: PREVIEW PDF
+         MODAL: PREVIEW PDF (Premium Style)
     ============================================================ --}}
-    <div class="modal fade" id="previewPdfModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered" style="height: 90vh;">
-            <div class="modal-content h-100">
-                <div class="pdf-modal-header">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="pdf-modal-icon-wrap">
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-pdf-viewer modal-dialog-centered">
+            <div class="modal-content">
+                <div class="pdf-viewer-header">
+                    <div class="pdf-viewer-title">
+                        <div class="pdf-icon-wrapper">
                             <i class="fas fa-file-pdf"></i>
                         </div>
-                        <div>
-                            <p class="pdf-modal-title">Pratinjau Dokumen</p>
-                            <p class="pdf-modal-subtitle">Gunakan tombol di atas untuk cetak atau unduh.</p>
-                        </div>
+                        <h6 class="modal-title">Preview Laporan</h6>
                     </div>
-                    <div class="pdf-modal-actions">
-                        <button type="button" id="printPdfBtn" class="btn-pdf-print">
-                            <i class="fas fa-print"></i> Cetak
-                        </button>
-                        <a id="downloadPdfBtn" href="#" class="btn-pdf-download" target="_blank">
-                            <i class="fas fa-download"></i> Unduh
-                        </a>
-                        <button type="button" class="btn-close ms-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                    
+                    <div class="pdf-viewer-actions">
+                        <div class="pdf-desktop-actions">                           
+                            <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File" target="_blank">
+                                <i class="fas fa-download"></i> <span>Unduh Laporan</span>
+                            </a>
+                        </div>
+                        
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="pdf-modal-body flex-grow-1">
-                    <iframe id="pdfIframe" src="" width="100%" height="100%" frameborder="0"></iframe>
+                <div class="pdf-viewer-body">
+                    <div id="pdfCanvasContainer">
+                        <div id="pdfLoadingIndicator">
+                            <div class="loader-logo-container">
+                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
+                            </div>
+                        </div>
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -680,28 +707,32 @@
             });
 
             // ── Detail Modal ───────────────────────────────────────────────
-            document.querySelectorAll('.btn-detail').forEach(button => {
-                button.addEventListener('click', function () {
-                    document.getElementById('det_name').textContent         = this.dataset.nama;
-                    document.getElementById('det_nisn').textContent         = this.dataset.nisn;
-                    document.getElementById('det_email').textContent        = this.dataset.email;
-                    document.getElementById('det_hp').textContent           = this.dataset.no_hp || '-';
-                    document.getElementById('det_kelas_jurusan').textContent = `${this.dataset.kelas} - ${this.dataset.jurusan}`;
-                    document.getElementById('det_sekolah').textContent      = this.dataset.sekolah;
-                    document.getElementById('det_perusahaan').textContent   = this.dataset.perusahaan || 'Belum ditugaskan';
+            function initDetailModalListeners() {
+                document.querySelectorAll('.btn-detail').forEach(button => {
+                    button.onclick = null;
+                    button.addEventListener('click', function () {
+                        document.getElementById('det_name').textContent         = this.dataset.nama;
+                        document.getElementById('det_nisn').textContent         = this.dataset.nisn;
+                        document.getElementById('det_email').textContent        = this.dataset.email;
+                        document.getElementById('det_hp').textContent           = this.dataset.no_hp || '-';
+                        document.getElementById('det_kelas_jurusan').textContent = `${this.dataset.kelas} - ${this.dataset.jurusan}`;
+                        document.getElementById('det_sekolah').textContent      = this.dataset.sekolah;
+                        document.getElementById('det_perusahaan').textContent   = this.dataset.perusahaan || 'Belum ditugaskan';
 
-                    const mulai   = this.dataset.mulai;
-                    const selesai = this.dataset.selesai;
-                    document.getElementById('det_periode').textContent = (mulai && selesai && mulai !== '-')
-                        ? `${mulai} s/d ${selesai}` : 'Belum ditentukan';
+                        const mulai   = this.dataset.mulai;
+                        const selesai = this.dataset.selesai;
+                        document.getElementById('det_periode').textContent = (mulai && selesai && mulai !== '-')
+                            ? `${mulai} s/d ${selesai}` : 'Belum ditentukan';
 
-                    document.getElementById('det_guru_nama').textContent = this.dataset.guruNama;
-                    document.getElementById('det_guru_nip').textContent  = this.dataset.guruNip;
-                    document.getElementById('det_pl_nama').textContent   = this.dataset.plNama;
-                    document.getElementById('det_pl_nip').textContent    = this.dataset.plNip;
-                    document.getElementById('det_pl_hp').textContent     = this.dataset.plHp;
+                        document.getElementById('det_guru_nama').textContent = this.dataset.guruNama || '-';
+                        document.getElementById('det_guru_nip').textContent  = this.dataset.guruNip || '-';
+                        document.getElementById('det_pl_nama').textContent   = this.dataset.plNama || '-';
+                        document.getElementById('det_pl_nip').textContent    = this.dataset.plNip || '-';
+                        document.getElementById('det_pl_hp').textContent     = this.dataset.plHp || '-';
+                    });
                 });
-            });
+            }
+            initDetailModalListeners();
 
             // ── Delete Modal ───────────────────────────────────────────────
             const deleteForm = document.getElementById('formHapus');
@@ -710,6 +741,8 @@
                     deleteForm.action = this.dataset.url;
                 });
             });
+
+
 
             // ── Lokasi Modal Handlers ──────────────────────────────────────
             const editLocForm = document.getElementById('formEditLokasi');
@@ -741,9 +774,15 @@
                 button.addEventListener('click', function() {
                     const name = this.dataset.name;
                     const members = JSON.parse(this.dataset.members);
+                    const showActions = this.dataset.showActions === 'true';
                     
                     modalNameEl.innerText = name;
                     modalBodyEl.innerHTML = '';
+
+                    // Adjust table head actions column visibility (Always show now)
+                    const tableHead = groupModalEl.querySelector('thead tr');
+                    const actionsTh = tableHead.querySelector('th:last-child');
+                    actionsTh.classList.remove('d-none');
                     
                     // Route patterns
                     const logDownloadBase = "{{ route('admin.rekap.jurnal', ['nisn' => ':nisn']) }}";
@@ -752,10 +791,15 @@
                     members.forEach((member) => {
                         const logDownload = logDownloadBase.replace(':nisn', member.nisn);
                         const absDownload = absDownloadBase.replace(':nisn', member.nisn);
+                        const kelDownload = "{{ route('admin.rekap.kelompok', ['nisn' => '__NISN__']) }}".replace('__NISN__', member.nisn);
                         
-                        const statusBadge = `
+                        const statusBadge = showActions ? `
                             <span class="badge bg-secondary-light text-muted px-2 py-1 small rounded-pill" style="font-size: 0.65rem;">
                                 <i class="fas fa-flag-checkered me-1"></i> SELESAI
+                            </span>
+                        ` : `
+                            <span class="badge bg-success-light text-success px-2 py-1 small rounded-pill" style="font-size: 0.65rem;">
+                                <i class="fas fa-check-circle me-1"></i> AKTIF
                             </span>
                         `;
 
@@ -770,14 +814,33 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}" 
-                                            style="background: #f0f9ff; color: #0369a1; padding: 6px 10px; border-radius: 8px; border: 1px solid #bae6fd;">
-                                            <i class="fas fa-book"></i>
+                                        <button class="btn-small btn-detail" title="Lihat Informasi Akun" 
+                                            data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                            data-nisn="${member.nisn}" data-nama="${member.nama}" data-email="${member.email}"
+                                            data-no_hp="${member.no_hp || ''}" data-kelas="${member.kelas}" data-jurusan="${member.jurusan}"
+                                            data-sekolah="${member.sekolah}" data-perusahaan="${member.perusahaan || ''}"
+                                            data-mulai="${member.tgl_mulai_magang || ''}" data-selesai="${member.tgl_selesai_magang || ''}"
+                                            data-guru-nama="${member.guru ? member.guru.nama : '-'}" data-guru-nip="${member.id_guru || '-'}"
+                                            data-pl-nama="${member.pembimbing ? member.pembimbing.nama : '-'}" data-pl-nip="${member.id_pembimbing || '-'}"
+                                            data-pl-hp="${member.pembimbing ? member.pembimbing.no_telp : '-'}"
+                                            style="background: #eef2ff; color: #4f46e5; padding: 8px 12px; border-radius: 10px; border: 1px solid #e0e7ff; transition: all 0.3s ease;">
+                                            <i class="fas fa-user-circle"></i>
                                         </button>
-                                        <button class="btn-small btn-preview-pdf" title="Cetak Absensi" data-url="${absDownload}" 
-                                            style="background: #f0fdf4; color: #15803d; padding: 6px 10px; border-radius: 8px; border: 1px solid #bbf7d0;">
-                                            <i class="fas fa-file-signature"></i>
-                                        </button>
+
+                                        ${showActions ? `
+                                            <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}" 
+                                                style="background: #f0f9ff; color: #0369a1; padding: 8px 12px; border-radius: 10px; border: 1px solid #bae6fd; transition: all 0.3s ease;">
+                                                <i class="fas fa-book"></i>
+                                            </button>
+                                            <button class="btn-small btn-preview-pdf" title="Cetak Absensi" data-url="${absDownload}" 
+                                                style="background: #f0fdf4; color: #15803d; padding: 8px 12px; border-radius: 10px; border: 1px solid #bbf7d0; transition: all 0.3s ease;">
+                                                <i class="fas fa-calendar-check"></i>
+                                            </button>
+                                            <button class="btn-small btn-preview-pdf" title="Cetak Rekap Kelompok" data-url="${kelDownload}" 
+                                                style="background: #fff7ed; color: #9a3412; padding: 8px 12px; border-radius: 10px; border: 1px solid #ffedd5; transition: all 0.3s ease;">
+                                                <i class="fas fa-users"></i>
+                                            </button>
+                                        ` : ''}
                                     </div>
                                 </td>
                             </tr>
@@ -785,30 +848,68 @@
                         modalBodyEl.innerHTML += row;
                     });
                     
-                    // Re-init PDF preview listeners for the new buttons in the modal
+                    // Re-init listeners for buttons
                     initPdfPreviewListeners();
+                    initDetailModalListeners();
                     
                     if (groupModal) groupModal.show();
                 });
             });
 
-            // ── PDF Preview ────────────────────────────────────────────────
-            const pdfModalEl   = document.getElementById('previewPdfModal');
-            const pdfModal     = pdfModalEl ? new bootstrap.Modal(pdfModalEl) : null;
-            const pdfIframe    = document.getElementById('pdfIframe');
-            const downloadBtn  = document.getElementById('downloadPdfBtn');
-            const printBtn     = document.getElementById('printPdfBtn');
+            // ── PDF Preview (PDF.js renderer — no browser toolbar) ────────
+            const pdfModalEl  = document.getElementById('previewPdfModal');
+            const pdfModal    = pdfModalEl ? new bootstrap.Modal(pdfModalEl) : null;
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            const printBtn    = document.getElementById('printPdfBtn');
+
+            let currentPdfUrl = null;
+
+            async function renderPDF(url) {
+                const container  = document.getElementById('pdfCanvasContainer');
+                const loadingEl  = document.getElementById('pdfLoadingIndicator');
+                const errorEl    = document.getElementById('pdfErrorMsg');
+
+                container.querySelectorAll('canvas').forEach(c => c.remove());
+                loadingEl.style.display = 'flex';
+                errorEl.classList.add('d-none');
+                container.scrollTop = 0;
+
+                try {
+                    const pdfDoc = await pdfjsLib.getDocument(url).promise;
+                    loadingEl.style.display = 'none';
+                    const containerWidth = container.clientWidth - 40;
+                    const outputScale   = window.devicePixelRatio || 1;
+
+                    for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                        const page     = await pdfDoc.getPage(pageNum);
+                        const baseScale = containerWidth / page.getViewport({ scale: 1 }).width;
+                        const viewport  = page.getViewport({ scale: baseScale * outputScale });
+                        const canvas    = document.createElement('canvas');
+                        const ctx       = canvas.getContext('2d');
+                        canvas.width    = viewport.width;
+                        canvas.height   = viewport.height;
+                        canvas.style.width  = (viewport.width  / outputScale) + 'px';
+                        canvas.style.height = (viewport.height / outputScale) + 'px';
+                        container.appendChild(canvas);
+                        await page.render({ canvasContext: ctx, viewport }).promise;
+                    }
+                } catch (err) {
+                    loadingEl.style.display = 'none';
+                    errorEl.classList.remove('d-none');
+                    console.error('PDF.js error:', err);
+                }
+            }
 
             function initPdfPreviewListeners() {
                 document.querySelectorAll('.btn-preview-pdf').forEach(button => {
-                    // Remove existing to avoid double listeners if re-calling init
-                    button.onclick = null; 
+                    button.onclick = null;
                     button.addEventListener('click', function () {
                         const url = this.dataset.url;
                         if (!url) return;
-                        pdfIframe.src          = url.includes('#') ? url : url + '#view=Fit';
-                        downloadBtn.href       = url + (url.includes('?') ? '&' : '?') + 'download=1';
+                        currentPdfUrl     = url;
+                        downloadBtn.href  = url + (url.includes('?') ? '&' : '?') + 'download=1';
                         if (pdfModal) pdfModal.show();
+                        renderPDF(url);
                     });
                 });
             }
@@ -816,12 +917,16 @@
             initPdfPreviewListeners();
 
             if (pdfModalEl) {
+                // Cetak: buka tab baru lalu print
                 printBtn.addEventListener('click', () => {
-                    pdfIframe.contentWindow.focus();
-                    pdfIframe.contentWindow.print();
+                    if (!currentPdfUrl) return;
+                    const win = window.open(currentPdfUrl, '_blank');
+                    win.addEventListener('load', () => win.print(), { once: true });
                 });
+                // Bersihkan canvas saat modal ditutup
                 pdfModalEl.addEventListener('hidden.bs.modal', () => {
-                    pdfIframe.src = '';
+                    document.getElementById('pdfCanvasContainer').querySelectorAll('canvas').forEach(c => c.remove());
+                    currentPdfUrl = null;
                 });
             }
 
@@ -840,5 +945,11 @@
                 });
             });
         });
+    </script>
+
+    {{-- PDF.js library --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
 @endsection

@@ -40,16 +40,13 @@
                         <a class="nav-link {{ Route::is('pimpinan.home') ? 'active' : '' }}" href="{{ route('pimpinan.home') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ Route::is('pimpinan.siswa') ? 'active' : '' }}" href="{{ route('pimpinan.siswa') }}">Siswa</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('pimpinan.guru') ? 'active' : '' }}" href="{{ route('pimpinan.guru') }}">Guru</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ Route::is('pimpinan.pembimbing') ? 'active' : '' }}" href="{{ route('pimpinan.pembimbing') }}">Pembimbing</a>
+                        <a class="nav-link {{ Route::is('pimpinan.siswa') || Route::is('pimpinan.guru') || Route::is('pimpinan.pembimbing') || Route::is('pimpinan.admin') ? 'active' : '' }}" href="{{ route('pimpinan.admin') }}">Kelola Akun</a>
                     </li>                    
                     <li class="nav-item">
                         <a class="nav-link {{ Route::is('pimpinan.rekap') ? 'active' : '' }}" href="{{ route('pimpinan.rekap') }}">Rekap</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Route::is('pimpinan.profil') ? 'active' : '' }}" href="{{ route('pimpinan.profil') }}">Profil</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-3">

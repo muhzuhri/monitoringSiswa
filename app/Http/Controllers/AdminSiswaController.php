@@ -25,6 +25,13 @@ class AdminSiswaController extends Controller
         return $user;
     }
 
+    protected function authorizeReportViewer(): void
+    {
+        $user = Auth::user();
+        $role = $user instanceof HasRole ? $user->getRole() : null;
+        abort_unless($user && in_array($role, ['admin', 'pimpinan']), 403);
+    }
+
     public function kelolaSiswa(Request $request)
     {
         $admin = $this->authorizeAdmin();
@@ -162,7 +169,7 @@ class AdminSiswaController extends Controller
      */
     public function downloadJurnalMingguan(Request $request, $nisn)
     {
-        $this->authorizeAdmin();
+        $this->authorizeReportViewer();
         $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
 
         $logbooks = $siswa->logbooks()->orderBy('tanggal', 'asc')->get();
@@ -185,7 +192,7 @@ class AdminSiswaController extends Controller
      */
     public function downloadRekapAbsensiIndividu(Request $request, $nisn)
     {
-        $this->authorizeAdmin();
+        $this->authorizeReportViewer();
         $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
 
         $absensis = $siswa->absensis()->orderBy('tanggal', 'asc')->get();
@@ -207,7 +214,7 @@ class AdminSiswaController extends Controller
      */
     public function downloadRekapAbsensiKelompok(Request $request, $nisnKetua)
     {
-        $this->authorizeAdmin();
+        $this->authorizeReportViewer();
         
         // Find leader
         $leader = Siswa::where('nisn', $nisnKetua)->firstOrFail();

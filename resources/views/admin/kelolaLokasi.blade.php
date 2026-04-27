@@ -4,63 +4,8 @@
 @section('body-class', 'dashboard-page admin-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-siswa.css') }}">
-    <style>
-        .location-card {
-            background: #fff;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            height: 100%;
-            border: 1px solid rgba(0,0,0,0.05);
-            position: relative;
-            overflow: hidden;
-        }
-        .location-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        .location-icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        .location-status {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        .coord-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #666;
-        }
-        .coord-item i {
-            width: 20px;
-            color: #0d6efd;
-        }
-        .radius-badge {
-            background: #f8f9fa;
-            border: 1px solid #eee;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-lokasi.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-modals.css') }}">
 @endpush
 
 @section('body')

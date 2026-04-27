@@ -8,6 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
+@push('scripts')
+    <script src="{{ asset('assets/js/siswa/absensiKegiatan-siswa.js') }}"></script>
+@endpush
+
 @section('body')
     <div class="page-wrapper">
         <div class="page-header">
@@ -27,21 +31,37 @@
         </div>
 
 
+        <!-- Notifications (Moved to Global Area) -->
+        <div class="notifications-area">
+            @if (session('success'))
+                <div class="ui-alert ui-alert-success mb-4 p-3 rounded-3 bg-success bg-opacity-10 text-success border border-success border-opacity-20 d-flex align-items-center gap-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="ui-alert ui-alert-danger mb-4 p-3 rounded-3 bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 d-flex align-items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+        </div>
+
         <!-- Custom Tabs -->
         <div class="tabs-wrapper">
             <div class="tabs-nav" role="tablist">
-                <button class="tab-button active" id="tab-absensi" data-bs-toggle="pill" data-bs-target="#pills-absensi"
-                    type="button" role="tab" aria-selected="true">
-
-                    <i class="fas fa-clock"></i>
-                    <span>Absensi Harian</span>
+                <button class="tab-button {{ session('active_tab') == 'logbook' ? '' : 'active' }}" id="tab-absensi"
+                    data-bs-toggle="pill" data-bs-target="#pills-absensi" type="button" role="tab"
+                    aria-selected="{{ session('active_tab') == 'logbook' ? 'false' : 'true' }}">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Absensi</span>
                 </button>
 
-                <button class="tab-button" id="tab-logbook" data-bs-toggle="pill" data-bs-target="#pills-logbook"
-                    type="button" role="tab" aria-selected="false">
-
-                    <i class="fas fa-book-open"></i>
-                    <span>Logbook / Jurnal</span>
+                <button class="tab-button {{ session('active_tab') == 'logbook' ? 'active' : '' }}" id="tab-logbook"
+                    data-bs-toggle="pill" data-bs-target="#pills-logbook" type="button" role="tab"
+                    aria-selected="{{ session('active_tab') == 'logbook' ? 'true' : 'false' }}">
+                    <i class="fas fa-edit"></i>
+                    <span>Logbook</span>
                 </button>
             </div>
         </div>
@@ -49,34 +69,23 @@
         <div class="tab-content" id="pills-tabContent">
 
             <!-- TAB ABSENSI -->
-            <div class="tab-pane fade show active" id="pills-absensi" role="tabpanel">
+            <div class="tab-pane fade {{ session('active_tab') == 'logbook' ? '' : 'show active' }}" id="pills-absensi"
+                role="tabpanel">
                 <div class="content-grid">
                     <!-- Left: Action Card -->
                     <div class="action-section">
-                        <div class="ui-card action-card">
-                            @if (session('success'))
-                                <div class="ui-alert ui-alert-success">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>{{ session('success') }}</span>
-                                </div>
-                            @endif
-                            @if (session('error'))
-                                <div class="ui-alert ui-alert-danger">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <span>{{ session('error') }}</span>
-                                </div>
-                            @endif
+                        <div class="ui-card">
 
                             <div class="clock-section">
-                                <h5 class="clock-label">Waktu Saat Ini</h5>
-                                <h1 class="real-time-clock" id="realtimeClock">--:--:--</h1>
+                                <span class="clock-label">Waktu Saat Ini</span>
+                                <h1 class="real-time-clock" id="realtimeClock">--:--</h1>
                                 <div class="location-badge">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Lokasi: {{ $user->perusahaan }}</span>
+                                    <i class="fas fa-map-marker-alt fa-lg"></i>
+                                    <span>{{ $user->perusahaan }}</span>
                                 </div>
                             </div>
 
-                            <div class="action-forms">
+                            <div class="action-forms mt-4">
                                 @if (!$absensiHariIni)
                                     <!-- Check In Form -->
                                     <form id="formAbsensiMasuk" enctype="multipart/form-data">
@@ -84,7 +93,7 @@
                                         <input type="hidden" name="type" value="masuk">
                                         <div class="form-group">
                                             <label class="form-label-custom">
-                                                <i class="fas fa-info-circle"></i> Status Kehadiran
+                                                Status Kehadiran
                                             </label>
                                             <select name="status_pilihan" class="form-control-custom" required
                                                 onchange="togglePhotoLabel(this.value)">
@@ -96,35 +105,23 @@
 
                                         <div class="form-group">
                                             <label class="form-label-custom">
-                                                <i class="fas fa-camera"></i> <span id="photoLabel">Foto Selfie / Bukti</span>
+                                                <span id="photoLabel">Foto Selfie di Lokasi</span>
                                             </label>
-                                            
-                                                <input type="file" name="foto" class="form-control-custom" required
-                                                    accept="image/*" capture="camera">
-                                                <div class="form-help-text" id="photoHelp">Ambil foto Anda di lokasi magang atau upload surat keterangan.</div>
-                                        </div>
 
-                                        <script>
-                                            function togglePhotoLabel(val) {
-                                                const label = document.getElementById('photoLabel');
-                                                const help = document.getElementById('photoHelp');
-                                                if (val === 'hadir') {
-                                                    label.innerText = 'Foto Selfie di Lokasi';
-                                                    help.innerText = 'Ambil foto Anda di lokasi magang.';
-                                                } else {
-                                                    label.innerText = 'Foto Surat / Bukti Pendukung';
-                                                    help.innerText = 'Unggah foto surat izin atau surat keterangan sakit.';
-                                                }
-                                            }
-                                        </script>
+                                            <input type="file" name="foto" class="form-control-custom" required
+                                                accept="image/*" capture="camera">
+                                            <small class="text-muted mt-2 d-block" id="photoHelp">
+                                                <i class="fas fa-info-circle me-1"></i> Ambil foto sesuai status kehadiran.
+                                            </small>
+                                        </div>
 
                                         <button class="btn-action-main btn-checkin" type="submit">
                                             <div class="icon-box-white">
-                                                <i class="fas fa-sign-in-alt"></i>
+                                                <i class="fas fa-fingerprint"></i>
                                             </div>
                                             <div class="btn-text-content">
-                                                <span class="btn-title">CHECK-IN (MASUK)</span>
-                                                <span class="btn-subtitle">Batas: 07:00 - 10:00</span>
+                                                <span class="btn-title">ABSEN MASUK</span>
+                                                <span class="btn-subtitle">Jadwal: 07:00 - 10:00</span>
                                             </div>
                                         </button>
                                     </form>
@@ -136,11 +133,13 @@
 
                                         <div class="form-group">
                                             <label class="form-label-custom">
-                                                <i class="fas fa-camera"></i> Foto Bukti Pulang
+                                                Foto Bukti Pulang
                                             </label>
                                             <input type="file" name="foto" class="form-control-custom" required
                                                 accept="image/*" capture="camera">
-                                            <div class="form-help-text">Ambil foto bukti selesai kegiatan.</div>
+                                            <small class="text-muted mt-2 d-block">
+                                                <i class="fas fa-info-circle me-1"></i> Ambil foto bukti selesai kegiatan.
+                                            </small>
                                         </div>
 
                                         <button class="btn-action-main btn-checkout" type="submit">
@@ -148,20 +147,19 @@
                                                 <i class="fas fa-sign-out-alt"></i>
                                             </div>
                                             <div class="btn-text-content">
-                                                <span class="btn-title">CHECK-OUT (PULANG)</span>
-                                                <span class="btn-subtitle">Batas: 15:00 - 16:30</span>
+                                                <span class="btn-title">ABSEN PULANG</span>
+                                                <span class="btn-subtitle">Jadwal: 15:00 - 16:30</span>
                                             </div>
                                         </button>
                                     </form>
                                 @else
-                                    <div class="ui-alert ui-alert-info">
-                                        <div class="icon-box-white" style="background: #0dcaf0; color: white;">
-                                            <i class="fas fa-check-double"></i>
+                                    <div class="bg-light p-4 rounded-4 text-center border">
+                                        <div class="text-success mb-2">
+                                            <i class="fas fa-check-double fa-3x"></i>
                                         </div>
-                                        <div class="btn-text-content" style="color: #055160;">
-                                            <span class="btn-title">SELESAI</span>
-                                            <span class="btn-subtitle">Anda sudah absen masuk & pulang hari ini.</span>
-                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Absensi Selesai</h6>
+                                        <p class="text-muted small mb-0">Kamu sudah melakukan absen masuk & pulang hari
+                                            ini.</p>
                                     </div>
                                 @endif
                             </div>
@@ -170,10 +168,10 @@
 
                     <!-- Right: History & Status -->
                     <div class="history-section">
-                        <div class="ui-card history-card">
+                        <div class="ui-card">
                             <div class="section-header">
                                 <i class="fas fa-history"></i>
-                                <h5>Riwayat Absensi Terakhir</h5>
+                                <h5>Riwayat Absensi</h5>
                             </div>
                             <div class="table-container">
                                 <table class="ui-table">
@@ -188,18 +186,17 @@
                                     <tbody>
                                         @forelse($absensis as $absen)
                                             <tr>
-                                                <td data-label="Tanggal">
-                                                    {{ \Carbon\Carbon::parse($absen->tanggal)->translatedFormat('D, d M Y') }}
+                                                <td data-label="Tanggal" class="fw-bold">
+                                                    {{ \Carbon\Carbon::parse($absen->tanggal)->translatedFormat('d M Y') }}
                                                 </td>
                                                 <td data-label="Masuk">
                                                     <div class="time-cell">
                                                         <span
-                                                            class="time-val in">{{ $absen->jam_masuk ? \Carbon\Carbon::parse($absen->jam_masuk)->format('H:i') : '-' }}</span>
+                                                            class="time-val in">{{ $absen->jam_masuk ? \Carbon\Carbon::parse($absen->jam_masuk)->format('H:i') : '--:--' }}</span>
                                                         @if ($absen->foto_masuk)
                                                             <a href="{{ asset('storage/' . $absen->foto_masuk) }}"
-                                                                target="_blank" class="img-link"
-                                                                title="Lihat Foto Masuk">
-                                                                <i class="fas fa-image"></i>
+                                                                target="_blank" class="img-link">
+                                                                <i class="fas fa-eye"></i>
                                                             </a>
                                                         @endif
                                                     </div>
@@ -207,49 +204,44 @@
                                                 <td data-label="Pulang">
                                                     <div class="time-cell">
                                                         <span
-                                                            class="time-val out">{{ $absen->jam_pulang ? \Carbon\Carbon::parse($absen->jam_pulang)->format('H:i') : '-' }}</span>
+                                                            class="time-val out">{{ $absen->jam_pulang ? \Carbon\Carbon::parse($absen->jam_pulang)->format('H:i') : '--:--' }}</span>
                                                         @if ($absen->foto_pulang)
                                                             <a href="{{ asset('storage/' . $absen->foto_pulang) }}"
-                                                                target="_blank" class="img-link"
-                                                                title="Lihat Foto Pulang">
-                                                                <i class="fas fa-image"></i>
+                                                                target="_blank" class="img-link">
+                                                                <i class="fas fa-eye"></i>
                                                             </a>
                                                         @endif
                                                     </div>
                                                 </td>
                                                 <td data-label="Status" class="text-center">
                                                     @if ($absen->verifikasi == 'verified')
-                                                        <span class="badge-ui badge-success"
-                                                            title="Sudah diverifikasi pembimbing">
-                                                            <i class="fas fa-check-circle me-1"></i> Disetujui
+                                                        <span class="badge-ui badge-success">
+                                                            <i class="fas fa-check"></i>
                                                         </span>
                                                     @elseif($absen->verifikasi == 'rejected')
-                                                        <span class="badge-ui badge-danger"
-                                                            title="Ditolak: {{ $absen->keterangan }}">
-                                                            <i class="fas fa-times-circle me-1"></i> Ditolak
+                                                        <span class="badge-ui badge-danger">
+                                                            <i class="fas fa-times"></i>
                                                         </span>
                                                     @else
-                                                        <span class="badge-ui badge-warning"
-                                                            title="Menunggu verifikasi pembimbing">
-                                                            <i class="fas fa-clock me-1"></i> Pending
+                                                        <span class="badge-ui badge-warning">
+                                                            <i class="fas fa-clock"></i>
                                                         </span>
                                                     @endif
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4"
-                                                    style="text-align: center; color: #999; padding: 3rem;">Belum ada
-                                                    riwayat absensi.</td>
+                                                <td colspan="4" class="text-center py-5 text-muted">Belum ada riwayat
+                                                    absensi.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
                             <div class="history-footer">
-                                <button class="btn-ripple btn-history-more" data-bs-toggle="modal"
+                                <button class="btn-history-more" data-bs-toggle="modal"
                                     data-bs-target="#modalHistoryDetail">
-                                    <i class="fas fa-expand-arrows-alt"></i> Lihat Riwayat Lengkap
+                                    <i class="fas fa-external-link-alt"></i> Detail Lengkap
                                 </button>
                             </div>
                         </div>
@@ -258,38 +250,61 @@
             </div>
 
             <!-- TAB LOGBOOK -->
-            <div class="tab-pane fade" id="pills-logbook" role="tabpanel">
-                <div class="content-grid logbook-grid">
+            <div class="tab-pane fade {{ session('active_tab') == 'logbook' ? 'show active' : '' }}" id="pills-logbook"
+                role="tabpanel">
+                <div class="content-grid">
                     <!-- Form Input Logbook -->
                     <div class="logbook-form-section">
-                        <div class="ui-card sticky-card">
-                            <div class="section-header">
-                                <i class="fas fa-pen-nib"></i>
-                                <h5>Isi Logbook Hari Ini</h5>
-                            </div>
-                            <form action="{{ route('siswa.logbook.store') }}" method="POST"
-                                enctype="multipart/form-data">
-                                @csrf
-                                <div class="form-group">
-                                    <label class="form-label-custom">Tanggal Kegiatan</label>
-                                    <input type="date" name="tanggal" class="form-control-custom"
-                                        value="{{ date('Y-m-d') }}" required>
+                        <div class="ui-card">
+                            @if (!$logbookHariIni)
+                                <form action="{{ route('siswa.logbook.store') }}" method="POST"
+                                    enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="tanggal" value="{{ date('Y-m-d') }}">
+
+                                    @if ($errors->any())
+                                        <div class="alert alert-danger p-2 mb-3 small">
+                                            <ul class="mb-0">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+                                    <div class="form-group text-center mb-4">
+                                        <div class="clock-section">
+                                            <span class="clock-label">Waktu Saat Ini</span>
+                                            <h1 class="real-time-clock" id="logbookRealtimeClock">--:--</h1>
+                                            <div class="location-badge">
+                                                <i class="fas fa-map-marker-alt fa-lg"></i>
+                                                <span>{{ $user->perusahaan }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label-custom">Deskripsi Kegiatan</label>
+                                        <textarea name="kegiatan" class="form-control-custom" rows="5"
+                                            placeholder="Tuliskan detail pekerjaan, kendala, atau hasil hari ini..." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label-custom">Foto Bukti (Opsional)</label>
+                                        <input type="file" name="foto" class="form-control-custom" accept="image/*">
+                                    </div>
+                                    <button type="submit" class="btn-submit">
+                                        <i class="fas fa-paper-plane me-2"></i> Simpan Kegiatan
+                                    </button>
+                                </form>
+                            @else
+                                <div class="text-center py-4">
+                                    <div class="bg-light p-4 rounded-4 text-center border">
+                                        <div class="text-success mb-2">
+                                            <i class="fas fa-check-double fa-3x"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Kegiatan Selesai</h6>
+                                        <p class="text-muted small mb-0">Kamu sudah mengisi laporan kegiatan hari ini.</p>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label-custom">Deskripsi Kegiatan</label>
-                                    <textarea name="kegiatan" class="form-control-custom" rows="5"
-                                        placeholder="Apa yang kamu kerjakan hari ini? (Detailkan tugas, kendala, atau hasil kerja)" required></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label-custom">Foto Bukti Kegiatan (Opsional)</label>
-                                    <input type="file" name="foto" class="form-control-custom" accept="image/*">
-                                    <div class="form-help-text">Lampirkan foto saat sedang mengerjakan tugas atau hasil
-                                        kerja.</div>
-                                </div>
-                                <button type="submit" class="btn-submit">
-                                    <i class="fas fa-save"></i> Simpan Logbook
-                                </button>
-                            </form>
+                            @endif
                         </div>
                     </div>
 
@@ -297,7 +312,8 @@
                     <div class="logbook-history-section">
                         <div class="ui-card">
                             <div class="section-header">
-                                <h5>Riwayat Logbook (3 Hari Terakhir)</h5>
+                                <i class="fas fa-tasks"></i>
+                                <h5>Riwayat Kegiatan</h5>
                             </div>
 
                             <div class="table-container">
@@ -305,27 +321,31 @@
                                     <thead>
                                         <tr>
                                             <th>Tanggal</th>
-                                            <th>Kegiatan / Pekerjaan</th>
+                                            <th>Jam</th>
+                                            <th>Detail Pekerjaan</th>
                                             <th class="text-center">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($logbooks as $log)
                                             <tr>
-                                                <td data-label="Tanggal" style="white-space: nowrap;">
-                                                    <div class="fw-bold">
-                                                        {{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('D, d M Y') }}
-                                                    </div>
+                                                <td data-label="Tanggal" class="w-nowrap fw-bold">
+                                                    {{ \Carbon\Carbon::parse($log->tanggal)->translatedFormat('d M Y') }}
                                                 </td>
-                                                <td data-label="Kegiatan">
+                                                <td data-label="Jam">
+                                                    <span class="badge bg-light text-dark border">
+                                                        {{ $log->created_at ? $log->created_at->format('H:i') : '--:--' }}
+                                                    </span>
+                                                </td>
+                                                <td data-label="Detail">
                                                     <div class="log-content-wrapper">
-                                                        <div class="fw-bold text-dark">
-                                                            {{ Str::limit($log->kegiatan, 100) }}</div>
+                                                        <div class="text-dark">
+                                                            {{ Str::limit($log->kegiatan, 120) }}
+                                                        </div>
                                                         @if ($log->catatan_pembimbing)
                                                             <div
-                                                                class="small mt-1 p-2 rounded bg-light border-start border-3 border-primary">
-                                                                <i class="fas fa-comment-dots text-primary me-1"></i>
-                                                                <span class="text-muted">Catatan:</span>
+                                                                class="mt-2 p-2 rounded-3 bg-light border-start border-3 border-primary small">
+                                                                <span class="text-primary fw-bold">Catatan:</span>
                                                                 "{{ $log->catatan_pembimbing }}"
                                                             </div>
                                                         @endif
@@ -333,19 +353,24 @@
                                                 </td>
                                                 <td data-label="Status" class="text-center">
                                                     @if ($log->status == 'verified')
-                                                        <span class="badge-ui badge-success">Disetujui</span>
+                                                        <span class="badge-ui badge-success">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
                                                     @elseif($log->status == 'rejected')
-                                                        <span class="badge-ui badge-danger">Ditolak</span>
+                                                        <span class="badge-ui badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
                                                     @else
-                                                        <span class="badge-ui badge-warning">Pending</span>
+                                                        <span class="badge-ui badge-warning">
+                                                            <i class="fas fa-clock"></i>
+                                                        </span>
                                                     @endif
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="3"
-                                                    style="text-align: center; color: #999; padding: 3rem;">Belum ada
-                                                    riwayat logbook.</td>
+                                                <td colspan="4" class="text-center py-5 text-muted">Belum ada riwayat
+                                                    kegiatan.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -363,49 +388,49 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content modal-content-premium">
                 <div class="modal-header-premium">
-                    <div class="header-icon">
-                        <i class="fas fa-history"></i>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="header-icon">
+                            <i class="fas fa-history text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">Riwayat Lengkap</h5>
+                            <p class="modal-subtitle text-white-50">Lihat semua data absensi dan kegiatan kamu.</p>
+                        </div>
                     </div>
-                    <div class="header-text">
-                        <h5 class="modal-title">Riwayat Lengkap</h5>
-                        <p class="modal-subtitle">Gunakan tombol Navigasi untuk melihat data sebelumnya.</p>
-                    </div>
-                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <!-- Tab Switcher inside Modal -->
                     <div class="modal-tab-nav">
                         <button class="modal-tab-btn active" onclick="switchModalTab('absensi')">
-                            <i class="fas fa-clock"></i> Absensi
+                            <i class="fas fa-calendar-check me-1"></i> Absensi
                         </button>
                         <button class="modal-tab-btn" onclick="switchModalTab('kegiatan')">
-                            <i class="fas fa-book"></i> Kegiatan
+                            <i class="fas fa-edit me-1"></i> Kegiatan
                         </button>
                     </div>
 
                     <!-- Navigation Bar -->
-                    <div class="pagination-nav-bar">
-                        <button id="btnPrevPage" class="btn-nav-page" onclick="changePage(1)">
-                            <i class="fas fa-history"></i> Sebelumnya
+                    <div class="pagination-nav-bar px-4 py-3">
+                        <button id="btnPrevPage" class="btn-nav-page" onclick="changePage(-1)">
+                            <i class="fas fa-chevron-left me-1"></i> Sebelumnya
                         </button>
-                        <div class="page-indicator">
+                        <div class="page-indicator fw-bold text-primary">
                             Halaman <span id="currentPageNum">1</span>
                         </div>
-                        <button id="btnNextPage" class="btn-nav-page" onclick="changePage(-1)">
-                            Selanjutnya <i class="fas fa-chevron-right"></i>
+                        <button id="btnNextPage" class="btn-nav-page" onclick="changePage(1)">
+                            Selanjutnya <i class="fas fa-chevron-right ms-1"></i>
                         </button>
                     </div>
 
                     <!-- Content Area -->
-                    <div class="history-table-wrapper">
+                    <div class="history-table-wrapper px-3 pb-3">
                         <div id="absensiTableArea">
                             <table class="history-detail-table">
                                 <thead>
                                     <tr>
-                                        <th>Hari & Tanggal</th>
-                                        <th>Kehadiran</th>
+                                        <th>Tanggal</th>
+                                        <th>Detail Waktu</th>
                                         <th>Status</th>
                                         <th class="text-center">Aksi</th>
                                     </tr>
@@ -416,12 +441,13 @@
                             </table>
                         </div>
 
-                        <div id="kegiatanTableArea" style="display: none;">
+                        <div id="kegiatanTableArea" class="hidden">
                             <table class="history-detail-table">
                                 <thead>
                                     <tr>
-                                        <th>Hari & Tanggal</th>
-                                        <th style="min-width: 250px;">Detail Kegiatan</th>
+                                        <th>Tanggal</th>
+                                        <th>Waktu</th>
+                                        <th class="min-w-250">Kegiatan</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -465,286 +491,20 @@
                     </form>
                 </div>
                 <div class="modal-footer modal-footer-custom">
-                    <button type="button" class="btn-pill btn-pill-secondary" data-bs-dismiss="modal"
-                        style="background: #e9ecef; border: none; color: #495057;">Batal</button>
-                    <button type="button" class="btn-pill btn-pill-primary"
-                        style="background: #198754; border: none; color: #ffffff;">Lakukan Check-In</button>
+                    <button type="button" class="btn-pill btn-secondary-custom" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn-pill btn-primary-custom">Lakukan Check-In</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-GB', {
-                hour12: false
-            });
-            document.getElementById('realtimeClock').textContent = timeString;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Pagination & Tab State
-        let currentModalTab = 'absensi';
-        let currentAbsenPage = 1;
-        let currentKegiatanPage = 1;
-        let hasMoreAbsen = true;
-        let hasMoreKegiatan = true;
-
-        function switchModalTab(tab) {
-            currentModalTab = tab;
-            document.querySelectorAll('.modal-tab-btn').forEach(btn => btn.classList.remove('active'));
-            if (tab === 'absensi') {
-                document.querySelectorAll('.modal-tab-btn')[0].classList.add('active');
-                document.getElementById('absensiTableArea').style.display = 'block';
-                document.getElementById('kegiatanTableArea').style.display = 'none';
-                updatePaginationUI(currentAbsenPage, hasMoreAbsen);
-            } else {
-                document.querySelectorAll('.modal-tab-btn')[1].classList.add('active');
-                document.getElementById('absensiTableArea').style.display = 'none';
-                document.getElementById('kegiatanTableArea').style.display = 'block';
-                updatePaginationUI(currentKegiatanPage, hasMoreKegiatan);
-            }
-            fetchHistoryData();
-        }
-
-        async function fetchHistoryData() {
-            const page = currentModalTab === 'absensi' ? currentAbsenPage : currentKegiatanPage;
-            const route = currentModalTab === 'absensi' ? '{{ route('siswa.absensi.detail') }}' :
-                '{{ route('siswa.logbook.detail') }}';
-            const tbodyId = currentModalTab === 'absensi' ? 'historyAbsensiBody' : 'historyKegiatanBody';
-            const tbody = document.getElementById(tbodyId);
-            const cols = currentModalTab === 'absensi' ? 4 : 3;
-
-            try {
-                const response = await fetch(`${route}?page=${page}`);
-                const result = await response.json();
-                const data = result.data;
-
-                if (currentModalTab === 'absensi') {
-                    hasMoreAbsen = result.has_more;
-                    updatePaginationUI(currentAbsenPage, hasMoreAbsen);
-                } else {
-                    hasMoreKegiatan = result.has_more;
-                    updatePaginationUI(currentKegiatanPage, hasMoreKegiatan);
-                }
-
-                if (data.length === 0) {
-                    tbody.innerHTML =
-                        `<tr><td colspan="${cols}" class="text-center p-5 text-muted"><i class="fas fa-folder-open mb-3 d-block" style="font-size: 2rem; opacity: 0.3;"></i> Tidak ada data di halaman ini.</td></tr>`;
-                    return;
-                }
-
-                if (currentModalTab === 'absensi') {
-                    tbody.innerHTML = data.map(item => `
-                            <tr>
-                                <td data-label="Tanggal"><div class="date-col"><strong>${item.tanggal.split(',')[0]}</strong><span>${item.tanggal.split(',')[1]}</span></div></td>
-                                <td data-label="Waktu">
-                                    <div class="arrival-time-stack">
-                                        <div class="time-in"><i class="fas fa-sign-in-alt"></i> ${item.jam_masuk}</div>
-                                        <div class="time-out"><i class="fas fa-sign-out-alt"></i> ${item.jam_pulang}</div>
-                                    </div>
-                                </td>
-                                <td data-label="Status" class="text-center">
-                                    ${item.verifikasi === 'verified' 
-                                        ? `<span class="badge-ui badge-success"><i class="fas fa-check-circle me-1"></i> Disetujui</span>`
-                                        : item.verifikasi === 'rejected'
-                                        ? `<span class="badge-ui badge-danger"><i class="fas fa-times-circle me-1"></i> Ditolak</span>`
-                                        : `<span class="badge-ui badge-warning"><i class="fas fa-clock me-1"></i> Pending</span>`
-                                    }
-                                </td>
-                                <td data-label="Aksi" class="text-center">
-                                    <div class="action-btns-row">
-                                        ${item.foto_masuk ? `<a href="${item.foto_masuk}" target="_blank" class="btn-preview-mini m" title="Foto Masuk"><i class="fas fa-camera"></i></a>` : ''}
-                                        ${item.foto_pulang ? `<a href="${item.foto_pulang}" target="_blank" class="btn-preview-mini p" title="Foto Pulang"><i class="fas fa-camera"></i></a>` : ''}
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('');
-                } else {
-                    tbody.innerHTML = data.map(item => `
-                            <tr>
-                                <td data-label="Tanggal"><div class="date-col"><strong>${item.tanggal.split(',')[0]}</strong><span>${item.tanggal.split(',')[1]}</span></div></td>
-                                <td data-label="Kegiatan">
-                                    <div class="activity-detail-preview">
-                                        <p class="act-text">${item.kegiatan}</p>
-                                        ${item.catatan ? `<div class="pembimbing-note"><i class="fas fa-comment-dots"></i> "${item.catatan}"</div>` : ''}
-                                    </div>
-                                </td>
-                                <td data-label="Status"><span class="badge ${getLogStatusClass(item.status)}">${item.status}</span></td>
-                            </tr>
-                        `).join('');
-                }
-
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                tbody.innerHTML =
-                    `<tr><td colspan="${cols}" class="text-center p-5 text-danger">Gagal memuat data.</td></tr>`;
-            }
-        }
-
-        function changePage(direction) {
-            if (currentModalTab === 'absensi') {
-                if (direction === 1 && hasMoreAbsen) currentAbsenPage++;
-                else if (direction === -1 && currentAbsenPage > 1) currentAbsenPage--;
-            } else {
-                if (direction === 1 && hasMoreKegiatan) currentKegiatanPage++;
-                else if (direction === -1 && currentKegiatanPage > 1) currentKegiatanPage--;
-            }
-            fetchHistoryData();
-        }
-
-        function updatePaginationUI(page, hasMore) {
-            document.getElementById('currentPageNum').innerText = page;
-
-            // "Sebelumnya" (Previous) means Older Data (Increment Page)
-            document.getElementById('btnPrevPage').disabled = !hasMore;
-            // "Selanjutnya" (Next) means Newer Data (Decrement Page)
-            document.getElementById('btnNextPage').disabled = (page === 1);
-
-            document.getElementById('btnPrevPage').style.opacity = !hasMore ? '0.5' : '1';
-            document.getElementById('btnNextPage').style.opacity = (page === 1) ? '0.5' : '1';
-        }
-
-        function getStatusBadgeClass(status) {
-            status = status.toLowerCase();
-            if (status.includes('hadir')) return 'badge-ui badge-success';
-            if (status.includes('izin')) return 'badge-ui badge-info';
-            if (status.includes('sakit')) return 'badge-ui badge-warning';
-            return 'badge-ui badge-danger';
-        }
-
-        function getLogStatusClass(status) {
-            if (status === 'verified') return 'badge-ui badge-success';
-            if (status === 'rejected') return 'badge-ui badge-danger';
-            return 'badge-ui badge-warning';
-        }
-
-        // --- KONFIGURASI ABSENSI LOKASI ---
-        const TARGET_LAT = -2.9847200554793494;
-        const TARGET_LNG = 104.73225951187132;
-        const MAX_RADIUS = 500; // meter
-
-        // Fungsi Hitung Jarak (Haversine)
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c; // in metres
-        }
-
-        async function prosesAbsensi(type) {
-            const form = type === 'masuk' ? document.getElementById('formAbsensiMasuk') : document.getElementById('formAbsensiPulang');
-            const statusPilihan = form.querySelector('[name="status_pilihan"]')?.value || 'hadir';
-
-            // 1. Tampilkan Loading
-            Swal.fire({
-                title: 'Sedang Memproses...',
-                text: 'Mencoba mengambil lokasi Anda...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // 2. Minta Izin Lokasi
-            if (!navigator.geolocation) {
-                Swal.fire('Error', 'Browser Anda tidak mendukung fitur lokasi.', 'error');
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-                const distance = calculateDistance(userLat, userLng, TARGET_LAT, TARGET_LNG);
-
-                // 3. Validasi Geofencing di sisi client (Opsional untuk UX)
-                if (statusPilihan === 'hadir' && distance > MAX_RADIUS) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Di Luar Jangkauan',
-                        text: `Anda berada ${Math.round(distance)}m di luar radius Fasilkom. Silakan mendekat ke lokasi.`,
-                    });
-                    return;
-                }
-
-                // 4. Kirim Data via Fetch
-                const formData = new FormData(form);
-                formData.append('latitude', userLat);
-                formData.append('longitude', userLng);
-
-                try {
-                    const response = await fetch("{{ route('siswa.absensi.store') }}", {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: result.message,
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire('Gagal', result.message, 'error');
-                    }
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    Swal.fire('Error', 'Terjadi kesalahan sistem saat menghubungi server.', 'error');
-                }
-
-            }, (error) => {
-                console.error('Geolocation Error:', error);
-                let msg = 'Gagal mengambil lokasi.';
-                if (error.code === 1) msg = 'Mohon izinkan akses lokasi di browser Anda.';
-                else if (error.code === 2) msg = 'Lokasi tidak ditemukan.';
-                Swal.fire('Akses Lokasi Ditolak', msg, 'warning');
-            }, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            });
-        }
-
-        // Event Listeners for buttons
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnMasuk = document.querySelector('#formAbsensiMasuk .btn-checkin');
-            const btnPulang = document.querySelector('#formAbsensiPulang .btn-checkout');
-
-            if (btnMasuk) {
-                btnMasuk.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    prosesAbsensi('masuk');
-                });
-            }
-
-            if (btnPulang) {
-                btnPulang.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    prosesAbsensi('pulang');
-                });
-            }
-        });
-
-        var historyModal = document.getElementById('modalHistoryDetail');
-        historyModal.addEventListener('shown.bs.modal', function() {
-            fetchHistoryData();
-        });
+        window.absensiConfig = {
+            absensiDetailRoute: "{{ route('siswa.absensi.detail') }}",
+            logbookDetailRoute: "{{ route('siswa.logbook.detail') }}",
+            absensiStoreRoute: "{{ route('siswa.absensi.store') }}",
+            csrfToken: "{{ csrf_token() }}",
+            storageUrl: "{{ asset('storage') }}"
+        };
     </script>
 @endsection

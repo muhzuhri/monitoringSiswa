@@ -4,29 +4,29 @@
 
 /* ── CSS Variables ── */
 :root {
-    --color-primary:    #7c3aed;
+    --color-primary: #7c3aed;
     --color-primary-lt: #ede9fe;
-    --color-blue:       #3b82f6;
-    --color-blue-lt:    #dbeafe;
-    --color-green:      #22c55e;
-    --color-green-lt:   #dcfce7;
-    --color-orange:     #f97316;
-    --color-orange-lt:  #ffedd5;
-    --color-red:        #ef4444;
-    --color-red-lt:     #fee2e2;
-    --color-warning:    #eab308;
+    --color-blue: #3b82f6;
+    --color-blue-lt: #dbeafe;
+    --color-green: #22c55e;
+    --color-green-lt: #dcfce7;
+    --color-orange: #f97316;
+    --color-orange-lt: #ffedd5;
+    --color-red: #ef4444;
+    --color-red-lt: #fee2e2;
+    --color-warning: #eab308;
     --color-warning-lt: #fef9c3;
 
-    --text-dark:   #1e1b4b;
+    --text-dark: #1e1b4b;
     --text-medium: #4b5563;
-    --text-muted:  #9ca3af;
+    --text-muted: #9ca3af;
 
-    --bg-page:   #f5f3ff;
-    --bg-white:  #ffffff;
-    --border:    #e5e7eb;
-    --shadow-sm: 0 1px 4px rgba(0,0,0,.08);
-    --shadow-md: 0 6px 24px rgba(124,58,237,.13);
-    --radius:    14px;
+    --bg-page: #f5f3ff;
+    --bg-white: #ffffff;
+    --border: #e5e7eb;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, .08);
+    --shadow-md: 0 6px 24px rgba(124, 58, 237, .13);
+    --radius: 14px;
     --radius-sm: 8px;
     --transition: .2s ease;
 }
@@ -94,7 +94,9 @@ body.dosen-page {
     box-shadow: var(--shadow-sm);
 }
 
-.bg-primary-light { background: var(--color-primary-lt); }
+.bg-primary-light {
+    background: var(--color-primary-lt);
+}
 
 .badge.bg-purple-light {
     background: var(--color-primary-lt);
@@ -110,7 +112,9 @@ body.dosen-page {
     border: 1px solid #fef08a;
 }
 
-.x-small { font-size: 0.75rem; }
+.x-small {
+    font-size: 0.75rem;
+}
 
 /* ── Content Cards ── */
 .content-card {
@@ -189,7 +193,9 @@ body.dosen-page {
     border-left: 4px solid var(--color-red);
 }
 
-.alert-icon { font-size: 1.25rem; }
+.alert-icon {
+    font-size: 1.25rem;
+}
 
 /* ── Buttons ── */
 .btn-save-profile {
@@ -218,26 +224,85 @@ body.dosen-page {
 }
 
 /* ── Grid Layout Helpers ── */
-.row { display: flex; flex-wrap: wrap; margin-right: -0.75rem; margin-left: -0.75rem; }
-.col-md-6 { flex: 0 0 50%; max-width: 50%; padding-right: 0.75rem; padding-left: 0.75rem; }
-.col-12 { flex: 0 0 100%; max-width: 100%; }
-
-@media (max-width: 768px) {
-    .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -0.75rem;
+    margin-left: -0.75rem;
 }
 
-.g-3 { margin-top: -0.5rem; }
-.g-3 > div { margin-top: 1rem; }
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+}
 
-.pt-3 { padding-top: 1rem !important; }
-.border-top { border-top: 1px solid var(--border) !important; }
-.text-center { text-align: center !important; }
-.text-end { text-align: right !important; }
-.mx-auto { margin-left: auto !important; margin-right: auto !important; }
-.d-block { display: block !important; }
-.fw-bold { font-weight: 700 !important; }
-.fw-normal { font-weight: 400 !important; }
-.text-dark { color: var(--text-dark) !important; }
-.text-primary { color: var(--color-primary) !important; }
-.text-purple { color: #8b5cf6 !important; }
-.text-warning { color: var(--color-orange) !important; }
+.col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.g-3 {
+    margin-top: -0.5rem;
+}
+
+.g-3>div {
+    margin-top: 1rem;
+}
+
+.pt-3 {
+    padding-top: 1rem !important;
+}
+
+.border-top {
+    border-top: 1px solid var(--border) !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.fw-bold {
+    font-weight: 700 !important;
+}
+
+.fw-normal {
+    font-weight: 400 !important;
+}
+
+.text-dark {
+    color: var(--text-dark) !important;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-purple {
+    color: #8b5cf6 !important;
+}
+
+.text-warning {
+    color: var(--color-orange) !important;
+}

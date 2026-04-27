@@ -4,33 +4,53 @@
 @section('body-class', 'dashboard-page pimpinan-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-siswa.css') }}">
-    <style>
-        .pimpinan-read-only-badge {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        /* Override for Pimpinan specific constraints */
-        .management-header { margin-bottom: 1.5rem; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/siswa.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/siswa-modals.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="{{ asset('assets/js/pimpinan/siswa.js') }}"></script>
 @endpush
 
 @section('body')
-    <div class="management-container">
+    <div class="management-container" id="siswa-container" 
+         data-jurnal-url="{{ route('admin.rekap.jurnal', ['nisn' => ':nisn']) }}"
+         data-absensi-url="{{ route('admin.rekap.absensi', ['nisn' => ':nisn']) }}">
+        <!-- Global Navigation Tabs: Admin, Siswa, Guru, Pembimbing -->
+        <div class="tabs-wrapper">
+            <div class="tabs-nav">
+                <a href="{{ route('pimpinan.admin') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('pimpinan.admin') ? 'active' : '' }}">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admin</span>
+                </a>
+                <a href="{{ route('pimpinan.siswa') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('pimpinan.siswa') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Siswa</span>
+                </a>
+                <a href="{{ route('pimpinan.guru') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('pimpinan.guru') ? 'active' : '' }}">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Guru</span>
+                </a>
+                <a href="{{ route('pimpinan.pembimbing') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('pimpinan.pembimbing') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Pembimbing</span>
+                </a>
+            </div>
+        </div>
+
         <div class="admin-content-wrapper">
 
             {{-- HEADER --}}
             <div class="management-header">
-                <div class="header-title">
-                    <h5>Data Seluruh Siswa Magang</h5>
-                    <p>Memantau biodata dan penempatan siswa magang secara real-time.</p>
+                <div class="header-title d-flex align-items-center gap-3">
+                    <div class="header-logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h5>Data Siswa Magang</h5>
+                        <p>Pantau perkembangan dan riwayat seluruh siswa magang.</p>
+                    </div>
                 </div>
                 <div class="header-actions">
                     <form action="{{ route('pimpinan.siswa') }}" method="GET" class="search-form" id="searchForm">
@@ -45,10 +65,7 @@
                                 onchange="this.form.submit()"
                             >
                         </div>
-                    </form>
-                    <div class="pimpinan-read-only-badge">
-                        <i class="fas fa-eye"></i> Tampilan Baca-Saja
-                    </div>
+                    </form>                    
                 </div>
             </div>
 
@@ -93,71 +110,116 @@
                     {{-- View: Per Kelompok (Cards) --}}
                     <div class="view-container" id="active-grouped-view">
                         <div class="row g-4">
-                            @forelse($groupedSiswas as $g)
-                                <div class="col-xl-4 col-md-6">
-                                    <div class="student-card">
-                                        <div class="card-actions">
-                                            <button class="action-round btn-detail"
-                                                data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
-                                                data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
-                                                data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
-                                                data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
-                                                data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
-                                                data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
-                                                data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
-                                                data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}"
-                                                title="Lihat Detail">
-                                                <i class="fas fa-eye text-primary"></i>
-                                            </button>
-                                        </div>
+                             @forelse($groupedSiswas as $g)
+                                 <div class="col-xl-4 col-md-6">
+                                     <div class="student-card">
+                                         <div class="card-actions">
+                                             <button class="action-round btn-detail"
+                                                 data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                 data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
+                                                 data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
+                                                 data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
+                                                 data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
+                                                 data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                 data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                 data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
+                                                 data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
+                                                 data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}"
+                                                 title="Lihat Detail">
+                                                 <i class="fas fa-eye"></i>
+                                             </button>
+                                         </div>
+ 
+                                         <div class="card-identity">
+                                              <div class="card-avatar">
+                                                  @if($g['is_group'])
+                                                      <div class="avatar-group-icon">
+                                                          <i class="fas fa-user-friends"></i>
+                                                      </div>
+                                                  @else
+                                                      <span>{{ strtoupper(substr($g['leader']->nama, 0, 1)) }}</span>
+                                                  @endif
+                                              </div>
+                                              <div class="card-identity-info">
+                                                 <h6>{{ Str::limit($g['leader']->nama, 25) }}</h6>
+                                                 <p>NISN: {{ $g['leader']->nisn }}</p>
+                                                 @if($g['is_group'])
+                                                     <span class="badge-info-light">({{ $g['members']->count() }} Siswa)</span>
+                                                 @endif
+                                             </div>
+                                         </div>
+ 
+                                         <div class="card-info-list">
+                                             <div class="card-info-row">
+                                                 <span class="card-info-label">Sekolah</span>
+                                                 <span class="card-info-value">{{ Str::limit($g['leader']->sekolah, 22) }}</span>
+                                             </div>
+                                             <div class="card-info-row">
+                                                 <span class="card-info-label">Penempatan</span>
+                                                 <span class="card-info-value">{{ Str::limit($g['leader']->perusahaan ?? 'Belum ada', 22) }}</span>
+                                             </div>
+                                         </div>
+ 
+                                         <div class="card-footer-bar">
+                                             @if($g['leader']->absen_hari_ini)
+                                                 <span class="status-label hadir">
+                                                     <span class="status-dot hadir"></span> Hadir
+                                                 </span>
+                                             @else
+                                                 <span class="status-label belum">
+                                                     <span class="status-dot belum"></span> Belum Absen
+                                                 </span>
+                                             @endif
+                                             <span class="card-guru-info">
+                                                 <i class="fas fa-chalkboard-teacher me-1"></i>
+                                                 {{ Str::limit($g['leader']->guru->nama ?? '-', 15) }}
+                                             </span>
+                                         </div>
 
-                                        <div class="card-identity">
-                                            <div class="card-avatar">
-                                                @if($g['is_group'])
-                                                    <i class="fas fa-users"></i>
-                                                @else
-                                                    {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
-                                                @endif
-                                            </div>
-                                            <div class="card-identity-info">
-                                                <h6>{{ $g['leader']->nama }}</h6>
-                                                <p>NISN: {{ $g['leader']->nisn }}</p>
-                                                @if($g['is_group'])
-                                                    <span class="badge-kelompok">Kelompok ({{ $g['members']->count() }})</span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <div class="card-info-list">
-                                            <div class="card-info-row">
-                                                <span class="card-info-label">Sekolah</span>
-                                                <span class="card-info-value">{{ $g['leader']->sekolah }}</span>
-                                            </div>
-                                            <div class="card-info-row">
-                                                <span class="card-info-label">Penempatan</span>
-                                                <span class="card-info-value">{{ $g['leader']->perusahaan ?? 'Belum ada' }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="card-footer-bar">
-                                            @if($g['leader']->absen_hari_ini)
-                                                <span class="status-label hadir">
-                                                    <span class="status-dot hadir"></span> Hadir
-                                                </span>
-                                            @else
-                                                <span class="status-label belum">
-                                                    <span class="status-dot belum"></span> Belum Absen
-                                                </span>
-                                            @endif
-                                            <span class="card-guru-info">
-                                                <i class="fas fa-chalkboard-teacher me-1"></i>
-                                                {{ Str::limit($g['leader']->guru->nama ?? '-', 18) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                         <div class="action-grid">
+                                             @if($g['is_group'])
+                                                 <button class="btn-action btn-show-members" 
+                                                         data-name="{{ $g['leader']->nama }}"
+                                                         data-type="active"
+                                                         data-members="{{ $g['members']->map(function($m) {
+                                                             return [
+                                                                 'nisn' => $m->nisn,
+                                                                 'nama' => $m->nama,
+                                                                 'email' => $m->email,
+                                                                 'no_hp' => $m->no_hp,
+                                                                 'kelas' => $m->kelas,
+                                                                 'jurusan' => $m->jurusan,
+                                                                 'sekolah' => $m->sekolah,
+                                                                 'perusahaan' => $m->perusahaan,
+                                                                 'mulai' => $m->tgl_mulai_magang ? \Carbon\Carbon::parse($m->tgl_mulai_magang)->format('d M Y') : '-',
+                                                                 'selesai' => $m->tgl_selesai_magang ? \Carbon\Carbon::parse($m->tgl_selesai_magang)->format('d M Y') : '-',
+                                                                 'guru_nama' => $m->guru->nama ?? '-',
+                                                                 'guru_nip' => $m->guru->id_guru ?? '-',
+                                                                 'pl_nama' => $m->pembimbing->nama ?? '-',
+                                                                 'pl_nip' => $m->pembimbing->id_pembimbing ?? '-',
+                                                                 'pl_hp' => $m->pembimbing->no_telp ?? '-',
+                                                                 'status' => $m->status
+                                                             ];
+                                                         })->toJson() }}">
+                                                     <i class="fas fa-users-viewfinder"></i> Anggota
+                                                 </button>
+                                             @else
+                                                 <button class="btn-action detail-btn btn-detail"
+                                                     data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                     data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}" data-email="{{ $g['leader']->email }}"
+                                                     data-no_hp="{{ $g['leader']->no_hp }}" data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
+                                                     data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
+                                                     data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                     data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                     data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->id_guru ?? '-' }}"
+                                                     data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->id_pembimbing ?? '-' }}"
+                                                     data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}">
+                                                     <i class="fas fa-info-circle"></i> Detail
+                                                 </button>
+                                             @endif
+                                         </div>
+                                     </div>
+                                 </div>
                             @empty
                                 <div class="col-12 text-center py-5">
                                     <div class="empty-state">
@@ -212,21 +274,21 @@
                                                 <div class="cell-sub"><i class="fas fa-user-tie me-1 opacity-50"></i> {{ $s->pembimbing->nama ?? '-' }}</div>
                                             </td>
                                             <td>
-                                                <div class="action-group justify-content-end">
-                                                    <button class="btn-icon btn-detail-soft btn-detail"
-                                                        data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                        data-nisn="{{ $s->nisn }}" data-nama="{{ $s->nama }}" data-email="{{ $s->email }}"
-                                                        data-no_hp="{{ $s->no_hp }}" data-kelas="{{ $s->kelas }}" data-jurusan="{{ $s->jurusan }}"
-                                                        data-sekolah="{{ $s->sekolah }}" data-perusahaan="{{ $s->perusahaan }}"
-                                                        data-mulai="{{ $s->tgl_mulai_magang ? \Carbon\Carbon::parse($s->tgl_mulai_magang)->format('d M Y') : '-' }}"
-                                                        data-selesai="{{ $s->tgl_selesai_magang ? \Carbon\Carbon::parse($s->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                        data-guru-nama="{{ $s->guru->nama ?? '-' }}" data-guru-nip="{{ $s->guru->id_guru ?? '-' }}"
-                                                        data-pl-nama="{{ $s->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $s->pembimbing->id_pembimbing ?? '-' }}"
-                                                        data-pl-hp="{{ $s->pembimbing->no_telp ?? '-' }}"
-                                                        title="Lihat Detail">
-                                                        <i class="fas fa-eye text-primary"></i>
-                                                    </button>
-                                                </div>
+                                                 <div class="action-group justify-content-end">
+                                                     <button class="btn-icon btn-detail-soft btn-detail"
+                                                         data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                         data-nisn="{{ $s->nisn }}" data-nama="{{ $s->nama }}" data-email="{{ $s->email }}"
+                                                         data-no_hp="{{ $s->no_hp }}" data-kelas="{{ $s->kelas }}" data-jurusan="{{ $s->jurusan }}"
+                                                         data-sekolah="{{ $s->sekolah }}" data-perusahaan="{{ $s->perusahaan }}"
+                                                         data-mulai="{{ $s->tgl_mulai_magang ? \Carbon\Carbon::parse($s->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                         data-selesai="{{ $s->tgl_selesai_magang ? \Carbon\Carbon::parse($s->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                         data-guru-nama="{{ $s->guru->nama ?? '-' }}" data-guru-nip="{{ $s->guru->id_guru ?? '-' }}"
+                                                         data-pl-nama="{{ $s->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $s->pembimbing->id_pembimbing ?? '-' }}"
+                                                         data-pl-hp="{{ $s->pembimbing->no_telp ?? '-' }}"
+                                                         title="Lihat Detail Profil">
+                                                         <i class="fas fa-id-card text-primary"></i>
+                                                     </button>
+                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
@@ -278,83 +340,103 @@
                     {{-- View: Riwayat Cards (Grouped) --}}
                     <div class="view-container" id="riwayat-grouped-view">
                         <div class="row g-4">
-                            @forelse($groupedRiwayat as $g)
-                                <div class="col-xl-4 col-md-6">
-                                    <div class="history-card">
-                                        {{-- Header --}}
-                                        <div class="student-header">
-                                            <div class="student-avatar">
-                                                @if($g['is_group'])
-                                                    <i class="fas fa-layer-group"></i>
-                                                @else
-                                                    {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
-                                                @endif
-                                            </div>
-                                            <div class="student-meta">
-                                                <h6 class="student-name">
-                                                    {{ $g['leader']->nama }}
-                                                    @if($g['is_group'])
-                                                        <span class="badge bg-info-light text-info-dark">{{ $g['members']->count() }} Anggota</span>
-                                                    @endif
-                                                </h6>
-                                                <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
-                                                <div class="mt-1">
-                                                    <span class="badge-status hadir" style="background: var(--p-bg-primary-light); color: var(--p-primary); font-size: 0.65rem; padding: 2px 10px;">
-                                                        <i class="fas fa-flag-checkered me-1"></i> SELESAI
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="status-wrapper">
-                                                <span class="status-badge status-hadir" style="background: rgba(100, 116, 139, 0.1); color: #64748b;">
-                                                    <i class="fas fa-archive"></i> Arsip
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {{-- Info Grid --}}
-                                        <div class="info-grid">
-                                            <div class="info-item">
-                                                <label class="info-label"><i class="fas fa-school"></i> SEKOLAH</label>
-                                                <span class="info-value" title="{{ $g['leader']->sekolah }}">{{ $g['leader']->sekolah }}</span>
-                                            </div>
-                                            <div class="info-item">
-                                                <label class="info-label"><i class="fas fa-building"></i> PERUSAHAAN</label>
-                                                <span class="info-value" title="{{ $g['leader']->perusahaan }}">{{ $g['leader']->perusahaan ?? '-' }}</span>
-                                            </div>
-                                        </div>
-
-                                        {{-- Action Buttons --}}
-                                        <div class="action-grid">
-                                            @if($g['is_group'])
-                                                <button class="btn-action btn-detail-group btn-show-members" 
-                                                        data-name="{{ $g['leader']->nama }}"
-                                                        data-members="{{ $g['members']->toJson() }}">
-                                                    <i class="fas fa-users-viewfinder"></i> Anggota Kelompok
-                                                </button>
-                                            @else
-                                                <button class="btn-action btn-detail-group btn-detail"
-                                                    data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                    ... (Data Attributes Same as Active Tab) ...
-                                                    data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
-                                                    data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
-                                                    data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
-                                                    data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
-                                                    data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
-                                                    data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                    data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
-                                                    data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
-                                                    data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}">
-                                                    <i class="fas fa-user-circle"></i> Detail Profil
-                                                </button>
-                                            @endif
-                                            
-                                            <button class="btn-action btn-absensi-group btn-preview-pdf" 
-                                                    data-url="{{ route('admin.rekap.kelompok', $g['leader']->nisn) }}">
-                                                <i class="fas fa-file-signature"></i> Rekap Absensi Kelompok
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                             @forelse($groupedRiwayat as $g)
+                                 <div class="col-xl-4 col-md-6">
+                                     <div class="history-card">
+                                         {{-- Header --}}
+                                         <div class="student-header">
+                                             <div class="student-avatar">
+                                                 @if($g['is_group'])
+                                                     <i class="fas fa-layer-group"></i>
+                                                 @else
+                                                     {{ strtoupper(substr($g['leader']->nama, 0, 1)) }}
+                                                 @endif
+                                             </div>
+                                             <div class="student-meta">
+                                                 <h6 class="student-name">
+                                                     {{ Str::limit($g['leader']->nama, 22) }}
+                                                     @if($g['is_group'])
+                                                         <span class="badge-kelompok">({{ $g['members']->count() }} Anggota)</span>
+                                                     @endif
+                                                 </h6>
+                                                 <p class="student-nisn">NISN: {{ $g['leader']->nisn }}</p>
+                                                 <div class="mt-1 d-flex gap-2">
+                                                     <span class="badge-completed">
+                                                         <i class="fas fa-flag-checkered"></i> SELESAI
+                                                     </span>
+                                                 </div>
+                                             </div>
+                                             <div class="status-wrapper">
+                                                 <span class="badge-archive">
+                                                     <i class="fas fa-archive"></i> Arsip
+                                                 </span>
+                                             </div>
+                                             </div>
+                                         </div>
+ 
+                                         {{-- Info Grid --}}
+                                         <div class="info-grid">
+                                             <div class="info-item">
+                                                 <label class="info-label"><i class="fas fa-university"></i> SEKOLAH</label>
+                                                 <span class="info-value" title="{{ $g['leader']->sekolah }}">{{ $g['leader']->sekolah }}</span>
+                                             </div>
+                                             <div class="info-item">
+                                                 <label class="info-label"><i class="fas fa-building"></i> INSTANSI</label>
+                                                 <span class="info-value" title="{{ $g['leader']->perusahaan }}">{{ $g['leader']->perusahaan ?? '-' }}</span>
+                                             </div>
+                                         </div>
+ 
+                                         {{-- Action Buttons --}}
+                                         <div class="action-grid">
+                                             @if($g['is_group'])
+                                                 <button class="btn-action btn-show-members" 
+                                                         data-name="{{ $g['leader']->nama }}"
+                                                         data-type="history"
+                                                         data-members="{{ $g['members']->map(function($m) {
+                                                             return [
+                                                                 'nisn' => $m->nisn,
+                                                                 'nama' => $m->nama,
+                                                                 'email' => $m->email,
+                                                                 'no_hp' => $m->no_hp,
+                                                                 'kelas' => $m->kelas,
+                                                                 'jurusan' => $m->jurusan,
+                                                                 'sekolah' => $m->sekolah,
+                                                                 'perusahaan' => $m->perusahaan,
+                                                                 'mulai' => $m->tgl_mulai_magang ? \Carbon\Carbon::parse($m->tgl_mulai_magang)->format('d M Y') : '-',
+                                                                 'selesai' => $m->tgl_selesai_magang ? \Carbon\Carbon::parse($m->tgl_selesai_magang)->format('d M Y') : '-',
+                                                                 'guru_nama' => $m->guru->nama ?? '-',
+                                                                 'guru_nip' => $m->guru->id_guru ?? '-',
+                                                                 'pl_nama' => $m->pembimbing->nama ?? '-',
+                                                                 'pl_nip' => $m->pembimbing->id_pembimbing ?? '-',
+                                                                 'pl_hp' => $m->pembimbing->no_telp ?? '-',
+                                                                 'status' => $m->status
+                                                             ];
+                                                         })->toJson() }}">
+                                                     <i class="fas fa-users-viewfinder"></i> Anggota
+                                                 </button>
+                                             @else
+                                                 <button class="btn-action btn-detail"
+                                                     data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                     data-nisn="{{ $g['leader']->nisn }}" data-nama="{{ $g['leader']->nama }}"
+                                                     data-email="{{ $g['leader']->email }}" data-no_hp="{{ $g['leader']->no_hp }}"
+                                                     data-kelas="{{ $g['leader']->kelas }}" data-jurusan="{{ $g['leader']->jurusan }}"
+                                                     data-sekolah="{{ $g['leader']->sekolah }}" data-perusahaan="{{ $g['leader']->perusahaan }}"
+                                                     data-mulai="{{ $g['leader']->tgl_mulai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                     data-selesai="{{ $g['leader']->tgl_selesai_magang ? \Carbon\Carbon::parse($g['leader']->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                     data-guru-nama="{{ $g['leader']->guru->nama ?? '-' }}" data-guru-nip="{{ $g['leader']->guru->id_guru ?? '-' }}"
+                                                     data-pl-nama="{{ $g['leader']->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $g['leader']->pembimbing->id_pembimbing ?? '-' }}"
+                                                     data-pl-hp="{{ $g['leader']->pembimbing->no_telp ?? '-' }}">
+                                                     <i class="fas fa-user-circle"></i> Detail
+                                                 </button>
+                                             @endif
+                                             
+                                             <button class="btn-action btn-preview-pdf" 
+                                                     data-url="{{ route('admin.rekap.kelompok', $g['leader']->nisn) }}">
+                                                 <i class="fas fa-file-pdf"></i> Rekap
+                                             </button>
+                                         </div>
+                                     </div>
+                                 </div>
                             @empty
                                 <div class="col-12 text-center py-5">
                                     <div class="empty-state">
@@ -397,21 +479,31 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="action-group justify-content-end gap-2">
-                                                    <button class="btn-icon btn-detail-soft btn-detail"
-                                                        data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                        data-nisn="{{ $rs->nisn }}" data-nama="{{ $rs->nama }}" data-email="{{ $rs->email }}"
-                                                        data-no_hp="{{ $rs->no_hp }}" data-kelas="{{ $rs->kelas }}" data-jurusan="{{ $rs->jurusan }}"
-                                                        data-sekolah="{{ $rs->sekolah }}" data-perusahaan="{{ $rs->perusahaan }}"
-                                                        data-mulai="{{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }}"
-                                                        data-selesai="{{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                        data-guru-nama="{{ $rs->guru->nama ?? '-' }}" data-guru-nip="{{ $rs->guru->id_guru ?? '-' }}"
-                                                        data-pl-nama="{{ $rs->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $rs->pembimbing->id_pembimbing ?? '-' }}"
-                                                        data-pl-hp="{{ $rs->pembimbing->no_telp ?? '-' }}"
-                                                        title="Lihat Detail">
-                                                        <i class="fas fa-eye text-primary"></i>
-                                                    </button>
-                                                </div>
+                                                 <div class="action-group justify-content-end gap-2">
+                                                     <button class="btn-icon btn-detail-soft btn-detail"
+                                                         data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                         data-nisn="{{ $rs->nisn }}" data-nama="{{ $rs->nama }}" data-email="{{ $rs->email }}"
+                                                         data-no_hp="{{ $rs->no_hp }}" data-kelas="{{ $rs->kelas }}" data-jurusan="{{ $rs->jurusan }}"
+                                                         data-sekolah="{{ $rs->sekolah }}" data-perusahaan="{{ $rs->perusahaan }}"
+                                                         data-mulai="{{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                         data-selesai="{{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                         data-guru-nama="{{ $rs->guru->nama ?? '-' }}" data-guru-nip="{{ $rs->guru->id_guru ?? '-' }}"
+                                                         data-pl-nama="{{ $rs->pembimbing->nama ?? '-' }}" data-pl-nip="{{ $rs->pembimbing->id_pembimbing ?? '-' }}"
+                                                         data-pl-hp="{{ $rs->pembimbing->no_telp ?? '-' }}"
+                                                         title="Lihat Detail Profil">
+                                                         <i class="fas fa-id-card text-primary"></i>
+                                                     </button>
+                                                     <button class="btn-icon btn-detail-soft btn-preview-pdf" 
+                                                         data-url="{{ route('admin.rekap.jurnal', $rs->nisn) }}"
+                                                         title="Lihat Jurnal Individu">
+                                                         <i class="fas fa-book text-info"></i>
+                                                     </button>
+                                                     <button class="btn-icon btn-detail-soft btn-preview-pdf" 
+                                                         data-url="{{ route('admin.rekap.absensi', $rs->nisn) }}"
+                                                         title="Lihat Absensi Individu">
+                                                         <i class="fas fa-file-signature text-success"></i>
+                                                     </button>
+                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
@@ -433,168 +525,4 @@
 
     {{-- Modal Detail --}}
     @include('pimpinan.siswa_modals')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            // ── Tab Persistence ───────────────────────────────────────────
-            const activeTab = localStorage.getItem('activeStudentTab_Pimpinan');
-            if (activeTab) {
-                const tabEl = document.querySelector(`button[data-bs-target="${activeTab}"]`);
-                if (tabEl) {
-                    bootstrap.Tab.getInstance(tabEl)?.show() || new bootstrap.Tab(tabEl).show();
-                }
-            }
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.addEventListener('shown.bs.tab', event => {
-                    localStorage.setItem('activeStudentTab_Pimpinan', event.target.dataset.bsTarget);
-                });
-            });
-
-            // ── View Mode Switching ────────────────────────────────────────
-            function initViewMode() {
-                document.querySelectorAll('.view-mode-btn').forEach(btn => {
-                    const target = btn.dataset.target;
-                    const view   = btn.dataset.view;
-                    const savedView = localStorage.getItem(`viewMode_${target}_Pimpinan`);
-
-                    if (savedView === view) {
-                        btn.click();
-                    }
-
-                    btn.addEventListener('click', function () {
-                        const v = this.dataset.view;
-                        const t = this.dataset.target;
-                        const pane = this.closest('.tab-pane');
-
-                        pane.querySelectorAll('.view-mode-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-
-                        const grouped = pane.querySelector(`#${t}-grouped-view`);
-                        const flat    = pane.querySelector(`#${t}-flat-view`);
-
-                        if (v === 'grouped') {
-                            grouped.classList.remove('d-none');
-                            flat.classList.add('d-none');
-                        } else {
-                            grouped.classList.add('d-none');
-                            flat.classList.remove('d-none');
-                        }
-                        localStorage.setItem(`viewMode_${t}_Pimpinan`, v);
-                    });
-                });
-            }
-            initViewMode();
-
-            // ── Detail Modal Handler ───────────────────────────────────────
-            document.querySelectorAll('.btn-detail').forEach(button => {
-                button.addEventListener('click', function () {
-                    document.getElementById('det_name').textContent         = this.dataset.nama;
-                    document.getElementById('det_nisn').textContent         = this.dataset.nisn;
-                    document.getElementById('det_email').textContent        = this.dataset.email;
-                    document.getElementById('det_hp').textContent           = this.dataset.no_hp || '-';
-                    document.getElementById('det_kelas_jurusan').textContent = `${this.dataset.kelas} - ${this.dataset.jurusan}`;
-                    document.getElementById('det_sekolah').textContent      = this.dataset.sekolah;
-                    document.getElementById('det_perusahaan').textContent   = this.dataset.perusahaan || 'Belum ditugaskan';
-
-                    const mulai   = this.dataset.mulai;
-                    const selesai = this.dataset.selesai;
-                    document.getElementById('det_periode').textContent = (mulai && selesai && mulai !== '-')
-                        ? `${mulai} s/d ${selesai}` : 'Belum ditentukan';
-
-                    document.getElementById('det_guru_nama').textContent = this.dataset.guruNama;
-                    document.getElementById('det_guru_nip').textContent  = this.dataset.guruNip;
-                    document.getElementById('det_pl_nama').textContent   = this.dataset.plNama;
-                    document.getElementById('det_pl_nip').textContent    = this.dataset.plNip;
-                    document.getElementById('det_pl_hp').textContent     = this.dataset.plHp;
-                });
-            });
-
-            // ── Modal Group Members (Riwayat) ─────────────────────────────
-            const groupModalEl     = document.getElementById('groupMembersModal');
-            const groupModal        = groupModalEl ? new bootstrap.Modal(groupModalEl) : null;
-            const modalNameEl       = document.getElementById('modalGroupName');
-            const modalBodyEl       = document.getElementById('modalGroupBody');
-
-            document.querySelectorAll('.btn-show-members').forEach(button => {
-                button.addEventListener('click', function() {
-                    const name = this.dataset.name;
-                    const members = JSON.parse(this.dataset.members);
-                    
-                    modalNameEl.innerText = name;
-                    modalBodyEl.innerHTML = '';
-                    
-                    // Route patterns (Admin routes since they provide reports for Pimpinan)
-                    const logDownloadBase = "{{ route('admin.rekap.jurnal', ['nisn' => ':nisn']) }}";
-                    const absDownloadBase = "{{ route('admin.rekap.absensi', ['nisn' => ':nisn']) }}";
-
-                    members.forEach((member) => {
-                        const logDownload = logDownloadBase.replace(':nisn', member.nisn);
-                        const absDownload = absDownloadBase.replace(':nisn', member.nisn);
-                        
-                        const statusBadge = `
-                            <span class="badge bg-secondary-light text-muted px-2 py-1 small rounded-pill" style="font-size: 0.65rem;">
-                                <i class="fas fa-flag-checkered me-1"></i> SELESAI
-                            </span>
-                        `;
-
-                        const row = `
-                            <tr>
-                                <td>
-                                    <div class="cell-name mb-0" style="font-size: 0.95rem;">${member.nama}</div>
-                                    <div class="cell-sub small text-muted">NISN: ${member.nisn}</div>
-                                </td>
-                                <td class="text-center">
-                                    ${statusBadge}
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}" 
-                                            style="background: #f0f9ff; color: #0369a1; padding: 6px 10px; border-radius: 8px; border: 1px solid #bae6fd;">
-                                            <i class="fas fa-book"></i>
-                                        </button>
-                                        <button class="btn-small btn-preview-pdf" title="Cetak Absensi" data-url="${absDownload}" 
-                                            style="background: #f0fdf4; color: #15803d; padding: 6px 10px; border-radius: 8px; border: 1px solid #bbf7d0;">
-                                            <i class="fas fa-file-signature"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                        modalBodyEl.innerHTML += row;
-                    });
-                    
-                    initPdfPreviewListeners();
-                    if (groupModal) groupModal.show();
-                });
-            });
-
-            // ── PDF Preview ────────────────────────────────────────────────
-            const pdfModalEl   = document.getElementById('previewPdfModal');
-            const pdfModal     = pdfModalEl ? new bootstrap.Modal(pdfModalEl) : null;
-            const pdfIframe    = document.getElementById('pdfIframe');
-            const downloadBtn  = document.getElementById('downloadPdfBtn');
-            const printBtn     = document.getElementById('printPdfBtn');
-
-            function initPdfPreviewListeners() {
-                document.querySelectorAll('.btn-preview-pdf').forEach(button => {
-                    button.onclick = null; 
-                    button.addEventListener('click', function () {
-                        const url = this.dataset.url;
-                        if (!url) return;
-                        pdfIframe.src          = url.includes('#') ? url : url + '#view=Fit';
-                        downloadBtn.href       = url + (url.includes('?') ? '&' : '?') + 'download=1';
-                        if (pdfModal) pdfModal.show();
-                    });
-                });
-            }
-            initPdfPreviewListeners();
-
-            if (pdfModalEl) {
-                printBtn.addEventListener('click', () => {
-                    pdfIframe.contentWindow.print();
-                });
-            }
-        });
-    </script>
 @endsection

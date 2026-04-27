@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/admin/rekap.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin/kelola-modals.css') }}">
 @endpush
 
 @section('body')
@@ -116,22 +117,24 @@
     </div>
 
     <!-- Modal Preview PDF -->
-    <div class="modal fade" id="previewPdfModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-pdf-viewer modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header pdf-viewer-header">
+                <div class="pdf-viewer-header">
                     <div class="pdf-viewer-title">
                         <div class="pdf-icon-wrapper">
                             <i class="fas fa-file-pdf"></i>
                         </div>
-                        <h5 class="modal-title mb-0">Pratinjau Laporan Rekapitulasi</h5>
+                        <h5 class="modal-title mb-0">Preview Laporan</h5>
                     </div>
                     
                     <div class="pdf-viewer-actions">
-                        <a id="downloadPdfBtn" href="#" class="btn-pdf-action">
-                            <i class="fas fa-arrow-down-long"></i> Unduh Laporan
-                        </a>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <div class="pdf-desktop-actions">
+                            <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File" target="_blank">
+                                <i class="fas fa-download"></i> <span>Unduh Laporan</span>
+                            </a>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
                 <div class="modal-body pdf-viewer-body">

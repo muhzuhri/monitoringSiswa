@@ -4,7 +4,6 @@
 @section('body-class', 'dashboard-page guru-page')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/guru/daftarSiswa.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/guru/logbookSiswa.css') }}">
 @endpush
 
