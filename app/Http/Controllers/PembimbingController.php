@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absensi;
 use Illuminate\Http\Request;
 use App\Models\Siswa;
 use App\Models\Pembimbing;
@@ -10,82 +11,126 @@ use App\Models\KriteriaPenilaian;
 use App\Models\PenilaianDetail;
 use App\Models\Penilaian;
 use App\Models\TahunAjaran;
+use App\Models\PengajuanSiswa;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\PengajuanSiswa;
 
 class PembimbingController extends Controller
 {
+    /**
+     * Helper to calculate student internship progress percentage
+     */
+    private function calculateProgress($siswa)
+    {
+        if (!$siswa->tgl_mulai_magang || !$siswa->tgl_selesai_magang) {
+            return 0;
+        }
+
+        $start = Carbon::parse($siswa->tgl_mulai_magang);
+        $end = Carbon::parse($siswa->tgl_selesai_magang);
+        $now = Carbon::now();
+
+        if ($now->lt($start)) return 0;
+        if ($now->gt($end)) return 100;
+
+        $totalDays = max(1, $start->diffInDays($end));
+        $daysPassed = (int) $start->diffInDays($now);
+
+        return min(100, round(($daysPassed / $totalDays) * 100));
+    }
+
+    /**
+     * Helper to ensure assessment criteria exist for supervisor
+     */
+    private function ensureKriteriaExists($supervisorId)
+    {
+        $kriteria = KriteriaPenilaian::where('id_pembimbing', $supervisorId)
+            ->orderBy('tipe')
+            ->orderBy('urutan')
+            ->get();
+
+        if ($kriteria->isEmpty()) {
+            $allowedTypes = ['sikap_kerja', 'kompetensi_keahlian'];
+            $forbiddenWords = ['Teori', 'Praktek', 'Inisiatif', 'Kreativitas', 'Kesehatan dan Keselamatan Kerja'];
+            
+            $defaults = KriteriaPenilaian::whereNull('id_pembimbing')
+                ->whereIn('tipe', $allowedTypes)
+                ->get();
+
+            foreach ($defaults as $d) {
+                $isForbidden = false;
+                foreach ($forbiddenWords as $word) {
+                    if (mb_stripos($d->nama_kriteria, $word) !== false) {
+                        $isForbidden = true;
+                        break;
+                    }
+                }
+                if ($isForbidden) continue;
+                if (mb_strtolower($d->nama_kriteria) == 'disiplin' && $d->tipe == 'kompetensi_keahlian') continue;
+
+                KriteriaPenilaian::create([
+                    'nama_kriteria' => $d->nama_kriteria,
+                    'tipe' => $d->tipe,
+                    'jurusan' => $d->jurusan,
+                    'urutan' => $d->urutan,
+                    'id_pembimbing' => $supervisorId,
+                ]);
+            }
+            
+            return KriteriaPenilaian::where('id_pembimbing', $supervisorId)
+                ->orderBy('tipe')
+                ->orderBy('urutan')
+                ->get();
+        }
+        
+        return $kriteria;
+    }
     /**
      * Menampilkan daftar siswa binaan yang dibimbing oleh dosen login.
      */
     public function daftarSiswa(Request $request)
     {
+        /** @var \App\Models\Pembimbing $pembimbing */
         $pembimbing = Auth::user();
         $search     = $request->input('search');
-        $periodeId  = $request->input('periode');   // filter tahun ajaran untuk riwayat
+        $periodeId  = $request->input('periode');
         $today      = Carbon::now()->toDateString();
 
-        $baseQuery = Siswa::where('id_pembimbing', $pembimbing->id_pembimbing);
+        $query = Siswa::where('id_pembimbing', $pembimbing->id_pembimbing);
 
-        // Search feature
         if ($search) {
-            $baseQuery->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                     ->orWhere('nisn', 'like', "%{$search}%")
-                    ->orWhere('perusahaan', 'like', "%{$search}%")
-                    ->orWhere('sekolah', 'like', "%{$search}%");
+                    ->orWhere('perusahaan', 'like', "%{$search}%");
             });
         }
 
-        $allSiswas = (clone $baseQuery)->with([
-            'guru',
-            'tahunAjaran',
-            'absensis' => function ($q) use ($today) {
-                $q->whereDate('tanggal', $today);
-            },
-            'penilaians' => function ($q) {
-                $q->where('pemberi_nilai', 'Dosen Pembimbing');
-            }
+        $allSiswas = $query->with([
+            'guru', 'tahunAjaran',
+            'absensis' => fn($q) => $q->whereDate('tanggal', $today),
+            'penilaians' => fn($q) => $q->where('pemberi_nilai', 'Dosen Pembimbing')
         ])->orderBy('nama', 'asc')->get();
 
-        // Hitung progress & status hari ini untuk setiap siswa
-        foreach ($allSiswas as $siswa) {
-            if ($siswa->tgl_mulai_magang && $siswa->tgl_selesai_magang) {
-                $start     = Carbon::parse($siswa->tgl_mulai_magang);
-                $end       = Carbon::parse($siswa->tgl_selesai_magang);
-                $totalDays = max(1, $start->diffInDays($end));
-                $daysPassed = $start->isFuture() ? 0 : (int) $start->diffInDays(Carbon::now());
-                $siswa->progress_percent = min(100, round(($daysPassed / $totalDays) * 100));
-            } else {
-                $siswa->progress_percent = 0;
-            }
-
-            // Status hari ini
-            $siswa->absen_hari_ini = $siswa->absensis->first();
+        foreach ($allSiswas as $s) {
+            $s->progress_percent = $this->calculateProgress($s);
+            $s->absen_hari_ini = $s->absensis->first();
         }
 
-        // Siswa Bimbingan (aktif)
-        $siswasActive = $allSiswas->filter(fn($s) => $s->status !== 'selesai');
-
-        // Siswa Riwayat (selesai) — dengan filter periode opsional
+        $siswasActive = $allSiswas->where('status', '!=', 'selesai');
+        
         $siswasHistory = $allSiswas->filter(function ($s) use ($periodeId) {
             if ($s->status !== 'selesai') return false;
-            if ($periodeId) {
-                return (string) $s->id_tahun_ajaran === (string) $periodeId;
-            }
-            return true;
+            return !$periodeId || (string)$s->id_tahun_ajaran === (string)$periodeId;
         });
 
-        // Ambil semua tahun ajaran yang relevan (hanya yang punya riwayat siswa selesai milik pembimbing ini)
-        $periodeOptions = TahunAjaran::whereHas('siswas', function ($q) use ($pembimbing) {
-            $q->where('id_pembimbing', $pembimbing->id_pembimbing);
-        })->orderBy('tgl_mulai', 'desc')->get();
+        $periodeOptions = TahunAjaran::whereHas('siswas', fn($q) => $q->where('id_pembimbing', $pembimbing->id_pembimbing))
+            ->orderBy('tgl_mulai', 'desc')->get();
 
         return view('pembimbing.daftarSiswa', compact(
-            'pembimbing', 'siswasActive', 'siswasHistory',
-            'search', 'periodeId', 'periodeOptions'
+            'pembimbing', 'siswasActive', 'siswasHistory', 'search', 'periodeId', 'periodeOptions'
         ));
     }
 
@@ -212,23 +257,16 @@ class PembimbingController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
-        $absensi = \App\Models\Absensi::findOrFail($id);
+        $absensi = Absensi::findOrFail($id);
 
-        // Verifikasi bahwa absensi ini milik siswa yang dibimbing oleh dosen login
-        $pembimbing = Auth::user();
-        $isMySiswa = Siswa::where('nisn', $absensi->nisn)
-            ->where('id_pembimbing', $pembimbing->id_pembimbing)
-            ->exists();
-
-        if (!$isMySiswa) {
+        if ($absensi->siswa->id_pembimbing != Auth::user()->id_pembimbing) {
             return redirect()->back()->with('error', 'Akses ditolak.');
         }
 
-        $absensi->verifikasi = $request->status;
-        if ($request->has('keterangan')) {
-            $absensi->keterangan = $request->keterangan;
-        }
-        $absensi->save();
+        $absensi->update([
+            'verifikasi' => $request->status,
+            'keterangan' => $request->keterangan ?? $absensi->keterangan
+        ]);
 
         return redirect()->back()->with('success', 'Absensi berhasil divalidasi.');
     }
@@ -263,15 +301,11 @@ class PembimbingController extends Controller
     public function validasiSemuaAbsensi(Request $request, $nisn)
     {
         $pembimbing = Auth::user();
-        $siswa = Siswa::where('nisn', $nisn)
-            ->where('id_pembimbing', $pembimbing->id_pembimbing)
-            ->firstOrFail();
+        $siswa = Siswa::where('nisn', $nisn)->where('id_pembimbing', $pembimbing->id_pembimbing)->firstOrFail();
 
-        $updatedCount = \App\Models\Absensi::where('nisn', $nisn)
+        $updatedCount = Absensi::where('nisn', $nisn)
             ->where('verifikasi', 'pending')
-            ->update([
-                'verifikasi' => 'verified'
-            ]);
+            ->update(['verifikasi' => 'verified']);
 
         if ($updatedCount > 0) {
             return redirect()->back()->with('success', $updatedCount . ' absensi berhasil divalidasi sekaligus.');
@@ -336,14 +370,14 @@ class PembimbingController extends Controller
 
                 if ($existingAbsensi) {
                     $existingAbsensi->update([
-                        'jam_masuk' => $pengajuan->jam_masuk ? $pengajuan->jam_masuk : $existingAbsensi->jam_masuk,
-                        'jam_pulang' => $pengajuan->jam_pulang ? $pengajuan->jam_pulang : $existingAbsensi->jam_pulang,
+                        'jam_masuk' => $pengajuan->jam_masuk ?: $existingAbsensi->jam_masuk,
+                        'jam_pulang' => $pengajuan->jam_pulang ?: $existingAbsensi->jam_pulang,
                         'status' => $statusHadir,
                         'verifikasi' => 'verified',
                         'keterangan' => 'Validasi Lupa Absensi',
                     ]);
                 } else {
-                    \App\Models\Absensi::create([
+                    Absensi::create([
                         'nisn' => $pengajuan->nisn,
                         'tanggal' => $pengajuan->tanggal,
                         'jam_masuk' => $pengajuan->jam_masuk,
@@ -423,59 +457,7 @@ class PembimbingController extends Controller
             return $s->penilaians->where('pemberi_nilai', 'Dosen Pembimbing')->first();
         });
 
-        // 1. Fetch CURRENT custom criteria (strictly those assigned to this specific supervisor)
-        $supervisorId = (string) $pembimbing->id_pembimbing;
-        $kriteriaKustom = KriteriaPenilaian::where('id_pembimbing', $supervisorId)
-            ->orderBy('tipe')
-            ->orderBy('urutan')
-            ->get();
-
-        // 2. INITIALIZATION (Fall-back only):
-        // Only trigger if the supervisor has ZERO criteria in the database.
-        // This acts as a "Welcome" or "Reset" state.
-        if ($kriteriaKustom->count() === 0) {
-            $allowedTypes = ['sikap_kerja', 'kompetensi_keahlian'];
-            $forbiddenKeywords = ['Teori', 'Praktek', 'Inisiatif', 'Kreativitas', 'Kesehatan dan Keselamatan Kerja'];
-            
-            $defaults = KriteriaPenilaian::whereNull('id_pembimbing')
-                ->whereIn('tipe', $allowedTypes)
-                ->get();
-
-            foreach ($defaults as $d) {
-                // Skip forbidden items (Teacher-specific or redundant)
-                $isForbidden = false;
-                foreach ($forbiddenKeywords as $word) {
-                    if (mb_stripos($d->nama_kriteria, $word) !== false) {
-                        $isForbidden = true;
-                        break;
-                    }
-                }
-                if ($isForbidden) continue;
-                
-                // Specific: Skip Disiplin if it's in the Kompetensi category (standardize to Sikap Kerja)
-                if (mb_strtolower($d->nama_kriteria) == 'disiplin' && $d->tipe == 'kompetensi_keahlian') continue;
-
-                // Create clean copy for this supervisor
-                KriteriaPenilaian::create([
-                    'nama_kriteria' => $d->nama_kriteria,
-                    'tipe' => $d->tipe,
-                    'jurusan' => $d->jurusan,
-                    'urutan' => $d->urutan,
-                    'id_pembimbing' => $supervisorId,
-                ]);
-            }
-            
-            // Re-fetch after the one-time operation
-            $kriteriaKustom = KriteriaPenilaian::where('id_pembimbing', $supervisorId)
-                ->orderBy('tipe')
-                ->orderBy('urutan')
-                ->get();
-        }
-
-        // NOTE: We no longer perform "Auto-Cleanup" or "Auto-Restoration" on every load.
-        // This gives the supervisor full control over their list (can delete all or rename).
-
-        // 3. Set $kriteria for the assessment modal to use these custom ones
+        $kriteriaKustom = $this->ensureKriteriaExists($pembimbing->id_pembimbing);
         $kriteria = $kriteriaKustom;
             
         return view('pembimbing.penilaianSiswa', compact(
@@ -553,12 +535,10 @@ class PembimbingController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        $kriteria = KriteriaPenilaian::where('id_pembimbing', (string) $pembimbing->id_pembimbing)
-            ->orderBy('tipe')
-            ->orderBy('urutan')
-            ->get();
+        $kriteriaKustom = $this->ensureKriteriaExists($pembimbing->id_pembimbing);
+        $kriteria = $kriteriaKustom;
 
-        return view('pembimbing.penilaianSiswa', compact('pembimbing', 'siswa', 'penilaian', 'kriteria'));
+        return view('pembimbing.penilaianSiswa', compact('pembimbing', 'siswa', 'penilaian', 'kriteria', 'kriteriaKustom'));
     }
 
     /**

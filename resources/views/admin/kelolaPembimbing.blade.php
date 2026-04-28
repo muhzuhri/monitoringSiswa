@@ -85,7 +85,12 @@
                                             data-instansi="{{ $item->instansi }}" data-telp="{{ $item->no_telp }}"
                                             data-siswas="{{ json_encode(
                                                 $item->siswas->map(function ($s) {
-                                                    return ['nama' => $s->nama, 'nisn' => $s->nisn];
+                                                    return [
+                                                        'nama' => $s->nama, 
+                                                        'nisn' => $s->nisn,
+                                                        'id_periode' => $s->id_tahun_ajaran,
+                                                        'periode' => $s->tahunAjaran->tahun_ajaran ?? 'N/A'
+                                                    ];
                                                 }),
                                             ) }}">
                                             <i class="fas fa-eye"></i>
@@ -370,7 +375,7 @@
                             </div>
                             <div class="detail-p-item">
                                 <label>Nama Lengkap</label>
-                                <span id="det_name">-</span>
+                                <span id="det_nama">-</span>
                             </div>
                             <div class="detail-p-item">
                                 <label>Jabatan / NIDN</label>
@@ -397,7 +402,18 @@
 
                         <!-- Bottom Column: Supervised Students List -->
                         <div class="detail-section-card full-width">
-                            <h6 class="section-label"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="section-label mb-0"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                                <div class="filter-wrapper d-flex align-items-center gap-2">
+                                    <label class="small text-muted mb-0">Filter Periode:</label>
+                                    <select id="filter_periode" class="form-select form-select-sm" style="width: auto; border-radius: 8px;">
+                                        <option value="all">Semua Periode</option>
+                                        @foreach($periods as $p)
+                                            <option value="{{ $p->id_tahun_ajaran }}">{{ $p->tahun_ajaran }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div id="supervised_students_list" class="supervised-list">
                                 <!-- Will be populated by JS -->
                             </div>
@@ -434,6 +450,7 @@
         </div>
     </div>
 
+    @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Edit Logic
@@ -460,46 +477,61 @@
             });
 
             // Preview Detail Logic
+            let currentSiswas = [];
             const detailButtons = document.querySelectorAll('.btn-detail');
+            const filterPeriode = document.getElementById('filter_periode');
+
+            function renderStudents(siswas) {
+                const listContainer = document.getElementById('supervised_students_list');
+                listContainer.innerHTML = '';
+
+                if (siswas.length > 0) {
+                    siswas.forEach(s => {
+                        const studentDiv = document.createElement('div');
+                        studentDiv.className = 'student-card-mini';
+                        studentDiv.innerHTML = `
+                                                <div class="student-info">
+                                                    <div class="nama">${s.nama}</div>
+                                                    <div class="meta">NISN: ${s.nisn} | <span class="text-primary">${s.periode}</span></div>
+                                                </div>
+                                                <i class="fas fa-user-graduate"></i>
+                                            `;
+                        listContainer.appendChild(studentDiv);
+                    });
+                } else {
+                    listContainer.innerHTML =
+                        '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan untuk periode ini.</div>';
+                }
+            }
+
             detailButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    document.getElementById('det_id').textContent = this.closest('tr')
-                        .querySelector('.btn-edit').getAttribute('data-id');
-                    document.getElementById('det_nama').textContent = this.getAttribute(
-                        'data-nama');
-                    document.getElementById('det_jabatan').textContent = this.getAttribute(
-                        'data-jabatan');
-                    document.getElementById('det_email').textContent = this.getAttribute(
-                        'data-email');
-                    document.getElementById('det_telp').textContent = this.getAttribute(
-                        'data-telp');
-                    document.getElementById('det_instansi').textContent = this.getAttribute(
-                        'data-instansi');
+                    const id = this.closest('tr').querySelector('.btn-edit').getAttribute('data-id');
+                    document.getElementById('det_id').textContent = id;
+                    document.getElementById('det_nama').textContent = this.getAttribute('data-nama');
+                    document.getElementById('det_jabatan').textContent = this.getAttribute('data-jabatan');
+                    document.getElementById('det_email').textContent = this.getAttribute('data-email');
+                    document.getElementById('det_telp').textContent = this.getAttribute('data-telp');
+                    document.getElementById('det_instansi').textContent = this.getAttribute('data-instansi');
+
+                    // Reset filter
+                    if (filterPeriode) filterPeriode.value = 'all';
 
                     // Populate supervised students list
-                    const siswas = JSON.parse(this.getAttribute('data-siswas'));
-                    const listContainer = document.getElementById('supervised_students_list');
-                    listContainer.innerHTML = '';
-
-                    if (siswas.length > 0) {
-                        siswas.forEach(s => {
-                            const studentDiv = document.createElement('div');
-                            studentDiv.className = 'student-card-mini';
-                            studentDiv.innerHTML = `
-                                                    <div class="student-info">
-                                                        <div class="nama">${s.nama}</div>
-                                                        <div class="meta">NISN: ${s.nisn}</div>
-                                                    </div>
-                                                    <i class="fas fa-user-graduate"></i>
-                                                `;
-                            listContainer.appendChild(studentDiv);
-                        });
-                    } else {
-                        listContainer.innerHTML =
-                            '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan.</div>';
-                    }
+                    currentSiswas = JSON.parse(this.getAttribute('data-siswas'));
+                    renderStudents(currentSiswas);
                 });
             });
+
+            if (filterPeriode) {
+                filterPeriode.addEventListener('change', function() {
+                    const selectedPeriode = this.value;
+                    const filtered = selectedPeriode === 'all' 
+                        ? currentSiswas 
+                        : currentSiswas.filter(s => s.id_periode == selectedPeriode);
+                    renderStudents(filtered);
+                });
+            }
 
             // Delete Logic
             const deleteButtons = document.querySelectorAll('.btn-delete-trigger');
@@ -528,4 +560,5 @@
             });
         });
     </script>
+    @endpush
 @endsection

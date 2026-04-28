@@ -7,12 +7,16 @@ use App\Models\InformasiDashboard;
 use App\Models\LaporanAkhir;
 use App\Models\Logbook;
 use App\Models\Penilaian;
+use App\Models\PenilaianDetail;
+use App\Models\KriteriaPenilaian;
 use App\Models\ProgramStudi;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class GuruController extends Controller
 {
@@ -23,88 +27,37 @@ class GuruController extends Controller
     {
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
-        $today = Carbon::now()->toDateString();
-        $month = Carbon::now()->month;
-        $year = Carbon::now()->year;
-
-        // 1. Daftar Siswa Bimbingan
-        $siswas = $user->siswas;
-        $totalSiswa = $siswas->count();
-
-        // 2. Monitoring Hari Ini
-        $siswaNisns = $siswas->pluck('nisn')->toArray();
-
-        $absenTodayCount = Absensi::where('nisn', $siswaNisns)
-            ->whereDate('tanggal', $today)
-            ->count();
-        $belumAbsen = max(0, $totalSiswa - $absenTodayCount);
-
-        $logbookTodayCount = Logbook::whereIn('nisn', $siswaNisns)
-            ->whereDate('tanggal', $today)
-            ->count();
-        $belumLogbook = max(0, $totalSiswa - $logbookTodayCount);
-
-        // 3. Rata-rata Progres PKL
-        $totalProgress = 0;
-        foreach ($siswas as $siswa) {
-            if ($siswa->tgl_mulai_magang && $siswa->tgl_selesai_magang) {
-                $start = Carbon::parse($siswa->tgl_mulai_magang);
-                $end = Carbon::parse($siswa->tgl_selesai_magang);
-                $totalDays = max(1, $start->diffInDays($end));
-                $daysPassed = $start->isFuture() ? 0 : (int) $start->diffInDays(Carbon::now());
-                $p = min(100, round(($daysPassed / $totalDays) * 100));
-                $totalProgress += $p;
-            }
-        }
-        $rataProgress = $totalSiswa > 0 ? round($totalProgress / $totalSiswa) : 0;
-
-        // 4. Notifikasi / Pending Verifikasi
-        $pendingLogbookCount = Logbook::whereIn('nisn', $siswaNisns)
-            ->where('status', 'pending')
-            ->count();
-
-        $pendingLaporanCount = LaporanAkhir::whereIn('nisn', $siswaNisns)
-            ->where('status', 'pending')
-            ->count();
-
-        // 5. Data Chart: Presensi Bulan Ini
-        $statsPresensi = [
-            'hadir' => Absensi::whereIn('nisn', $siswaNisns)->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->whereIn('status', ['hadir', 'terlambat'])->count(),
-            'izin' => Absensi::whereIn('nisn', $siswaNisns)->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'izin')->count(),
-            'sakit' => Absensi::whereIn('nisn', $siswaNisns)->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'sakit')->count(),
-            'alpa' => Absensi::whereIn('nisn', $siswaNisns)->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'alpa')->count(),
-        ];
-
-        // 6. Data Chart: Rata-rata Nilai
-        $avgNilaiTeknis = Penilaian::whereIn('nisn', $siswaNisns)->avg('nilai_teknis') ?: 0;
-        $avgNilaiNonTeknis = Penilaian::whereIn('nisn', $siswaNisns)->avg('nilai_non_teknis') ?: 0;
-
-        // Preview Siswa (Limit 5)
-        $siswaPreviews = $user->siswas()->with([
-            'absensis' => function ($q) use ($today) {
-                $q->whereDate('tanggal', $today);
-            }
-        ])->limit(5)->get();
-
-        // Informasi Dashboard
-        $informasi     = InformasiDashboard::getInstance();
+        
+        // Data for the view (Informasi & Program Studi are currently used)
+        $informasi = InformasiDashboard::getInstance();
         $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
 
-        return view('guru.guru', compact(
-            'user',
-            'totalSiswa',
-            'belumAbsen',
-            'belumLogbook',
-            'rataProgress',
-            'pendingLogbookCount',
-            'pendingLaporanCount',
-            'statsPresensi',
-            'avgNilaiTeknis',
-            'avgNilaiNonTeknis',
-            'siswaPreviews',
-            'informasi',
-            'programStudis'
-        ));
+        // Note: Statistics (absenToday, logbookCount, etc.) are removed as they are 
+        // not displayed in current guru.blade.php view, improving performance.
+
+        return view('guru.guru', compact('user', 'informasi', 'programStudis'));
+    }
+
+    /**
+     * Helper to calculate student internship progress percentage
+     */
+    private function calculateProgress($siswa)
+    {
+        if (!$siswa->tgl_mulai_magang || !$siswa->tgl_selesai_magang) {
+            return 0;
+        }
+
+        $start = Carbon::parse($siswa->tgl_mulai_magang);
+        $end = Carbon::parse($siswa->tgl_selesai_magang);
+        $now = Carbon::now();
+
+        if ($now->lt($start)) return 0;
+        if ($now->gt($end)) return 100;
+
+        $totalDays = max(1, $start->diffInDays($end));
+        $daysPassed = (int) $start->diffInDays($now);
+
+        return min(100, round(($daysPassed / $totalDays) * 100));
     }
 
     /**
@@ -119,128 +72,65 @@ class GuruController extends Controller
         $periodeId = $request->input('periode');
         $today = Carbon::now()->toDateString();
 
-        // 1. Siswa Bimbingan (yang sudah dikoordinir guru ini)
-        $query = $user->siswas();
+        // 1. Siswa Bimbingan (Aktif)
+        $query = $user->siswas()->where(function($q) {
+            $q->where('status', '!=', 'selesai')->orWhereNull('status');
+        });
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%")
-                    ->orWhere('perusahaan', 'like', "%{$search}%")
-                    ->orWhere('sekolah', 'like', "%{$search}%");
+                $q->where('nama', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%");
             });
         }
+        $siswas = $query->with(['absensis' => fn($q) => $q->whereDate('tanggal', $today)])
+            ->orderBy('nama', 'asc')->get();
 
-        // Tampilkan hanya siswa yang aktif (belum selesai)
-        $query->where(function($q) {
-            $q->where(function($sq) {
-                $sq->where('status', '!=', 'selesai')
-                   ->orWhereNull('status');
-            })->where(function($subQ) {
-                $subQ->where('tgl_selesai_magang', '>=', now())
-                     ->orWhereNull('tgl_selesai_magang');
-            });
-        });
+        // Map and Group
+        foreach ($siswas as $s) {
+            $s->progress_percent = $this->calculateProgress($s);
+            $s->absen_hari_ini = $s->absensis->first();
+        }
+        $groupedSiswas = $this->mapGroupedSiswa($siswas);
 
-        $siswas = $query->with([
-            'absensis' => function ($q) use ($today) {
-                $q->whereDate('tanggal', $today);
-            }
-        ])->orderBy('nama', 'asc')->get();
-
-        // Grouping logic for Siswa Bimbingan
-        $groupedSiswas = $siswas->groupBy('nisn_ketua')->map(function ($group) {
-            $leader = $group->where('nisn', $group->first()->nisn_ketua)->first() ?: $group->first();
-            return [
-                'leader' => $leader,
-                'members' => $group,
-                'is_group' => $group->count() > 1 || $leader->tipe_magang === 'kelompok',
-                'type' => ($group->count() > 1 || $leader->tipe_magang === 'kelompok') ? 'Kelompok' : 'Individu'
-            ];
-        });
-
-        // 2. Daftar Siswa Tersedia (yang belum punya guru pembimbing)
+        // 2. Daftar Siswa Tersedia
         $availableQuery = Siswa::whereNull('id_guru');
-
-        if ($npsn) {
-            $availableQuery->where('npsn', $npsn);
-        }
-
+        if ($npsn) $availableQuery->where('npsn', $npsn);
         if ($search) {
             $availableQuery->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%")
-                    ->orWhere('sekolah', 'like', "%{$search}%");
+                $q->where('nama', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%");
             });
         }
-
         $availableSiswas = $availableQuery->orderBy('nama', 'asc')->get();
-        $groupedAvailable = $availableSiswas->groupBy('nisn_ketua')->map(function ($group) {
-            $leader = $group->where('nisn', $group->first()->nisn_ketua)->first() ?: $group->first();
-            return [
-                'leader' => $leader,
-                'members' => $group,
-                'is_group' => $group->count() > 1 || $leader->tipe_magang === 'kelompok',
-                'type' => ($group->count() > 1 || $leader->tipe_magang === 'kelompok') ? 'Kelompok' : 'Individu'
-            ];
-        });
+        $groupedAvailable = $this->mapGroupedSiswa($availableSiswas);
 
-        // Hitung progress untuk setiap siswa bimbingan
-        foreach ($siswas as $siswa) {
-            if ($siswa->tgl_mulai_magang && $siswa->tgl_selesai_magang) {
-                $start = Carbon::parse($siswa->tgl_mulai_magang);
-                $end = Carbon::parse($siswa->tgl_selesai_magang);
-                $totalDays = max(1, $start->diffInDays($end));
-                $daysPassed = $start->isFuture() ? 0 : (int) $start->diffInDays(Carbon::now());
-                $siswa->progress_percent = min(100, round(($daysPassed / $totalDays) * 100));
-            } else {
-                $siswa->progress_percent = 0;
-            }
-
-            // Status hari ini
-            $siswa->absen_hari_ini = $siswa->absensis->first();
-        }
-
-        // 3. Riwayat Siswa Binaan (yang statusnya sudah selesai)
-        $riwayatQuery = $user->siswas()
-            ->where(function($q) {
-                $q->where('status', 'selesai')
-                  ->orWhere('tgl_selesai_magang', '<', now());
-            });
-
-        if ($periodeId) {
-            $riwayatQuery->where('id_tahun_ajaran', $periodeId);
-        }
-
+        // 3. Riwayat Siswa (Selesai)
+        $riwayatQuery = $user->siswas()->where('status', 'selesai');
+        if ($periodeId) $riwayatQuery->where('id_tahun_ajaran', $periodeId);
         $riwayatSiswas = $riwayatQuery->orderBy('tgl_selesai_magang', 'desc')->get();
+        $groupedRiwayat = $this->mapGroupedSiswa($riwayatSiswas);
 
-        $groupedRiwayat = $riwayatSiswas->groupBy('nisn_ketua')->map(function ($group) {
-            $leader = $group->where('nisn', $group->first()->nisn_ketua)->first() ?: $group->first();
-            return [
-                'leader' => $leader,
-                'members' => $group,
-                'is_group' => $group->count() > 1 || $leader->tipe_magang === 'kelompok',
-                'type' => ($group->count() > 1 || $leader->tipe_magang === 'kelompok') ? 'Kelompok' : 'Individu'
-            ];
-        });
-
-        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', function ($q) use ($user) {
-            $q->where('id_guru', $user->id_guru);
-        })->orderBy('tgl_mulai', 'desc')->get();
+        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', fn($q) => $q->where('id_guru', $user->id_guru))
+            ->orderBy('tgl_mulai', 'desc')->get();
 
         return view('guru.daftarSiswa', compact(
-            'user', 
-            'siswas', 
-            'search', 
-            'npsn', 
-            'periodeId',
-            'periodeOptions',
-            'groupedSiswas', 
-            'groupedAvailable', 
-            'availableSiswas', 
-            'riwayatSiswas',
-            'groupedRiwayat'
+            'user', 'siswas', 'search', 'npsn', 'periodeId', 'periodeOptions',
+            'groupedSiswas', 'groupedAvailable', 'availableSiswas', 'riwayatSiswas', 'groupedRiwayat'
         ));
+    }
+
+    /**
+     * Helper to group students by leader and prepare for view
+     */
+    private function mapGroupedSiswa($siswas)
+    {
+        return $siswas->groupBy('nisn_ketua')->map(function ($group) {
+            $leader = $group->where('nisn', $group->first()->nisn_ketua)->first() ?: $group->first();
+            return [
+                'leader' => $leader,
+                'members' => $group,
+                'is_group' => $group->count() > 1 || $leader->tipe_magang === 'kelompok',
+            ];
+        });
     }
 
     /**
@@ -268,7 +158,7 @@ class GuruController extends Controller
     }
 
     /**
-     * Menampilkan logbook/kegiatan siswa tertentu.
+     * Menampilkan logbook kegiatan siswa tertentu.
      */
     public function logbookSiswa(Request $request, $nisn)
     {
@@ -289,32 +179,28 @@ class GuruController extends Controller
     }
 
     /**
-     * Verifikasi logbook siswa (Approve/Reject).
+     * Memproses verifikasi logbook.
      */
     public function verifikasiLogbook(Request $request, $id)
     {
-        /** @var \App\Models\Guru $user */
-        $user = Auth::user();
-
-        $validated = $request->validate([
-            'status' => ['required', 'in:verified,rejected'],
-            'catatan' => ['nullable', 'string', 'max:255'],
+        $request->validate([
+            'status' => 'required|in:verified,rejected',
+            'catatan' => 'nullable|string'
         ]);
 
-        $logbook = \App\Models\Logbook::findOrFail($id);
+        $logbook = Logbook::findOrFail($id);
+        $siswa = Siswa::where('nisn', $logbook->nisn)->first();
 
-        // Pastikan logbook ini milik siswa bimbingan guru ini
-        if ($logbook->siswa->id_guru != $user->id_guru) {
-            return back()->with('error', 'Anda tidak memiliki akses untuk memverifikasi logbook ini.');
+        if (!$siswa || $siswa->id_guru != Auth::user()->id_guru) {
+            return back()->with('error', 'Akses ditolak.');
         }
 
         $logbook->update([
-            'status' => $validated['status'],
-            'catatan_pembimbing' => $validated['catatan'],
+            'status' => $request->status,
+            'catatan_guru' => $request->catatan
         ]);
 
-        $statusLabel = $validated['status'] == 'verified' ? 'disetujui' : 'ditolak';
-        return back()->with('success', "Logbook berhasil {$statusLabel}.");
+        return back()->with('success', 'Logbook berhasil divalidasi.');
     }
 
     /**
@@ -327,42 +213,19 @@ class GuruController extends Controller
         $siswa = $user->siswas()->where('nisn', $nisn)->with('absensis')->firstOrFail();
 
         $absensis = $siswa->absensis()->orderBy('tanggal', 'desc')->paginate(15);
-
         $rekap = [
             'total' => $siswa->absensis()->count(),
             'hadir' => $siswa->absensis()->whereIn('status', ['hadir', 'terlambat'])->count(),
-            'izin' => $siswa->absensis()->where('status', 'izin')->count(),
+            'izin'  => $siswa->absensis()->where('status', 'izin')->count(),
             'sakit' => $siswa->absensis()->where('status', 'sakit')->count(),
-            'alpa' => $siswa->absensis()->where('status', 'alpa')->count(),
+            'alpa'  => $siswa->absensis()->where('status', 'alpa')->count(),
         ];
 
         return view('guru.absensiSiswa', compact('user', 'siswa', 'absensis', 'rekap'));
     }
 
     /**
-     * Export rekap absensi ke PDF.
-     */
-    public function exportAbsensiSiswa($nisn)
-    {
-        /** @var \App\Models\Guru $user */
-        $user = Auth::user();
-        $siswa = $user->siswas()->where('nisn', $nisn)->firstOrFail();
-
-        $absensis = $siswa->absensis()->orderBy('tanggal', 'asc')->get();
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('siswa.printJurnal', [
-            'user' => $siswa,
-            'logbooks' => $siswa->logbooks()->orderBy('tanggal', 'asc')->get()->map(function ($log) use ($siswa) {
-                $log->absen = $siswa->absensis()->whereDate('tanggal', $log->tanggal)->first();
-                return $log;
-            })
-        ]);
-
-        return $pdf->download("Rekap_Monitoring_{$siswa->nama}.pdf");
-    }
-
-    /**
-     * Menampilkan daftar laporan akhir yang perlu diverifikasi.
+     * Daftar Laporan Akhir yang perlu diverifikasi.
      */
     public function verifikasiLaporan(Request $request)
     {
@@ -372,89 +235,62 @@ class GuruController extends Controller
         $periodeId = $request->input('periode');
         $siswaNisns = $user->siswas->pluck('nisn')->toArray();
 
-        // 1. Ambil laporan terbaru untuk setiap siswa yang berstatus pending
-        $queryPending = \App\Models\LaporanAkhir::whereIn('nisn', $siswaNisns)
-            ->where('status', 'pending')
-            ->with('siswa');
+        $query = LaporanAkhir::whereIn('nisn', $siswaNisns)->with('siswa');
 
         if ($search) {
-            $queryPending->whereHas('siswa', function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
-            });
+            $query->whereHas('siswa', fn($q) => $q->where('nama', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%"));
         }
 
-        $laporanPending = $queryPending->orderBy('created_at', 'desc')->get();
-
-        // 2. Ambil semua riwayat laporan
-        $queryHistory = \App\Models\LaporanAkhir::whereIn('nisn', $siswaNisns)
-            ->where('status', '!=', 'pending')
-            ->with('siswa');
-
-        if ($search) {
-            $queryHistory->whereHas('siswa', function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
-            });
-        }
+        $laporanPending = (clone $query)->where('status', 'pending')->orderBy('created_at', 'desc')->get();
         
-        if ($periodeId) {
-            $queryHistory->whereHas('siswa', function ($q) use ($periodeId) {
-                $q->where('id_tahun_ajaran', $periodeId);
-            });
-        }
+        $historyQuery = (clone $query)->where('status', '!=', 'pending');
+        if ($periodeId) $historyQuery->whereHas('siswa', fn($q) => $q->where('id_tahun_ajaran', $periodeId));
+        $historyLaporan = $historyQuery->orderBy('updated_at', 'desc')->paginate(10)->withQueryString();
 
-        $historyLaporan = $queryHistory->orderBy('updated_at', 'desc')->paginate(10)->withQueryString();
-
-        $periodeOptions = \App\Models\TahunAjaran::whereHas('siswas', function ($q) use ($user) {
-            $q->where('id_guru', $user->id_guru);
-        })->orderBy('tgl_mulai', 'desc')->get();
+        $periodeOptions = TahunAjaran::whereHas('siswas', fn($q) => $q->where('id_guru', $user->id_guru))
+            ->orderBy('tgl_mulai', 'desc')->get();
 
         return view('guru.verifikasi', compact('user', 'laporanPending', 'historyLaporan', 'search', 'periodeId', 'periodeOptions'));
     }
 
     /**
-     * Menampilkan detail verifikasi laporan akhir.
+     * Show detail verifikasi.
      */
     public function showVerifikasiLaporan($id)
     {
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
-        $laporan = \App\Models\LaporanAkhir::with('siswa')->findOrFail($id);
+        $laporan = LaporanAkhir::with('siswa')->findOrFail($id);
 
-        // Pastikan siswa ini bimbingan guru ini
         if ($laporan->siswa->id_guru != $user->id_guru) {
             return redirect()->route('guru.verifikasi')->with('error', 'Akses ditolak.');
         }
 
-        // Ambil riwayat versi laporan siswa ini
         $history = $laporan->siswa->laporanAkhirs()->where('id_laporan', '!=', $id)->get();
-
-        return view('guru.verifikasi', compact('user', 'laporan', 'history')); // We can merge views if small or use different if complex. User provided verifikasi.blade.php.
+        return view('guru.verifikasi', compact('user', 'laporan', 'history'));
     }
 
     /**
-     * Update status verifikasi laporan akhir.
+     * Update verifikasi laporan akhir.
      */
     public function updateVerifikasiLaporan(Request $request, $id)
     {
-        /** @var \App\Models\Guru $user */
-        $user = Auth::user();
-        $laporan = \App\Models\LaporanAkhir::with('siswa')->findOrFail($id);
-
-        $validated = $request->validate([
+        $request->validate([
             'status' => 'required|in:approved,rejected',
             'catatan' => 'nullable|string',
-            'keterangan_revisi' => 'nullable|string',
         ]);
+
+        $laporan = LaporanAkhir::with('siswa')->findOrFail($id);
+        if ($laporan->siswa->id_guru != Auth::user()->id_guru) {
+            return redirect()->back()->with('error', 'Akses ditolak.');
+        }
 
         $laporan->update([
-            'status' => $validated['status'],
-            'catatan' => $validated['catatan'] ?? null,
+            'status' => $request->status,
+            'catatan' => $request->catatan,
         ]);
 
-        // Jika disetujui, update status siswa ke "Selesai"
-        if ($validated['status'] == 'approved') {
+        if ($request->status == 'approved') {
             $laporan->siswa->update(['status' => 'selesai']);
         }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guru;
 use App\Models\Admin;
+use App\Models\TahunAjaran;
 use App\Contracts\HasRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,11 +24,13 @@ class AdminGuruController extends Controller
     public function kelolaGuru()
     {
         $admin = $this->authorizeAdmin();
-        $guru = Guru::with('siswas')->orderBy('nama')->paginate(10);
+        $guru = Guru::with('siswas.tahunAjaran')->orderBy('nama')->paginate(10);
+        $periods = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
 
         return view('admin.kelolaGuru', [
             'user' => $admin,
             'guru' => $guru,
+            'periods' => $periods,
         ]);
     }
 

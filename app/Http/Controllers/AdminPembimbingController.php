@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pembimbing;
 use App\Models\Admin;
+use App\Models\TahunAjaran;
 use App\Contracts\HasRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,11 +24,13 @@ class AdminPembimbingController extends Controller
     public function kelolaPembimbing()
     {
         $admin = $this->authorizeAdmin();
-        $pembimbing = Pembimbing::with('siswas')->orderBy('nama')->paginate(10);
+        $pembimbing = Pembimbing::with('siswas.tahunAjaran')->orderBy('nama')->paginate(10);
+        $periods = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
 
         return view('admin.kelolaPembimbing', [
             'user' => $admin,
             'pembimbing' => $pembimbing,
+            'periods' => $periods,
         ]);
     }
 

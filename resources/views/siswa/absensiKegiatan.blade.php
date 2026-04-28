@@ -86,7 +86,15 @@
                             </div>
 
                             <div class="action-forms mt-4">
-                                @if (!$absensiHariIni)
+                                @if($isFinished)
+                                    <div class="bg-primary bg-opacity-10 p-4 rounded-4 text-center border border-primary border-opacity-20">
+                                        <div class="text-primary mb-2">
+                                            <i class="fas fa-graduation-cap fa-3x"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Masa Magang Berakhir</h6>
+                                        <p class="text-muted small mb-0">Terima kasih telah menyelesaikan program magang. Fitur absensi telah dinonaktifkan.</p>
+                                    </div>
+                                @elseif (!$absensiHariIni)
                                     <!-- Check In Form -->
                                     <form id="formAbsensiMasuk" enctype="multipart/form-data">
                                         @csrf
@@ -256,7 +264,17 @@
                     <!-- Form Input Logbook -->
                     <div class="logbook-form-section">
                         <div class="ui-card">
-                            @if (!$logbookHariIni)
+                            @if($isFinished)
+                                <div class="text-center py-4">
+                                    <div class="bg-primary bg-opacity-10 p-4 rounded-4 text-center border border-primary border-opacity-20">
+                                        <div class="text-primary mb-2">
+                                            <i class="fas fa-book fa-3x"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Logbook Selesai</h6>
+                                        <p class="text-muted small mb-0">Masa magang Anda telah berakhir. Anda tetap dapat melihat seluruh riwayat kegiatan.</p>
+                                    </div>
+                                </div>
+                            @elseif (!$logbookHariIni)
                                 <form action="{{ route('siswa.logbook.store') }}" method="POST"
                                     enctype="multipart/form-data">
                                     @csrf

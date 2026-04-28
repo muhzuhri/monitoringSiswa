@@ -81,7 +81,12 @@
                                                         data-bs-target="#modalDetailGuru" data-nama="{{ $item->nama }}"
                                                         data-email="{{ $item->email }}" data-id_guru="{{ $item->id_guru }}"
                                                         data-jabatan="{{ $item->jabatan }}" data-sekolah="{{ $item->sekolah }}" data-siswas="{{ json_encode($item->siswas->map(function ($s) {
-                            return ['nama' => $s->nama, 'nisn' => $s->nisn]; })) }}">
+                            return [
+                                'nama' => $s->nama, 
+                                'nisn' => $s->nisn, 
+                                'id_periode' => $s->id_tahun_ajaran,
+                                'periode' => $s->tahunAjaran->tahun_ajaran ?? 'N/A'
+                            ]; })) }}">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="btn-icon btn-edit-soft btn-edit" data-bs-toggle="modal"
@@ -358,7 +363,18 @@
 
                         <!-- Bottom Column: Supervised Students List -->
                         <div class="detail-section-card full-width">
-                            <h6 class="section-label"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="section-label mb-0"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                                <div class="filter-wrapper d-flex align-items-center gap-2">
+                                    <label class="small text-muted mb-0">Filter Periode:</label>
+                                    <select id="filter_periode" class="form-select form-select-sm" style="width: auto; border-radius: 8px;">
+                                        <option value="all">Semua Periode</option>
+                                        @foreach($periods as $p)
+                                            <option value="{{ $p->id_tahun_ajaran }}">{{ $p->tahun_ajaran }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             <div id="supervised_students_list" class="supervised-list">
                                 <!-- Will be populated by JS -->
                             </div>

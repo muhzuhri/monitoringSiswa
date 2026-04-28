@@ -63,7 +63,16 @@
                         </div>
                     </div>
                     <div class="card-body-premium">
-                        <form action="{{ route('siswa.pengajuan.store') }}" method="POST" enctype="multipart/form-data">
+                        @if($isFinished)
+                            <div class="text-center py-5">
+                                <div class="icon-circle-premium mb-4 mx-auto" style="width: 80px; height: 80px; font-size: 30px;">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark">Fitur Dinonaktifkan</h5>
+                                <p class="text-muted">Masa magang Anda telah berakhir. Anda tidak dapat melakukan pengajuan absensi atau kegiatan baru.</p>
+                            </div>
+                        @else
+                            <form action="{{ route('siswa.pengajuan.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
                             <div class="form-field">
@@ -120,12 +129,9 @@
                                  <div id="file-name-display" class="file-chosen-info hidden"></div>
                              </div>
  
-                             <div class="form-actions">
-                                 <button type="submit" class="premium-submit-btn">
-                                     <i class="fas fa-paper-plane"></i>Kirim Pengajuan
-                                 </button>
                              </div>
                          </form>
+                         @endif
                      </div>
                  </div>
              </div>

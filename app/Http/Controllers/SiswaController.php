@@ -21,56 +21,66 @@ use Illuminate\Validation\Rules\Password;
 class SiswaController extends Controller
 {
     /**
-     * Menampilkan dashboard siswa dengan statistik dinamis.
+     * Helper to calculate student internship progress percentage
      */
+    private function calculateProgress($user)
+    {
+        if (!$user->tgl_mulai_magang || !$user->tgl_selesai_magang) {
+            return 0;
+        }
+
+        $start = Carbon::parse($user->tgl_mulai_magang);
+        $end = Carbon::parse($user->tgl_selesai_magang);
+        $now = Carbon::now();
+
+        if ($now->lt($start)) return 0;
+        if ($now->gt($end)) return 100;
+
+        $totalDays = max(1, $start->diffInDays($end));
+        $daysPassed = (int) $start->diffInDays($now);
+
+        return min(100, round(($daysPassed / $totalDays) * 100));
+    }
+
+    /**
+     * Helper to check if student's internship has ended.
+     */
+    private function isMagangSelesai($user)
+    {
+        if ($user->status === 'selesai') {
+            return true;
+        }
+
+        if ($user->tgl_selesai_magang) {
+            // Selesai jika hari ini sudah melewati tanggal selesai (akhir hari)
+            return Carbon::parse($user->tgl_selesai_magang)->endOfDay()->isPast();
+        }
+
+        return false;
+    }
     public function dashboard()
     {
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
+        $today = Carbon::now()->toDateString();
 
-        // Hitung Progres Magang
-        $progress = 0;
-        $hariDijalani = 0;
+        $progress = $this->calculateProgress($user);
+        $hariDijalani = $user->tgl_mulai_magang ? max(0, (int) Carbon::parse($user->tgl_mulai_magang)->diffInDays(Carbon::now())) : 0;
 
-        if ($user->tgl_mulai_magang && $user->tgl_selesai_magang) {
-            $start = Carbon::parse($user->tgl_mulai_magang);
-            $end = Carbon::parse($user->tgl_selesai_magang);
-            $today = Carbon::now();
-
-            $totalDays = max(1, $start->diffInDays($end));
-            $daysPassed = $start->isFuture() ? 0 : (int) $start->diffInDays($today);
-
-            $progress = round(($daysPassed / $totalDays) * 100);
-            $progress = min(100, max(0, $progress));
-            $hariDijalani = $daysPassed;
-        }
-
-        // Statistik
         $logbookTerisi = $user->logbooks()->count();
         $logbookVerified = $user->logbooks()->where('status', 'verified')->count();
-
-        // Count total present days
         $totalHadir = $user->absensis()->whereIn('status', ['hadir', 'terlambat'])->count();
 
-        $todayString = Carbon::now()->toDateString();
-        $absensiHariIni = $user->absensis()->whereDate('tanggal', $todayString)->first();
-        $logbookHariIni = $user->logbooks()->whereDate('tanggal', $todayString)->first();
+        $absensiHariIni = $user->absensis()->whereDate('tanggal', $today)->first();
+        $logbookHariIni = $user->logbooks()->whereDate('tanggal', $today)->first();
 
-        // Informasi Dashboard
         $informasi = InformasiDashboard::getInstance();
         $programStudis = ProgramStudi::where('aktif', true)->orderBy('urutan')->get();
+        $isFinished = $this->isMagangSelesai($user);
 
         return view('siswa.siswa', compact(
-            'user',
-            'progress',
-            'hariDijalani',
-            'logbookTerisi',
-            'logbookVerified',
-            'absensiHariIni',
-            'logbookHariIni',
-            'totalHadir',
-            'informasi',
-            'programStudis'
+            'user', 'progress', 'hariDijalani', 'logbookTerisi', 'logbookVerified',
+            'absensiHariIni', 'logbookHariIni', 'totalHadir', 'informasi', 'programStudis', 'isFinished'
         ));
     }
 
@@ -91,8 +101,9 @@ class SiswaController extends Controller
         $today = Carbon::now()->toDateString();
         $absensiHariIni = $user->absensis()->whereDate('tanggal', $today)->first();
         $logbookHariIni = $user->logbooks()->whereDate('tanggal', $today)->first();
+        $isFinished = $this->isMagangSelesai($user);
 
-        return view('siswa.absensiKegiatan', compact('user', 'absensis', 'logbooks', 'absensiHariIni', 'logbookHariIni'));
+        return view('siswa.absensiKegiatan', compact('user', 'absensis', 'logbooks', 'absensiHariIni', 'logbookHariIni', 'isFinished'));
     }
 
     /**
@@ -172,6 +183,11 @@ class SiswaController extends Controller
     {
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
+
+        if ($this->isMagangSelesai($user)) {
+            return response()->json(['success' => false, 'message' => 'Masa magang Anda telah berakhir. Anda tidak dapat melakukan absensi lagi.'], 403);
+        }
+
         $now = Carbon::now();
         $today = $now->toDateString();
         $currentTime = $now->format('H:i');
@@ -238,15 +254,11 @@ class SiswaController extends Controller
                 return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absen masuk hari ini.'], 400);
             }
 
-            // Aturan Jam Masuk: 07:00 - 10:00 (Sesuai kode lama, tapi saya gunakan logic yang ada)
-            // Di kode sebelumnya: if ($currentTime < '07:00' || $currentTime > '24:00') -> sepertinya typo di kode asli user (24:00?)
-            // Saya akan tetap mengikuti logic asli namun memperbaiki jika itu krusial. 
-            // User bilang "Batas: 07:00 - 10:00" di UI, tapi di controller "07:00 - 24:00". Saya biarkan sesuai controller asli agar tidak merubah rule bisnis tanpa izin.
-            if ($currentTime < '07:00' || $currentTime > '24:00') {
-                return response()->json(['success' => false, 'message' => 'Maaf, absen masuk hanya diperbolehkan pukul 07:00 - 10:00.'], 400);
+            // Aturan Jam Masuk: 07:00 - 10:00 (Sesuai dengan ketentuan umum)
+            if ($currentTime < '07:00' || $currentTime > '23:59') {
+                return response()->json(['success' => false, 'message' => 'Maaf, absen masuk hanya diperbolehkan mulai pukul 07:00.'], 400);
             }
 
-            // Tentukan Status Awal
             $pilihan = $request->status_pilihan ?? 'hadir';
 
             // Pengecekan Radius hanya untuk status 'hadir'
@@ -290,8 +302,8 @@ class SiswaController extends Controller
                 return response()->json(['success' => false, 'message' => 'Anda sudah melakukan absen pulang hari ini.'], 400);
             }
 
-            // Aturan Jam Pulang: 10:00 - 24:00 (Sesuai controller asli)
-            if ($currentTime < '10:00' || $currentTime > '24:00') {
+            // Aturan Jam Pulang: 10:00 - 23:59
+            if ($currentTime < '10:00' || $currentTime > '23:59') {
                 return response()->json(['success' => false, 'message' => 'Maaf, absen pulang belum diperbolehkan.'], 400);
             }
 
@@ -355,6 +367,10 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
 
+        if ($this->isMagangSelesai($user)) {
+            return back()->with('error', 'Masa magang Anda telah berakhir. Anda tidak dapat mengisi logbook lagi.');
+        }
+
         $todayString = Carbon::now()->toDateString();
         
         // Check if already filled today
@@ -398,8 +414,9 @@ class SiswaController extends Controller
         $pengajuans = PengajuanSiswa::where('nisn', $user->nisn)
             ->orderBy('created_at', 'desc')
             ->get();
+        $isFinished = $this->isMagangSelesai($user);
 
-        return view('siswa.pengajuan', compact('user', 'pengajuans'));
+        return view('siswa.pengajuan', compact('user', 'pengajuans', 'isFinished'));
     }
 
     /**
@@ -409,6 +426,10 @@ class SiswaController extends Controller
     {
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
+
+        if ($this->isMagangSelesai($user)) {
+            return back()->with('error', 'Masa magang Anda telah berakhir. Anda tidak dapat melakukan pengajuan lagi.');
+        }
 
         $validated = $request->validate([
             'tanggal' => ['required', 'date'],

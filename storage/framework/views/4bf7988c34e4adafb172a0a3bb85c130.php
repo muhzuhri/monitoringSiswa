@@ -4,8 +4,7 @@
 <?php $__env->startSection('body-class', 'dosen-page'); ?>
 
 <?php $__env->startPush('styles'); ?>
-    <link rel="stylesheet" href="<?php echo e(asset('assets/css/dosen/style-dosen.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('assets/css/dosen/absensiKegiatan.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/dosen/absensisiswa.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('body'); ?>
@@ -253,45 +252,7 @@
     </div>
 
 <?php $__env->startPush('scripts'); ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Modal Logic
-            const openBtns = document.querySelectorAll('.btn-open-modal');
-            const closeBtns = document.querySelectorAll('.btn-close-modal');
-            const overlays = document.querySelectorAll('.custom-modal-overlay');
-
-            openBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal');
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.classList.add('show');
-                        document.body.style.overflow = 'hidden';
-                    }
-                });
-            });
-
-            closeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal');
-                    const modal = document.getElementById(modalId);
-                    if (modal) {
-                        modal.classList.remove('show');
-                        document.body.style.overflow = '';
-                    }
-                });
-            });
-
-            overlays.forEach(overlay => {
-                overlay.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        this.classList.remove('show');
-                        document.body.style.overflow = '';
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="<?php echo e(asset('assets/js/pembimbing/absensiSiswa.js')); ?>"></script>
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 

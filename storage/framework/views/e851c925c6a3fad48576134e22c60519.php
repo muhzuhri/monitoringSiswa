@@ -81,7 +81,12 @@
                                                         data-bs-target="#modalDetailGuru" data-nama="<?php echo e($item->nama); ?>"
                                                         data-email="<?php echo e($item->email); ?>" data-id_guru="<?php echo e($item->id_guru); ?>"
                                                         data-jabatan="<?php echo e($item->jabatan); ?>" data-sekolah="<?php echo e($item->sekolah); ?>" data-siswas="<?php echo e(json_encode($item->siswas->map(function ($s) {
-                            return ['nama' => $s->nama, 'nisn' => $s->nisn]; }))); ?>">
+                            return [
+                                'nama' => $s->nama, 
+                                'nisn' => $s->nisn, 
+                                'id_periode' => $s->id_tahun_ajaran,
+                                'periode' => $s->tahunAjaran->tahun_ajaran ?? 'N/A'
+                            ]; }))); ?>">
                                                         <i class="fas fa-eye"></i>
                                                     </button>
                                                     <button class="btn-icon btn-edit-soft btn-edit" data-bs-toggle="modal"
@@ -359,7 +364,18 @@
 
                         <!-- Bottom Column: Supervised Students List -->
                         <div class="detail-section-card full-width">
-                            <h6 class="section-label"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="section-label mb-0"><i class="fas fa-users"></i> Daftar Siswa Bimbingan</h6>
+                                <div class="filter-wrapper d-flex align-items-center gap-2">
+                                    <label class="small text-muted mb-0">Filter Periode:</label>
+                                    <select id="filter_periode" class="form-select form-select-sm" style="width: auto; border-radius: 8px;">
+                                        <option value="all">Semua Periode</option>
+                                        <?php $__currentLoopData = $periods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($p->id_tahun_ajaran); ?>"><?php echo e($p->tahun_ajaran); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="supervised_students_list" class="supervised-list">
                                 <!-- Will be populated by JS -->
                             </div>

@@ -87,7 +87,15 @@
                             </div>
 
                             <div class="action-forms mt-4">
-                                <?php if(!$absensiHariIni): ?>
+                                <?php if($isFinished): ?>
+                                    <div class="bg-primary bg-opacity-10 p-4 rounded-4 text-center border border-primary border-opacity-20">
+                                        <div class="text-primary mb-2">
+                                            <i class="fas fa-graduation-cap fa-3x"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Masa Magang Berakhir</h6>
+                                        <p class="text-muted small mb-0">Terima kasih telah menyelesaikan program magang. Fitur absensi telah dinonaktifkan.</p>
+                                    </div>
+                                <?php elseif(!$absensiHariIni): ?>
                                     <!-- Check In Form -->
                                     <form id="formAbsensiMasuk" enctype="multipart/form-data">
                                         <?php echo csrf_field(); ?>
@@ -258,7 +266,17 @@
                     <!-- Form Input Logbook -->
                     <div class="logbook-form-section">
                         <div class="ui-card">
-                            <?php if(!$logbookHariIni): ?>
+                            <?php if($isFinished): ?>
+                                <div class="text-center py-4">
+                                    <div class="bg-primary bg-opacity-10 p-4 rounded-4 text-center border border-primary border-opacity-20">
+                                        <div class="text-primary mb-2">
+                                            <i class="fas fa-book fa-3x"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-dark mb-1">Logbook Selesai</h6>
+                                        <p class="text-muted small mb-0">Masa magang Anda telah berakhir. Anda tetap dapat melihat seluruh riwayat kegiatan.</p>
+                                    </div>
+                                </div>
+                            <?php elseif(!$logbookHariIni): ?>
                                 <form action="<?php echo e(route('siswa.logbook.store')); ?>" method="POST"
                                     enctype="multipart/form-data">
                                     <?php echo csrf_field(); ?>

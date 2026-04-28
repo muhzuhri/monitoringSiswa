@@ -22,7 +22,32 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Preview Detail Logic
+    let currentSiswas = [];
     const detailButtons = document.querySelectorAll('.btn-detail');
+    const filterPeriode = document.getElementById('filter_periode');
+
+    function renderStudents(siswas) {
+        const listContainer = document.getElementById('supervised_students_list');
+        listContainer.innerHTML = '';
+
+        if (siswas.length > 0) {
+            siswas.forEach(s => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'student-card-mini';
+                studentDiv.innerHTML = `
+                                    <div class="student-info">
+                                        <div class="nama">${s.nama}</div>
+                                        <div class="meta">NISN: ${s.nisn} | <span class="text-primary">${s.periode}</span></div>
+                                    </div>
+                                    <i class="fas fa-user-graduate"></i>
+                                `;
+                listContainer.appendChild(studentDiv);
+            });
+        } else {
+            listContainer.innerHTML = '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan untuk periode ini.</div>';
+        }
+    }
+
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
             document.getElementById('det_nama').textContent = this.getAttribute('data-nama');
@@ -31,29 +56,24 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('det_sekolah').textContent = this.getAttribute('data-sekolah');
             document.getElementById('det_jabatan').textContent = this.getAttribute('data-jabatan');
 
-            // Populate supervised students list
-            const siswas = JSON.parse(this.getAttribute('data-siswas'));
-            const listContainer = document.getElementById('supervised_students_list');
-            listContainer.innerHTML = '';
+            // Reset filter
+            if (filterPeriode) filterPeriode.value = 'all';
 
-            if (siswas.length > 0) {
-                siswas.forEach(s => {
-                    const studentDiv = document.createElement('div');
-                    studentDiv.className = 'student-card-mini';
-                    studentDiv.innerHTML = `
-                                        <div class="student-info">
-                                            <div class="nama">${s.nama}</div>
-                                            <div class="meta">NISN: ${s.nisn}</div>
-                                        </div>
-                                        <i class="fas fa-user-graduate"></i>
-                                    `;
-                    listContainer.appendChild(studentDiv);
-                });
-            } else {
-                listContainer.innerHTML = '<div class="text-muted" style="padding: 1rem;">Belum ada siswa bimbingan.</div>';
-            }
+            // Populate supervised students list
+            currentSiswas = JSON.parse(this.getAttribute('data-siswas'));
+            renderStudents(currentSiswas);
         });
     });
+
+    if (filterPeriode) {
+        filterPeriode.addEventListener('change', function() {
+            const selectedPeriode = this.value;
+            const filtered = selectedPeriode === 'all' 
+                ? currentSiswas 
+                : currentSiswas.filter(s => s.id_periode == selectedPeriode);
+            renderStudents(filtered);
+        });
+    }
 
     // Delete Logic
     const deleteButtons = document.querySelectorAll('.btn-delete-trigger');
