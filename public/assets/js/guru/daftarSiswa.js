@@ -54,37 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Debounced NPSN Search
-    const npsnInput = document.getElementById('npsnInput');
-    const npsnSearchForm = document.getElementById('npsnSearchForm');
-    let npsnTimeout = null;
-
-    if (npsnInput && npsnSearchForm) {
-        npsnInput.addEventListener('input', function() {
-            clearTimeout(npsnTimeout);
-            npsnTimeout = setTimeout(() => {
-                npsnSearchForm.submit();
-            }, 500);
-        });
-        
-        // Keep focus if NPSN is searched
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('npsn')) {
-            // Activate search tab if NPSN was searched
-            const searchTabBtn = document.getElementById('search-tab');
-            if (searchTabBtn) {
-                const tab = new bootstrap.Tab(searchTabBtn);
-                tab.show();
-                
-                setTimeout(() => {
-                    npsnInput.focus();
-                    const val = npsnInput.value;
-                    npsnInput.value = '';
-                    npsnInput.value = val;
-                }, 200);
-            }
-        }
-    }
 
     // Auto-buka tab riwayat jika ada param ?tab=history atau ada filter periode aktif
     const urlParams = new URLSearchParams(window.location.search);
@@ -96,56 +65,271 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // PDF Preview Logic
-    const pdfModalElement = document.getElementById('previewPdfModal');
-    const pdfModalStatus = pdfModalElement ? new bootstrap.Modal(pdfModalElement) : null;
-    const pdfIframe = document.getElementById('pdfIframe');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const printPdfBtn = document.getElementById('printPdfBtn');
+    // ── PDF Preview Rendering Logic ────────────────────────────────────────
+    const pdfModalEl = document.getElementById('previewPdfModal');
+    const pdfModal = pdfModalEl ? bootstrap.Modal.getOrCreateInstance(pdfModalEl) : null;
+    const downloadBtn = document.getElementById('downloadPdfBtn');
+    
+    let currentPdfUrl = null;
+    let currentTaskId = 0;
 
-    function handlePdfPreview() {
-        const url = this.getAttribute('data-url');
-        if (url) {
-            const previewUrl = url.includes('#') ? url : url + '#view=Fit';
-            pdfIframe.src = previewUrl;
+    async function renderPDF(url) {
+        const taskId = ++currentTaskId;
+        
+        const container = document.getElementById('pdfCanvasContainer');
+        const loadingEl = document.getElementById('pdfLoadingIndicator');
+        const errorEl = document.getElementById('pdfErrorMsg');
+
+        if (!container) return;
+
+        // Clear previous content
+        container.querySelectorAll('canvas, img').forEach(c => c.remove());
+        loadingEl.style.display = 'flex';
+        errorEl.classList.add('d-none');
+        container.scrollTop = 0;
+
+        // Check if it's an image
+        const isImage = url.match(/\.(jpg|jpeg|png|gif)$/i);
+
+        if (isImage) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.borderRadius = '12px';
+            img.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            img.onload = () => {
+                if (currentTaskId !== taskId) return;
+                loadingEl.style.display = 'none';
+                container.appendChild(img);
+            };
+            img.onerror = () => {
+                if (currentTaskId !== taskId) return;
+                loadingEl.style.display = 'none';
+                errorEl.classList.remove('d-none');
+            };
+            return;
+        }
+
+        try {
+            // Wait for modal transition
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // Tambahkan header XMLHttpRequest agar Laravel tahu ini permintaan AJAX
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json, text/html, */*'
+                }
+            });
             
-            const downloadUrl = url.includes('?') ? url + '&download=1' : url + '?download=1';
-            if (downloadPdfBtn) downloadPdfBtn.href = downloadUrl;
-            if (pdfModalStatus) pdfModalStatus.show();
+            const contentType = response.headers.get('content-type');
+            
+            // Periksa jika server mengembalikan JSON yang berisi error
+            if (!response.ok && contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                errorEl.innerHTML = `
+                    <i class="fas fa-info-circle fa-3x mb-3 text-warning"></i>
+                    <h5 class="text-white mt-2 mb-1">${data.message || 'Dokumen belum tersedia.'}</h5>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Menunggu pihak terkait untuk melakukan input data.</p>
+                `;
+                loadingEl.style.display = 'none';
+                errorEl.classList.remove('d-none');
+                return;
+            }
+
+            if (contentType && contentType.includes('text/html')) {
+                // Tutup modal dan arahkan browser ke URL tersebut agar sesi toast dapat ditampilkan
+                const inst = bootstrap.Modal.getInstance(document.getElementById('previewPdfModal'));
+                if (inst) inst.hide();
+                window.location.href = url;
+                return;
+            }
+
+            const pdfDoc = await pdfjsLib.getDocument(url).promise;
+            
+            let containerWidth = container.clientWidth - 40;
+            if (containerWidth <= 0) containerWidth = 800;
+
+            const outputScale = window.devicePixelRatio || 1;
+
+            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                const page = await pdfDoc.getPage(pageNum);
+                const baseScale = containerWidth / page.getViewport({ scale: 1 }).width;
+                const viewport = page.getViewport({ scale: baseScale * outputScale });
+                
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                // Display size (CSS) should be translated back from scaled size
+                canvas.style.width = (viewport.width / outputScale) + 'px';
+                canvas.style.height = (viewport.height / outputScale) + 'px';
+                
+                canvas.style.display = 'block';
+                canvas.style.margin = '0 auto 20px';
+                canvas.style.maxWidth = '100%';
+                canvas.style.borderRadius = '8px';
+                canvas.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                canvas.style.background = '#ffffff';
+                
+                container.appendChild(canvas);
+                await page.render({ canvasContext: ctx, viewport }).promise;
+
+                if (currentTaskId !== taskId) return;
+                if (pageNum === 1) loadingEl.style.display = 'none';
+            }
+        } catch (err) {
+            if (currentTaskId === taskId) {
+                loadingEl.style.display = 'none';
+                errorEl.classList.remove('d-none');
+            }
+            console.error('PDF rendering error:', err);
         }
     }
 
     function initPdfPreviewListeners() {
-        const previewButtons = document.querySelectorAll('.btn-preview-pdf');
-        previewButtons.forEach(button => {
-            button.removeEventListener('click', handlePdfPreview);
-            button.addEventListener('click', handlePdfPreview);
+        document.querySelectorAll('.btn-preview-pdf').forEach(button => {
+            button.onclick = function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('data-url');
+                if (!url) return;
+                
+                currentPdfUrl = url;
+                // Add download=1 to force attachment response, remove target=_blank in HTML already
+                const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
+                if (downloadBtn) {
+                    downloadBtn.setAttribute('href', downloadUrl);
+                    
+                    let filename = 'Laporan_Siswa.pdf';
+                    if (url.includes('jurnal')) filename = 'Rekap_Jurnal.pdf';
+                    else if (url.includes('absensi')) filename = 'Rekap_Absensi.pdf';
+                    else if (url.includes('kelompok')) filename = 'Rekap_Kelompok.pdf';
+                    
+                    downloadBtn.setAttribute('download', filename);
+                }
+                
+                if (pdfModal) pdfModal.show();
+                renderPDF(url);
+            };
         });
     }
 
-    if (pdfModalElement) {
-        const triggerPrint = function() {
-            if (pdfIframe) {
-                pdfIframe.contentWindow.focus();
-                pdfIframe.contentWindow.print();
-            }
+    if (pdfModalEl) {
+        pdfModalEl.addEventListener('hidden.bs.modal', () => {
+            const container = document.getElementById('pdfCanvasContainer');
+            if (container) container.querySelectorAll('canvas, img').forEach(c => c.remove());
+            currentPdfUrl = null;
+        });
+    }
+
+    initPdfPreviewListeners();
+
+    // Detail Siswa Logic
+    function handleDetailSiswa(e) {
+        e.preventDefault();
+        const btn = e.currentTarget;
+        const d = btn.dataset;
+        
+        console.log("Loading student detail:", d);
+        
+        document.getElementById('det_name').innerText = d.nama || '-';
+        document.getElementById('det_nisn').innerText = d.nisn || '-';
+        document.getElementById('det_jk').innerText = d.jk === 'L' ? 'Laki-laki' : (d.jk === 'P' ? 'Perempuan' : '-');
+        document.getElementById('det_hp').innerText = d.no_hp || '-';
+        document.getElementById('det_email').innerText = d.email || '-';
+        document.getElementById('det_kelas_jurusan').innerText = `${d.kelas || '-'} ${d.jurusan || ''}`;
+        document.getElementById('det_sekolah').innerText = d.sekolah || '-';
+        document.getElementById('det_npsn').innerText = d.npsn || '-';
+        document.getElementById('det_perusahaan').innerText = d.perusahaan || '-';
+        document.getElementById('det_tipe_magang').innerText = d.tipe_magang || '-';
+        document.getElementById('det_nisn_ketua').innerText = d.nisn_ketua || '-';
+        document.getElementById('det_periode').innerText = `${d.mulai || '-'} s/d ${d.selesai || '-'}`;
+        document.getElementById('det_tahun_ajaran').innerText = d.tahun_ajaran || '-';
+        
+        // Guru & PL
+        document.getElementById('det_guru_nama').innerText = d.guruNama || '-';
+        document.getElementById('det_guru_nip').innerText = d.guruNip || '-';
+        document.getElementById('det_pl_nama').innerText = d.plNama || '-';
+        document.getElementById('det_pl_nip').innerText = d.plNip || '-';
+
+        // WhatsApp Buttons
+        const formatWa = (num) => {
+            let cleaned = num.replace(/\D/g, '');
+            return cleaned.startsWith('0') ? '62' + cleaned.substring(1) : cleaned;
         };
 
-        if (printPdfBtn) printPdfBtn.addEventListener('click', triggerPrint);
+        const guruWaBtn = document.getElementById('det_guru_wa_btn');
+        if(d.guruHp && d.guruHp !== '-') {
+            guruWaBtn.href = `https://wa.me/${formatWa(d.guruHp)}`;
+            guruWaBtn.classList.remove('d-none');
+        } else {
+            guruWaBtn.classList.add('d-none');
+        }
 
-        pdfModalElement.addEventListener('hidden.bs.modal', function() {
-            pdfIframe.src = '';
+        const plWaBtn = document.getElementById('det_pl_wa_btn');
+        if(d.plHp && d.plHp !== '-') {
+            plWaBtn.href = `https://wa.me/${formatWa(d.plHp)}`;
+            plWaBtn.classList.remove('d-none');
+        } else {
+            plWaBtn.classList.add('d-none');
+        }
+
+        // Surat Balasan
+        const suratBalasanText = document.getElementById('det_surat_balasan');
+        const viewSuratBtn = document.getElementById('btn_view_surat');
+        if(d.surat_balasan && d.surat_balasan !== 'null' && d.surat_balasan !== '') {
+            suratBalasanText.classList.add('d-none');
+            viewSuratBtn.classList.remove('d-none');
+            viewSuratBtn.setAttribute('data-url', `/storage/${d.surat_balasan}`);
+        } else {
+            suratBalasanText.classList.remove('d-none');
+            suratBalasanText.innerText = 'Belum diunggah';
+            viewSuratBtn.classList.add('d-none');
+        }
+    }
+
+    function initDetailListeners() {
+        document.querySelectorAll('.btn-preview-pdf').forEach(btn => {
+            btn.removeEventListener('click', handleDetailSiswa);
+            btn.addEventListener('click', handleDetailSiswa);
         });
     }
 
-    // Init listeners for initial content
-    initPdfPreviewListeners();
+    // Preview Surat Balasan inside Detail Modal
+    const btnViewSurat = document.getElementById('btn_view_surat');
+    if (btnViewSurat) {
+        btnViewSurat.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            if (url) {
+                if (downloadBtn) {
+                    const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
+                    downloadBtn.setAttribute('href', downloadUrl);
+                    const namaSiswa = document.getElementById('det_name').innerText || 'Siswa';
+                    downloadBtn.setAttribute('download', `Surat_Balasan_${namaSiswa.replace(/\s+/g, '_')}.pdf`);
+                }
+                if (pdfModal) pdfModal.show();
+                renderPDF(url);
+            }
+        });
+    }
+
+    initDetailListeners();
 
     // Modal Group Members
     const groupModalElement = document.getElementById('groupMembersModal');
     const groupModalInstance = groupModalElement ? new bootstrap.Modal(groupModalElement) : null;
     const modalName = document.getElementById('modalGroupName');
     const modalBody = document.getElementById('modalGroupBody');
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    }
 
     document.querySelectorAll('.btn-show-members').forEach(button => {
         button.addEventListener('click', function() {
@@ -155,15 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             modalName.innerText = name;
             modalBody.innerHTML = '';
-            
-            // Route patterns are now handled via data attributes or relative paths if possible, 
-            // but since they were in Blade, we might need a global config or data- attributes.
-            // Let's assume the data-members or buttons have them or we use a common structure.
-            
-            // To keep it clean, we'll look for hidden templates or data- attributes.
-            // For now, I'll use the patterns from the blade but they need to be passed.
-            // Actually, I can use the global `window.routes` if defined, but I'll stick to 
-            // data attributes on the trigger button for the patterns.
             
             const logbookRouteBase = this.getAttribute('data-logbook-route');
             const absensiRouteBase = this.getAttribute('data-absensi-route');
@@ -176,11 +351,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? '<i class="fas fa-check-circle"></i> Hadir' 
                     : '<i class="fas fa-times-circle"></i> Belum Absen';
                 
+                // Construct Data Attributes for Detail Modal
+                const detAttrs = `
+                    data-nisn="${member.nisn}"
+                    data-nama="${member.nama}"
+                    data-email="${member.email || '-'}"
+                    data-no_hp="${member.no_hp || '-'}"
+                    data-jk="${member.jenis_kelamin || '-'}"
+                    data-kelas="${member.kelas || '-'}"
+                    data-jurusan="${member.jurusan || '-'}"
+                    data-sekolah="${member.sekolah || '-'}"
+                    data-npsn="${member.npsn || '-'}"
+                    data-perusahaan="${member.perusahaan || '-'}"
+                    data-tipe_magang="${member.tipe_magang || '-'}"
+                    data-nisn_ketua="${member.nisn_ketua || '-'}"
+                    data-surat_balasan="${member.surat_balasan || ''}"
+                    data-tahun_ajaran="${(member.tahun_ajaran && member.tahun_ajaran.tahun_ajaran) ? member.tahun_ajaran.tahun_ajaran : '-'}"
+                    data-mulai="${formatDate(member.tgl_mulai_magang)}"
+                    data-selesai="${formatDate(member.tgl_selesai_magang)}"
+                    data-guru-nama="${(member.guru && member.guru.nama) ? member.guru.nama : '-'}"
+                    data-guru-nip="${(member.guru && member.guru.id_guru) ? member.guru.id_guru : '-'}"
+                    data-guru-hp="${(member.guru && member.guru.no_hp) ? member.guru.no_hp : '-'}"
+                    data-pl-nama="${(member.pembimbing && member.pembimbing.nama) ? member.pembimbing.nama : '-'}"
+                    data-pl-nip="${member.id_pembimbing || '-'}"
+                    data-pl-hp="${(member.pembimbing && member.pembimbing.no_telp) ? member.pembimbing.no_telp : '-'}"
+                `;
+
                 let actionButtons = '';
                 if (context === 'history') {
                     const logDownload = logbookDownloadBase.replace(':nisn', member.nisn);
                     const absDownload = absensiDownloadBase.replace(':nisn', member.nisn);
                     actionButtons = `
+                        <button class="btn-small btn-detail" title="Detail Profil" ${detAttrs} data-bs-toggle="modal" data-bs-target="#modalDetailSiswa" style="background: rgba(15, 23, 42, 0.04); color: #64748b; padding: 5px 8px; border-radius: 6px;">
+                            <i class="fas fa-id-card"></i>
+                        </button>
                         <button class="btn-small btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}" style="background: #f0f9ff; color: #0369a1; padding: 5px 8px; border-radius: 6px; border: 1px solid #bae6fd;">
                             <i class="fas fa-book"></i>
                         </button>
@@ -192,6 +396,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const logbookUrl = logbookRouteBase.replace(':nisn', member.nisn);
                     const absensiUrl = absensiRouteBase.replace(':nisn', member.nisn);
                     actionButtons = `
+                        <button class="btn-small btn-detail" title="Detail Profil" ${detAttrs} data-bs-toggle="modal" data-bs-target="#modalDetailSiswa" style="background: rgba(15, 23, 42, 0.04); color: #64748b; padding: 5px 8px; border-radius: 6px;">
+                            <i class="fas fa-id-card"></i>
+                        </button>
                         <a href="${logbookUrl}" class="btn-small" title="Logbook" style="background: rgba(15, 23, 42, 0.04); color: #4f46e5; padding: 5px 8px; border-radius: 6px;">
                             <i class="fas fa-book"></i>
                         </a>
@@ -224,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Re-init listeners for new modal content
             initPdfPreviewListeners();
+            initDetailListeners();
             
             if (groupModalInstance) groupModalInstance.show();
         });

@@ -567,7 +567,7 @@
 }
 
 .modal-body {
-    color: var(--text-grey);
+    /* color: var(--text-grey); */
     overflow-y: auto;
     padding-right: 5px;
     margin-top: 0px;

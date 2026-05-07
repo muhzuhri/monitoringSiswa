@@ -86,10 +86,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/guru/profil', [GuruController::class, 'profil'])->name('guru.profil');
     Route::post('/guru/profil', [GuruController::class, 'updateProfil'])->name('guru.profil.update');
 
-    // Download Reports (Guru)
     Route::get('/guru/siswa/{nisn}/download-jurnal', [GuruController::class, 'downloadJurnalMingguan'])->name('guru.rekap.jurnal');
     Route::get('/guru/siswa/{nisn}/download-absensi', [GuruController::class, 'downloadRekapAbsensiIndividu'])->name('guru.rekap.absensi');
     Route::get('/guru/siswa/{nisn}/download-rekap-kelompok', [GuruController::class, 'downloadRekapAbsensiKelompok'])->name('guru.rekap.kelompok');
+
+    // Tambahan Aksi Riwayat Siswa (Guru)
+    Route::get('/guru/siswa/{nisn}/cetak-penilaian-pembimbing', [GuruController::class, 'cetakPenilaianPembimbing'])->name('guru.siswa.cetakPenilaianPembimbing');
+    Route::get('/guru/siswa/{nisn}/cetak-sertifikat', [GuruController::class, 'cetakSertifikatSiswa'])->name('guru.siswa.cetakSertifikat');
+    Route::get('/guru/siswa/{nisn}/cetak-laporan-akhir', [GuruController::class, 'cetakLaporanAkhir'])->name('guru.siswa.cetakLaporan');
 
 
 
@@ -116,6 +120,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembimbing/siswa/{nisn}/cetak-absensi', [PembimbingController::class, 'cetakAbsensiSiswa'])->name('pembimbing.siswa.cetakAbsensi');
     
     Route::get('/pembimbing/laporan/{nisn}/cetak', [PembimbingController::class, 'cetakLaporanSiswa'])->name('pembimbing.laporan.cetak');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-penilaian-guru', [PembimbingController::class, 'cetakPenilaianGuru'])->name('pembimbing.siswa.cetakPenilaianGuru');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-laporan-akhir', [PembimbingController::class, 'cetakLaporanAkhir'])->name('pembimbing.siswa.cetakLaporan');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-sertifikat', [PembimbingController::class, 'cetakSertifikatSiswa'])->name('pembimbing.siswa.cetakSertifikat');
     Route::get('/pembimbing/profil', [PembimbingController::class, 'profil'])->name('pembimbing.profil');
     Route::post('/pembimbing/profil', [PembimbingController::class, 'updateProfil'])->name('pembimbing.profil.update');
 

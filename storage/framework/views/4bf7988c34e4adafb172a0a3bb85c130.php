@@ -27,8 +27,8 @@
                     <span class="text-muted small fw-bold me-2">VERIFIKASI:</span>
                     <a href="<?php echo e(route('pembimbing.absensi', $siswa->nisn)); ?>" 
                        class="btn-filter-submit <?php echo e(!$statusVerifikasi ? '' : 'btn-outline'); ?>" style="<?php echo e(!$statusVerifikasi ? '' : 'background:transparent; color:var(--color-primary); border:1px solid var(--color-primary);'); ?>">Semua</a>
-                    <a href="<?php echo e(route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'pending'])); ?>" 
-                       class="btn-filter-submit <?php echo e($statusVerifikasi == 'pending' ? '' : 'btn-outline'); ?>" style="<?php echo e($statusVerifikasi == 'pending' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);'); ?>">Pending</a>
+                    <a href="<?php echo e(route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'rejected'])); ?>" 
+                       class="btn-filter-submit <?php echo e($statusVerifikasi == 'rejected' ? '' : 'btn-outline'); ?>" style="<?php echo e($statusVerifikasi == 'rejected' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);'); ?>">rejected</a>
                     <a href="<?php echo e(route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'verified'])); ?>" 
                        class="btn-filter-submit <?php echo e($statusVerifikasi == 'verified' ? '' : 'btn-outline'); ?>" style="<?php echo e($statusVerifikasi == 'verified' ? 'background:var(--color-green);' : 'background:transparent; color:var(--color-green); border:1px solid var(--color-green);'); ?>">Verified</a>
                     
@@ -57,47 +57,7 @@
                 <div class="alert-content"><?php echo e(session('info')); ?></div>
             </div>
         <?php endif; ?>
-
         
-        <div class="stats-grid mb-4">
-            <div class="stat-card">
-                <div class="stat-icon bg-green">
-                    <i class="fas fa-check"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value"><?php echo e($rekap['hadir']); ?></h3>
-                    <p class="stat-label">Hadir</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-orange">
-                    <i class="fas fa-user-clock"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value"><?php echo e($rekap['izin'] + $rekap['sakit']); ?></h3>
-                    <p class="stat-label">Izin / Sakit</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-red">
-                    <i class="fas fa-times"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value"><?php echo e($rekap['alpa']); ?></h3>
-                    <p class="stat-label">Alpa</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-purple">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value"><?php echo e($rekap['total']); ?></h3>
-                    <p class="stat-label">Total Hari</p>
-                </div>
-            </div>
-        </div>
-
         
         <div class="content-card">
             <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);">
@@ -187,16 +147,14 @@
                     </tbody>
                 </table>
             </div>
-            <?php if($absensis->hasPages()): ?>
-                <div class="pagination-wrapper">
-                    <?php echo e($absensis->links()); ?>
-
-                </div>
-            <?php endif; ?>
+            
         </div>
 
         
         <?php $__currentLoopData = $absensis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $a): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php 
+                $isDynamic = isset($a->is_dynamic) && $a->is_dynamic;
+            ?>
             <div class="custom-modal-overlay" id="modalVer<?php echo e($a->id_absensi); ?>">
                 <div class="custom-modal modal-sm">
                     <div class="modal-header">
@@ -207,6 +165,8 @@
                     </div>
                     <form action="<?php echo e(route('pembimbing.absensi.validasi', $a->id_absensi)); ?>" method="POST">
                         <?php echo csrf_field(); ?>
+                        <input type="hidden" name="is_dynamic" value="<?php echo e($isDynamic ? 1 : 0); ?>">
+                        <input type="hidden" name="siswa_nisn" value="<?php echo e($siswa->nisn); ?>">
                         <div class="modal-body">
                             <div class="detail-section mb-4">
                                 <div class="detail-content" style="background:var(--color-primary-lt); border-color:var(--color-primary); display:flex; align-items:center; gap:1rem;">

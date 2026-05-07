@@ -127,7 +127,7 @@
                 <div class="laporan-grid">
                     <!-- Rekap Kehadiran Bulan Ini -->
                     <div class="ui-card">
-                        <h5 class="page-title mb-1-5">Rekap Absensi (Bulan Ini)</h5>
+                        <h5 class="page-title mb-1-5">Rekap Absensi (Keseluruhan)</h5>
                         <div class="rekap-grid">
                             <div class="rekap-box rekap-hadir">
                                 <span class="rekap-value">{{ $rekapAbsensi['hadir'] }}</span>
@@ -266,7 +266,7 @@
 @endsection
 
 @push('scripts')
-    <!-- Modal Preview PDF -->
+    <!--  Preview PDF -->
     <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-labelledby="previewPdfModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-pdf-viewer">
             <div class="modal-content">

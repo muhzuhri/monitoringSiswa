@@ -129,20 +129,26 @@
                                     @forelse($siswasDone as $s)
                                         @php
                                             $p = $s->penilaians->where('pemberi_nilai', 'Dosen Pembimbing')->first();
+                                            
+                                            // Hitung nilai kumulatif (rata-rata sikap + rata-rata kompetensi) / 2
+                                            $sikapAvg = $p ? ($p->penilaianDetails->where('kriteria.tipe', 'sikap_kerja')->avg('skor') ?? 0) : 0;
+                                            $kompetensiAvg = $p ? ($p->penilaianDetails->where('kriteria.tipe', 'kompetensi_keahlian')->avg('skor') ?? 0) : 0;
+                                            $cumulative = ($sikapAvg + $kompetensiAvg) / 2;
                                         @endphp
                                         <tr>
                                             <td><strong>{{ $s->nama }}</strong></td>
                                             <td>{{ $s->nisn }}</td>
-                                            <td><span class="fw-bold text-primary">{{ number_format($p->rata_rata ?? 0, 1) }}</span></td>
+                                            <td><span class="fw-bold text-primary">{{ number_format($cumulative, 1) }}</span></td>
                                             <td><span class="badge-status status-done">Sudah Dinilai</span></td>
                                             <td class="col-aksi">
                                                 <div class="table-aksi-flex">
                                                     <a href="{{ route('pembimbing.evaluasi.input', $s->nisn) }}" class="btn-action btn-primary">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <a href="{{ route('pembimbing.laporan.cetak', $s->nisn) }}" class="btn-action btn-success">
+                                                    <button type="button" class="btn-action btn-success btn-preview-pdf"
+                                                        data-url="{{ route('pembimbing.laporan.cetak', $s->nisn) }}">
                                                         <i class="fas fa-print"></i> Cetak
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -373,7 +379,47 @@
         </div>
     </div>
 
+    {{-- Modal Preview PDF (Standard Premium) --}}
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-hidden="true" style="z-index: 2000;">
+        <div class="modal-dialog modal-pdf-viewer modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="pdf-viewer-header">
+                    <div class="pdf-viewer-title">
+                        <div class="pdf-icon-wrapper">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h6 class="modal-title" style="color: white !important; margin: 0;">Preview Penilaian</h6>
+                    </div>
+
+                    <div class="pdf-viewer-actions">
+                        <div class="pdf-desktop-actions">
+                            <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File" download>
+                                <i class="fas fa-download"></i> <span>Unduh Penilaian</span>
+                            </a>
+                        </div>
+                        <div class="vr opacity-10"></div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="pdf-viewer-body bg-light">
+                    <div id="pdfCanvasContainer">
+                        <div id="pdfLoadingIndicator">
+                            <div class="loader-logo-container">
+                                <i class="fas fa-circle-notch fa-spin fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <script src="{{ asset('assets/js/pembimbing/penilaian.js') }}"></script>
     @endpush
 @endsection

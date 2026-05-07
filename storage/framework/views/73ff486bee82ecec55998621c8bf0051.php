@@ -19,7 +19,7 @@
     <div class="top-info-bar d-none d-md-block">
         <div class="container">
             <div><i class="fas fa-clock"></i> 8:00AM - 4:00PM | Senin - Jum'at</div>
-            <div><i class="fas fa-envelope"></i> humasss@ilkom.unsri.ac.id</div>
+            <div><i class="fas fa-envelope"></i> humas@ilkom.unsri.ac.id</div>
         </div>
     </div>
 

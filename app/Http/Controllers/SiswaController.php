@@ -58,6 +58,116 @@ class SiswaController extends Controller
 
         return false;
     }
+
+    /**
+     * Helper to get full attendance history including "Alpha" for missing workdays.
+     */
+    private function getFullAttendanceData($user, $startDate = null, $endDate = null)
+    {
+        // Internship bound dates
+        $internStart = $user->tgl_mulai_magang ? Carbon::parse($user->tgl_mulai_magang)->startOfDay() : null;
+        $internEnd   = $user->tgl_selesai_magang ? Carbon::parse($user->tgl_selesai_magang)->startOfDay() : null;
+
+        // Use student's internship start date or current month's start
+        $start = $startDate ? Carbon::parse($startDate) : ($internStart ?: Carbon::now()->startOfMonth());
+        $end   = $endDate   ? Carbon::parse($endDate)   : Carbon::now();
+
+        // Cap the end to internship end date so post-internship dates are never included
+        if ($internEnd && $end->gt($internEnd)) {
+            $end = $internEnd->copy();
+        }
+
+        // Cap calculations to today
+        $today = Carbon::now()->startOfDay();
+
+        $absensis = $user->absensis()
+            ->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->keyBy('tanggal');
+
+        $fullHistory = [];
+        $current = $start->copy();
+
+        while ($current <= $end) {
+            $dateStr = $current->toDateString();
+            $isWeekend = $current->isWeekend();
+
+            if (isset($absensis[$dateStr])) {
+                $fullHistory[] = $absensis[$dateStr];
+            } else {
+                // No attendance record found in DB
+                // CHECK: Must be a workday, must be in the past, within internship period
+                $afterStart  = $internStart && $current->gte($internStart);
+                $beforeEnd   = !$internEnd   || $current->lte($internEnd);
+                if (!$isWeekend && $current->lt($today) && $afterStart && $beforeEnd) {
+                    // It's a past workday during internship period -> Alpha
+                    $fullHistory[] = (object)[
+                        'tanggal'    => $dateStr,
+                        'jam_masuk'  => null,
+                        'jam_pulang' => null,
+                        'status'     => 'alpa',
+                        'verifikasi' => 'pending',
+                        'foto_masuk' => null,
+                        'foto_pulang'=> null,
+                    ];
+                }
+            }
+            $current->addDay();
+        }
+
+        return collect($fullHistory);
+    }
+
+    /**
+     * Helper to get full logbook history including "Alpha" for missing entries.
+     */
+    private function getFullLogbookData($user, $startDate = null, $endDate = null)
+    {
+        $internStart = $user->tgl_mulai_magang ? Carbon::parse($user->tgl_mulai_magang)->startOfDay() : null;
+        $internEnd   = $user->tgl_selesai_magang ? Carbon::parse($user->tgl_selesai_magang)->startOfDay() : null;
+
+        $start = $startDate ? Carbon::parse($startDate) : ($internStart ?: Carbon::now()->startOfMonth());
+        $end   = $endDate   ? Carbon::parse($endDate)   : Carbon::now();
+
+        // Cap the end to internship end date so post-internship dates are never included
+        if ($internEnd && $end->gt($internEnd)) {
+            $end = $internEnd->copy();
+        }
+
+        $today = Carbon::now()->startOfDay();
+
+        $logbooks = $user->logbooks()
+            ->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->keyBy('tanggal');
+
+        $fullHistory = [];
+        $current = $start->copy();
+
+        while ($current <= $end) {
+            $dateStr = $current->toDateString();
+            $isWeekend = $current->isWeekend();
+
+            if (isset($logbooks[$dateStr])) {
+                $fullHistory[] = $logbooks[$dateStr];
+            } else {
+                $afterStart = $internStart && $current->gte($internStart);
+                $beforeEnd  = !$internEnd   || $current->lte($internEnd);
+                if (!$isWeekend && $current->lt($today) && $afterStart && $beforeEnd) {
+                    $fullHistory[] = (object)[
+                        'tanggal'            => $dateStr,
+                        'kegiatan'           => 'Alpha',
+                        'status'             => 'pending',
+                        'catatan_pembimbing' => '-',
+                        'created_at'         => null,
+                    ];
+                }
+            }
+            $current->addDay();
+        }
+
+        return collect($fullHistory);
+    }
     public function dashboard()
     {
         /** @var \App\Models\Siswa $user */
@@ -92,11 +202,16 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
         
-        // LIMIT: 5 days for attendance on main page
-        $absensis = $user->absensis()->orderBy('tanggal', 'desc')->limit(5)->get();
+        // Fetch merged attendance data (including dynamic Alphas)
+        // We limit to 5 records for the preview
+        $absensis = $this->getFullAttendanceData($user)
+            ->sortByDesc('tanggal')
+            ->take(5);
         
         // LIMIT: 5 entries for logbooks on main page
-        $logbooks = $user->logbooks()->orderBy('tanggal', 'desc')->limit(5)->get();
+        $logbooks = $this->getFullLogbookData($user)
+            ->sortByDesc('tanggal')
+            ->take(5);
 
         $today = Carbon::now()->toDateString();
         $absensiHariIni = $user->absensis()->whereDate('tanggal', $today)->first();
@@ -117,11 +232,12 @@ class SiswaController extends Controller
         $perPage = 5;
         $page = $request->query('page', 1);
 
-        $data = $user->absensis()
-            ->orderBy('tanggal', 'desc')
-            ->skip(($page - 1) * $perPage)
+        $allData = $this->getFullAttendanceData($user)
+            ->sortByDesc('tanggal')
+            ->values();
+
+        $data = $allData->skip(($page - 1) * $perPage)
             ->take($perPage)
-            ->get()
             ->map(function($item) {
                 return [
                     'day' => Carbon::parse($item->tanggal)->translatedFormat('l'),
@@ -129,16 +245,16 @@ class SiswaController extends Controller
                     'jam_masuk' => $item->jam_masuk ? Carbon::parse($item->jam_masuk)->format('H:i') : '-',
                     'jam_pulang' => $item->jam_pulang ? Carbon::parse($item->jam_pulang)->format('H:i') : '-',
                     'status' => ucfirst($item->status),
-                    'foto_masuk' => $item->foto_masuk ? asset('storage/' . $item->foto_masuk) : null,
-                    'foto_pulang' => $item->foto_pulang ? asset('storage/' . $item->foto_pulang) : null,
-                    'verifikasi' => $item->verifikasi,
+                    'foto_masuk' => ($item->foto_masuk ?? null) ? asset('storage/' . $item->foto_masuk) : null,
+                    'foto_pulang' => ($item->foto_pulang ?? null) ? asset('storage/' . $item->foto_pulang) : null,
+                    'verifikasi' => $item->verifikasi ?? 'verified',
                 ];
             });
 
         return response()->json([
             'data' => $data,
             'current_page' => (int)$page,
-            'has_more' => $user->absensis()->count() > ($page * $perPage)
+            'has_more' => $allData->count() > ($page * $perPage)
         ]);
     }
 
@@ -153,26 +269,27 @@ class SiswaController extends Controller
         $perPage = 5; // Logbook typically takes more space
         $page = $request->query('page', 1);
 
-        $data = $user->logbooks()
-            ->orderBy('tanggal', 'desc')
-            ->skip(($page - 1) * $perPage)
+        $allData = $this->getFullLogbookData($user)
+            ->sortByDesc('tanggal')
+            ->values();
+
+        $data = $allData->skip(($page - 1) * $perPage)
             ->take($perPage)
-            ->get()
             ->map(function($item) {
                 return [
                     'day' => Carbon::parse($item->tanggal)->translatedFormat('l'),
                     'date' => Carbon::parse($item->tanggal)->translatedFormat('d M Y'),
-                    'jam' => $item->created_at ? $item->created_at->format('H:i') : '-',
+                    'jam' => $item->created_at ? Carbon::parse($item->created_at)->format('H:i') : '-',
                     'kegiatan' => $item->kegiatan,
                     'status' => $item->status,
-                    'catatan' => $item->catatan_pembimbing
+                    'catatan' => $item->catatan_pembimbing ?? '-'
                 ];
             });
 
         return response()->json([
             'data' => $data,
             'current_page' => (int)$page,
-            'has_more' => $user->logbooks()->count() > ($page * $perPage)
+            'has_more' => $allData->count() > ($page * $perPage)
         ]);
     }
 
@@ -548,15 +665,14 @@ class SiswaController extends Controller
         // Laporan Akhir
         $laporanAkhir = $user->laporanAkhir;
 
-        // Rekap Absensi (Bulanan - Current Month)
-        $month = Carbon::now()->month;
-        $year = Carbon::now()->year;
+        // Rekap Absensi (Keseluruhan - Dari awal magang)
+        $absensiData = $this->getFullAttendanceData($user);
 
         $rekapAbsensi = [
-            'hadir' => $user->absensis()->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->whereIn('status', ['hadir', 'terlambat'])->count(),
-            'izin' => $user->absensis()->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'izin')->count(),
-            'sakit' => $user->absensis()->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'sakit')->count(),
-            'alpa' => $user->absensis()->whereMonth('tanggal', $month)->whereYear('tanggal', $year)->where('status', 'alpa')->count(),
+            'hadir' => $absensiData->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin' => $absensiData->where('status', 'izin')->count(),
+            'sakit' => $absensiData->where('status', 'sakit')->count(),
+            'alpa' => $absensiData->where('status', 'alpa')->count(),
         ];
 
         // Penilaian (Both from Supervisor and Teacher)
@@ -628,8 +744,10 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
 
-        // Fetch logs (Oldest first)
-        $logbooks = $user->logbooks()->orderBy('tanggal', 'asc')->get();
+        // Fetch logs including Alphas
+        $logbooks = $this->getFullLogbookData($user)
+            ->sortBy('tanggal')
+            ->values();
         $user->load('pembimbing');
 
         // Jurnal Mingguan version (Table: No, Tanggal, Pembimbing Lapangan, Kegiatan, Status)
@@ -651,12 +769,21 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
 
-        // Fetch attendance
-        $absensis = $user->absensis()->orderBy('tanggal', 'asc')->get();
+        // Fetch attendance including dynamic Alphas
+        $absensis = $this->getFullAttendanceData($user)
+            ->sortBy('tanggal')
+            ->values();
+
+        // Hitung juga ringkasannya
+        $rekapAbsensi = [
+            'hadir' => $absensis->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin' => $absensis->where('status', 'izin')->count(),
+            'sakit' => $absensis->where('status', 'sakit')->count(),
+            'alpa' => $absensis->where('status', 'alpa')->count(),
+        ];
 
         $fileName = "Rekap_Absensi_Individu_{$user->nisn}_" . date('d_M_Y') . ".pdf";
-
-        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', compact('user', 'absensis'));
+        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', compact('user', 'absensis', 'rekapAbsensi'));
         
         if ($request->has('download')) {
             return $pdf->download($fileName);
@@ -672,24 +799,25 @@ class SiswaController extends Controller
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
 
-        $startMagang = $user->tahunAjaran ? Carbon::parse($user->tahunAjaran->tgl_mulai) : Carbon::now()->startOfMonth();
-        
-        // Find the latest attendance record date in the group to determine the end range
-        $latestAbsen = Absensi::whereIn('nisn', function($query) use ($user) {
+        // Find the earliest and latest attendance record date for the group
+        $groupNisns = function($query) use ($user) {
             $query->select('nisn')->from('siswa')
-                  ->where('nisn_ketua', $user->nisn_ketua ?: $user->nisn);
-        })->max('tanggal');
+                  ->where('nisn_ketua', $user->nisn_ketua ?: $user->nisn)
+                  ->orWhere('nisn', $user->nisn_ketua ?: $user->nisn);
+        };
 
-        $endRange = $latestAbsen ? Carbon::parse($latestAbsen) : Carbon::now();
+        $firstAbsen = Absensi::whereIn('nisn', $groupNisns)->min('tanggal');
+        $latestAbsen = Absensi::whereIn('nisn', $groupNisns)->max('tanggal');
+
+        $startRange = $firstAbsen ? Carbon::parse($firstAbsen)->startOfMonth() : Carbon::now()->startOfMonth();
+        $endRange = $latestAbsen ? Carbon::parse($latestAbsen)->endOfMonth() : Carbon::now()->endOfMonth();
         
-        // Ensure the range at least ends at now
-        if ($endRange->isPast()) {
-            $endRange = Carbon::now();
-        }
+        // Ensure we don't start before the actual intended internship period if needed, 
+        // but user specifically asked to follow attendance records.
         
-        // Calculate months between start and now
+        // Calculate months between start of first attendance and end of latest attendance
         $months = [];
-        $current = $startMagang->copy()->startOfMonth();
+        $current = $startRange->copy();
         
         while ($current <= $endRange) {
             $month = $current->month;

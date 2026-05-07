@@ -724,8 +724,6 @@
     display: flex !important;
     align-items: center !important;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
-    padding-right: 1rem;
-    margin-right: 1rem;
 }
 
 /* Action Buttons */
@@ -777,7 +775,7 @@
 .pdf-viewer-header .btn-close {
     filter: invert(1) brightness(2);
     opacity: 0.7;
-    margin-left: 1rem;
+    margin-left: 0px;
     padding: 0.5rem !important;
     background-size: 12px;
     transition: opacity 0.2s;

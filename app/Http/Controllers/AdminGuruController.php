@@ -45,6 +45,8 @@ class AdminGuruController extends Controller
             'id_guru' => ['required', 'string', 'max:50', Rule::unique('guru', 'id_guru')],
             'jabatan' => ['required', 'string', 'max:100'],
             'sekolah' => ['required', 'string', 'max:150'],
+            'npsn' => ['nullable', 'string', 'max:20'],
+            'no_hp' => ['nullable', 'string', 'max:20'],
         ]);
 
         Guru::create($validated);
@@ -65,6 +67,8 @@ class AdminGuruController extends Controller
             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
             'jabatan' => ['required', 'string', 'max:100'],
             'sekolah' => ['required', 'string', 'max:150'],
+            'npsn' => ['nullable', 'string', 'max:20'],
+            'no_hp' => ['nullable', 'string', 'max:20'],
         ]);
 
         if (!empty($validated['password'])) {

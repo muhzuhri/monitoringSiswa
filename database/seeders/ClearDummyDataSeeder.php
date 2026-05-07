@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Absensi;
 
 class ClearDummyDataSeeder extends Seeder
 {
@@ -12,12 +12,11 @@ class ClearDummyDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $nisns = ['123456789', '234567890', '345678901'];
+        $nisns = ['12345678', '123456782', '123456783'];
 
         echo "Membersihkan data dummy untuk NISN: " . implode(', ', $nisns) . "...\n";
 
-        \App\Models\Absensi::whereIn('nisn', $nisns)->delete();
-        \App\Models\Logbook::whereIn('nisn', $nisns)->delete();
+        Absensi::whereIn('nisn', $nisns)->delete();
 
         echo "Data dummy berhasil dibersihkan!\n";
     }

@@ -207,16 +207,18 @@ class PimpinanController extends Controller
     {
         $user = $this->authorizePimpinan();
         $guru = Guru::with('siswas')->orderBy('nama', 'asc')->paginate(10);
+        $periodeOptions = TahunAjaran::orderBy('tgl_mulai', 'desc')->get();
 
-        return view('pimpinan.guru', compact('user', 'guru'));
+        return view('pimpinan.guru', compact('user', 'guru', 'periodeOptions'));
     }
 
     public function pembimbing()
     {
         $user = $this->authorizePimpinan();
         $pembimbing = Pembimbing::with('siswas')->orderBy('nama', 'asc')->paginate(10);
+        $periodeOptions = TahunAjaran::orderBy('tgl_mulai', 'desc')->get();
 
-        return view('pimpinan.pembimbing', compact('user', 'pembimbing'));
+        return view('pimpinan.pembimbing', compact('user', 'pembimbing', 'periodeOptions'));
     }
 
     public function rekap()

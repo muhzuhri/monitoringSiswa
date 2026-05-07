@@ -3,7 +3,7 @@
 
 <?php $__env->startPush('styles'); ?>
     <link rel="stylesheet" href="<?php echo e(asset('assets/css/pimpinan/admin.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('assets/css/pimpinan/siswa-modals.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/pimpinan/modals.css')); ?>">
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startPush('scripts'); ?>

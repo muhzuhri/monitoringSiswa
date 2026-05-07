@@ -13,16 +13,16 @@
         
         <!-- Global Navigation Tabs: Siswa, Guru, Pembimbing -->
         <div class="tabs-wrapper border-0 bg-transparent mb-4">
-            <div class="tabs-nav">
-                <a href="<?php echo e(route('admin.kelolaSiswa')); ?>" class="tab-button <?php echo e(Route::is('admin.kelolaSiswa') ? 'active' : ''); ?>">
+            <div class="tabs-nav d-flex w-100 gap-3">
+                <a href="<?php echo e(route('admin.kelolaSiswa')); ?>" class="tab-button text-decoration-none flex-fill justify-content-center text-center <?php echo e(Route::is('admin.kelolaSiswa') ? 'active' : ''); ?>">
                     <i class="fas fa-users"></i>
                     <span>Siswa</span>
                 </a>
-                <a href="<?php echo e(route('admin.kelolaGuru')); ?>" class="tab-button <?php echo e(Route::is('admin.kelolaGuru') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.kelolaGuru')); ?>" class="tab-button text-decoration-none flex-fill justify-content-center text-center <?php echo e(Route::is('admin.kelolaGuru') ? 'active' : ''); ?>">
                     <i class="fas fa-chalkboard-teacher"></i>
                     <span>Guru</span>
                 </a>
-                <a href="<?php echo e(route('admin.kelolaPembimbing')); ?>" class="tab-button <?php echo e(Route::is('admin.kelolaPembimbing') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.kelolaPembimbing')); ?>" class="tab-button text-decoration-none flex-fill justify-content-center text-center <?php echo e(Route::is('admin.kelolaPembimbing') ? 'active' : ''); ?>">
                     <i class="fas fa-user-tie"></i>
                     <span>Pembimbing</span>
                 </a>
@@ -80,7 +80,9 @@
                                                     <button class="btn-icon btn-detail-soft btn-detail" data-bs-toggle="modal"
                                                         data-bs-target="#modalDetailGuru" data-nama="<?php echo e($item->nama); ?>"
                                                         data-email="<?php echo e($item->email); ?>" data-id_guru="<?php echo e($item->id_guru); ?>"
-                                                        data-jabatan="<?php echo e($item->jabatan); ?>" data-sekolah="<?php echo e($item->sekolah); ?>" data-siswas="<?php echo e(json_encode($item->siswas->map(function ($s) {
+                                                        data-jabatan="<?php echo e($item->jabatan); ?>" data-sekolah="<?php echo e($item->sekolah); ?>"
+                                                        data-no_hp="<?php echo e($item->no_hp); ?>" data-npsn="<?php echo e($item->npsn); ?>"
+                                                        data-siswas="<?php echo e(json_encode($item->siswas->map(function ($s) {
                             return [
                                 'nama' => $s->nama, 
                                 'nisn' => $s->nisn, 
@@ -93,7 +95,8 @@
                                                         data-bs-target="#modalEditGuru" data-id="<?php echo e($item->id_guru); ?>"
                                                         data-nama="<?php echo e($item->nama); ?>" data-email="<?php echo e($item->email); ?>"
                                                         data-id_guru="<?php echo e($item->id_guru); ?>" data-jabatan="<?php echo e($item->jabatan); ?>"
-                                                        data-sekolah="<?php echo e($item->sekolah); ?>">
+                                                        data-sekolah="<?php echo e($item->sekolah); ?>" data-no_hp="<?php echo e($item->no_hp); ?>"
+                                                        data-npsn="<?php echo e($item->npsn); ?>">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <button class="btn-icon btn-delete-soft btn-delete-trigger" data-bs-toggle="modal"
@@ -145,83 +148,92 @@
                     </div>
 
                     <div class="modal-form-body">
-                        <div class="p-form-group">
-                            <label>Nama Lengkap</label>
-                            <div class="p-input-wrapper">
-                                <i class="fas fa-user input-icon"></i>
-                                <input type="text" name="nama" class="p-input with-icon" required
-                                    placeholder="Contoh: Budi Santoso, S.Pd.">
-                            </div>
-                        </div>
-
-                        <div class="p-form-group">
-                            <label>Alamat Email Resmi</label>
-                            <div class="p-input-wrapper">
-                                <i class="fas fa-envelope input-icon"></i>
-                                <input type="email" name="email" class="p-input with-icon" required placeholder="budi@sekolah.sch.id">
-                            </div>
-                        </div>
-
-                        <div class="p-form-row">
-                            <div class="p-form-group">
-                                <label>Kata Sandi</label>
-                                <div class="p-input-wrapper">
-                                    <i class="fas fa-lock input-icon"></i>
-                                    <div class="input-group">
-                                        <input type="password" name="password" class="p-input with-icon" required
-                                            placeholder="Minimal 6 karakter">
-                                        <button class="btn-light-custom toggle-password" type="button" style="padding: 0 1rem; border-radius: 0 12px 12px 0;">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
+                        <div class="row g-4">
+                            
+                            <div class="col-md-6">
+                                <span class="form-section-label">Informasi Akun & Personal</span>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-user input-icon"></i>
+                                        <input type="text" name="nama" class="p-input with-icon" required placeholder="Nama Lengkap & Gelar">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted mb-1">Email Resmi <span class="text-danger">*</span></label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-envelope input-icon"></i>
+                                        <input type="email" name="email" class="p-input with-icon" required placeholder="email@sekolah.sch.id">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">Kata Sandi <span class="text-danger">*</span></label>
+                                        <div class="p-input-wrapper">
+                                            <div class="input-group">
+                                                <input type="password" name="password" class="p-input" required placeholder="Sandi">
+                                                <button class="btn btn-outline-secondary toggle-password" type="button"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-bold text-muted mb-1">Konfirmasi <span class="text-danger">*</span></label>
+                                        <div class="p-input-wrapper">
+                                            <div class="input-group">
+                                                <input type="password" name="password_confirmation" class="p-input" required placeholder="Ulangi">
+                                                <button class="btn btn-outline-secondary toggle-password" type="button"><i class="fas fa-eye"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small fw-bold text-muted mb-1">No. WhatsApp</label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-phone input-icon"></i>
+                                        <input type="text" name="no_hp" class="p-input with-icon" placeholder="08xxxxxxxxxx">
                                     </div>
                                 </div>
                             </div>
-                            <div class="p-form-group">
-                                <label>Konfirmasi Kata Sandi</label>
-                                <div class="p-input-wrapper">
-                                    <i class="fas fa-shield-alt input-icon"></i>
-                                    <div class="input-group">
-                                        <input type="password" name="password_confirmation" class="p-input with-icon" required
-                                            placeholder="Ulangi kata sandi">
-                                        <button class="btn-light-custom toggle-password" type="button" style="padding: 0 1rem; border-radius: 0 12px 12px 0;">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
+
+                            
+                            <div class="col-md-6">
+                                <span class="form-section-label">Identitas & Penugasan</span>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted mb-1">NIP Resmi <span class="text-danger">*</span></label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-id-card input-icon"></i>
+                                        <input type="text" name="id_guru" class="p-input with-icon" required placeholder="Nomor Induk Pegawai">
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="p-form-group">
-                            <label>Nomor Induk Pegawai (NIP)</label>
-                            <div class="p-input-wrapper">
-                                <i class="fas fa-id-card input-icon"></i>
-                                <input type="text" name="id_guru" class="p-input with-icon" required placeholder="Masukkan NIP Resmi">
-                            </div>
-                        </div>
-
-                        <div class="p-form-row">
-                            <div class="p-form-group">
-                                <label>Jabatan / Bidang</label>
-                                <div class="p-input-wrapper">
-                                    <i class="fas fa-briefcase input-icon"></i>
-                                    <input type="text" name="jabatan" class="p-input with-icon" required
-                                        placeholder="Contoh: Informatika">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted mb-1">Jabatan / Mata Pelajaran <span class="text-danger">*</span></label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-briefcase input-icon"></i>
+                                        <input type="text" name="jabatan" class="p-input with-icon" required placeholder="Contoh: Guru Informatika">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="p-form-group">
-                                <label>Asal Instansi Sekolah</label>
-                                <div class="p-input-wrapper">
-                                    <i class="fas fa-school input-icon"></i>
-                                    <input type="text" name="sekolah" class="p-input with-icon" required
-                                        placeholder="Contoh: SMK Negeri 1 Palembang">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted mb-1">Cari NPSN Sekolah</label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-fingerprint input-icon"></i>
+                                        <input type="text" name="npsn" id="reg_npsn_guru" class="p-input with-icon" placeholder="Ketik NPSN...">
+                                    </div>
+                                    <small id="reg_npsn_guru_msg" class="text-muted"></small>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small fw-bold text-muted mb-1">Asal Instansi Sekolah <span class="text-danger">*</span></label>
+                                    <div class="p-input-wrapper">
+                                        <i class="fas fa-school input-icon"></i>
+                                        <input type="text" name="sekolah" id="reg_sekolah_guru" class="p-input with-icon" required placeholder="Nama Sekolah">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-form-footer">
-                        <button type="button" class="btn-light-custom" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn-primary-custom rounded-full px-5">Simpan Data Guru</button>
+                    <div class="modal-form-footer border-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn-primary-custom rounded-pill px-5">Daftarkan Guru</button>
                     </div>
                 </form>
             </div>
@@ -289,13 +301,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="p-form-group">
-                            <label>NIP</label>
-                            <div class="p-input-wrapper">
-                                <i class="fas fa-id-card input-icon"></i>
-                                <input type="text" name="id_guru" id="edit_id_guru" class="p-input with-icon" required>
-                            </div>
-                        </div>
                         <div class="p-form-row">
                             <div class="p-form-group">
                                 <label>Jabatan</label>
@@ -305,11 +310,36 @@
                                 </div>
                             </div>
                             <div class="p-form-group">
+                                <label>NIP</label>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-id-card input-icon"></i>
+                                    <input type="text" name="id_guru" id="edit_id_guru" class="p-input with-icon" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-form-row">
+                            <div class="p-form-group">
                                 <label>Sekolah</label>
                                 <div class="p-input-wrapper">
                                     <i class="fas fa-school input-icon"></i>
                                     <input type="text" name="sekolah" id="edit_sekolah" class="p-input with-icon" required>
                                 </div>
+                            </div>
+                            <div class="p-form-group">
+                                <label>NPSN Sekolah</label>
+                                <div class="p-input-wrapper">
+                                    <i class="fas fa-fingerprint input-icon"></i>
+                                    <input type="text" name="npsn" id="edit_npsn" class="p-input with-icon">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-form-group">
+                            <label>No. HP / WhatsApp</label>
+                            <div class="p-input-wrapper">
+                                <i class="fas fa-phone-alt input-icon"></i>
+                                <input type="text" name="no_hp" id="edit_hp" class="p-input with-icon">
                             </div>
                         </div>
                     </div>
@@ -340,12 +370,16 @@
                                 <span id="det_nama">-</span>
                             </div>
                             <div class="detail-p-item">
-                                <label>Nomor Induk Pegawai (NIP)</label>
+                                <label>NIP Resmi</label>
                                 <span id="det_id_guru">-</span>
                             </div>
                             <div class="detail-p-item">
-                                <label>Alamat Email</label>
+                                <label>Email Korespondensi</label>
                                 <span id="det_email">-</span>
+                            </div>
+                            <div class="detail-p-item">
+                                <label>No. WhatsApp</label>
+                                <span id="det_no_hp">-</span>
                             </div>
                         </div>
 
@@ -353,11 +387,15 @@
                         <div class="detail-section-card">
                             <h6 class="section-label"><i class="fas fa-school"></i> Instansi & Bidang</h6>
                             <div class="detail-p-item">
-                                <label>Sekolah Asal</label>
+                                <label>Asal Sekolah</label>
                                 <span id="det_sekolah">-</span>
                             </div>
                             <div class="detail-p-item">
-                                <label>Jabatan</label>
+                                <label>NPSN Sekolah</label>
+                                <span id="det_npsn">-</span>
+                            </div>
+                            <div class="detail-p-item">
+                                <label>Jabatan Guru</label>
                                 <span id="det_jabatan">-</span>
                             </div>
                         </div>

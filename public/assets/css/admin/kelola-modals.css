@@ -334,3 +334,122 @@
     .pdf-desktop-actions { display: none !important; }
     .pdf-viewer-header { padding: 0.5rem 1rem !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Edit Modal — Section Block System
+   (Enhanced for balanced 2-column layout)
+═══════════════════════════════════════════════════════════ */
+
+.edit-section-block {
+    background: #ffffff;
+    border: 1px solid #e8effc;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.04);
+    transition: all 0.3s ease;
+}
+
+.edit-section-block:hover {
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.08);
+    transform: translateY(-2px);
+}
+
+.edit-section-block .p-input-wrapper {
+    margin-bottom: 0.5rem; /* Add consistent spacing within sections */
+}
+
+.edit-section-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 1.25rem;
+}
+
+.edit-section-title i {
+    width: 32px;
+    height: 32px;
+    background: #eff6ff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: #3b82f6;
+}
+
+.edit-field-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.req {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+/* Custom Password Group for Pill Inputs */
+.custom-pw-group {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+.custom-pw-group .p-input {
+    padding-right: 50px !important; /* Space for the eye icon */
+}
+
+.custom-pw-group .pw-toggle-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    height: 38px;
+    width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.custom-pw-group .pw-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1e293b !important;
+}
+
+/* Select Styling Match */
+select.p-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 18px;
+    padding-right: 40px;
+}
+
+.modal-form-body.bg-light {
+    background-color: #f8fafc !important;
+}
+
+/* Fix for date inputs in pill style */
+input[type="date"].p-input {
+    min-height: 48px;
+    line-height: 24px;
+}
+
+/* Ensure no overlap in small grid columns */
+.row.g-3 > [class*="col-"] {
+    position: relative;
+}
+

@@ -430,13 +430,13 @@
 
                     <!-- Navigation Bar -->
                     <div class="pagination-nav-bar px-4 py-3">
-                        <button id="btnPrevPage" class="btn-nav-page" onclick="changePage(-1)">
+                        <button id="btnPrevPage" class="btn-nav-page" onclick="changePage(1)">
                             <i class="fas fa-chevron-left me-1"></i> Sebelumnya
                         </button>
                         <div class="page-indicator fw-bold text-primary">
                             Halaman <span id="currentPageNum">1</span>
                         </div>
-                        <button id="btnNextPage" class="btn-nav-page" onclick="changePage(1)">
+                        <button id="btnNextPage" class="btn-nav-page" onclick="changePage(-1)">
                             Selanjutnya <i class="fas fa-chevron-right ms-1"></i>
                         </button>
                     </div>
@@ -449,8 +449,7 @@
                                     <tr>
                                         <th>Tanggal</th>
                                         <th>Detail Waktu</th>
-                                        <th>Status</th>
-                                        <th class="text-center">Aksi</th>
+                                        <th class="text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historyAbsensiBody">

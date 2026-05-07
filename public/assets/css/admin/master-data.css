@@ -28,12 +28,37 @@ body.admin-page {
     color: var(--p-text-main);
 }
 
-.management-container { max-width: 1500px; margin: 2rem auto; padding: 0 2rem; }
-.admin-content-wrapper { background: #fff; border-radius: var(--p-radius-xl); box-shadow: var(--p-shadow-lg); padding: 2.5rem; border: 1px solid #fff; }
+.management-container {
+    max-width: 1500px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
 
-.management-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.header-title h5 { font-size: 1.8rem; font-weight: 800; color: var(--p-accent); }
-.header-title p { color: var(--p-text-muted); font-size: 0.95rem; }
+.admin-content-wrapper {
+    background: #fff;
+    border-radius: var(--p-radius-xl);
+    box-shadow: var(--p-shadow-lg);
+    padding: 2.5rem;
+    border: 1px solid #fff;
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header-title h5 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--p-accent);
+}
+
+.header-title p {
+    color: var(--p-text-muted);
+    font-size: 0.95rem;
+}
 
 /* Tabs Master */
 .nav-pills .nav-link {
@@ -50,12 +75,14 @@ body.admin-page {
 
 .nav-pills .nav-link.active {
     background: var(--p-primary);
-    color: #fff;
+    color: #5c4848;
     border-color: var(--p-primary);
     box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2);
 }
 
-.nav-pills .nav-link i { margin-right: 8px; }
+.nav-pills .nav-link i {
+    margin-right: 8px;
+}
 
 /* Data Table Wrapper */
 .data-table-wrapper {
@@ -93,12 +120,24 @@ body.admin-page {
     align-items: center;
 }
 
-.bg-success-subtle { background: #ecfdf5 !important; color: #059669 !important; }
-.bg-info-subtle { background: #f0f9ff !important; color: #0369a1 !important; }
-.bg-warning-subtle { background: #fffbeb !important; color: #b45309 !important; }
+.bg-success-subtle {
+    background: #ecfdf5 !important;
+    color: #059669 !important;
+}
+
+.bg-info-subtle {
+    background: #f0f9ff !important;
+    color: #0369a1 !important;
+}
+
+.bg-warning-subtle {
+    background: #fffbeb !important;
+    color: #b45309 !important;
+}
 
 /* Action Buttons in Table */
-.btn-edit-sekolah, .btn-edit-periode {
+.btn-edit-sekolah,
+.btn-edit-periode {
     width: 34px;
     height: 34px;
     display: inline-flex;
@@ -108,7 +147,8 @@ body.admin-page {
     transition: var(--p-transition);
 }
 
-.btn-edit-sekolah:hover, .btn-edit-periode:hover {
+.btn-edit-sekolah:hover,
+.btn-edit-periode:hover {
     background: #dbeafe !important;
     color: var(--p-primary) !important;
     transform: translateY(-2px);

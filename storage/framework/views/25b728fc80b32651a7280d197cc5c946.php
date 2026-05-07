@@ -11,7 +11,7 @@
         
         <div class="page-header animate-fade-in">
             <div class="header-content">
-                <h3 class="header-title">Pengajuan Lupa Isi<span class="dot-primary">.</span></h3>
+                <h3 class="header-title">Pengajuan Lupa Isi</h3>
                 <p class="header-subtitle">Laporkan absensi atau kegiatan yang terlewat untuk diverifikasi pembimbing.</p>
             </div>
         </div>
@@ -72,7 +72,7 @@
                         <?php else: ?>
                             <form action="<?php echo e(route('siswa.pengajuan.store')); ?>" method="POST" enctype="multipart/form-data">
                             <?php echo csrf_field(); ?>
-                            
+
                             <div class="form-field">
                                 <label class="field-label">Jenis Lupa <span class="required-mark">*</span></label>
                                 <select class="custom-select" name="jenis" id="jenis_pengajuan" required>
@@ -102,7 +102,7 @@
                                      </div>
                                  </div>
                              </div>
- 
+
                              <!-- Fields for Kegiatan -->
                              <div id="fields_kegiatan" class="nested-fields-kegiatan <?php echo e(old('jenis') != 'kegiatan' ? 'hidden' : ''); ?>">
                                  <div class="form-field">
@@ -110,12 +110,12 @@
                                      <textarea class="custom-textarea" name="deskripsi" rows="3" placeholder="Jelaskan secara singkat kegiatan yang Anda lakukan hari itu..."><?php echo e(old('deskripsi')); ?></textarea>
                                  </div>
                              </div>
- 
+
                              <div class="form-field">
                                  <label class="field-label">Alasan Keterlambatan Pengisian <span class="required-mark">*</span></label>
                                  <textarea class="custom-textarea" name="alasan_terlambat" rows="2" required placeholder="Mengapa Anda baru mengisi sekarang?"><?php echo e(old('alasan_terlambat')); ?></textarea>
                              </div>
- 
+
                              <div class="form-field">
                                  <label class="field-label">Foto / Bukti Lampiran <span class="hint-mark">(Opsional)</span></label>
                                  <div class="custom-upload-area">
@@ -126,13 +126,19 @@
                                  </div>
                                  <div id="file-name-display" class="file-chosen-info hidden"></div>
                              </div>
- 
+
+                             <div class="form-actions">
+                                 <button type="submit" class="premium-submit-btn" id="btn-kirim-pengajuan">
+                                     <i class="fas fa-paper-plane"></i>
+                                     Kirim Pengajuan
+                                 </button>
                              </div>
-                         </form>
-                         <?php endif; ?>
-                     </div>
-                 </div>
-             </div>
+
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
 
 
             <!-- Riwayat Pengajuan -->

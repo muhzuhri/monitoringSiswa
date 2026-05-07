@@ -74,6 +74,34 @@
                 @endforelse
             </tbody>
         </table>
+        
+        <div style="margin-top: 20px;">
+            <table class="data-table" style="width: 50%;">
+                <thead>
+                    <tr>
+                        <th colspan="2">Ringkasan Kehadiran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hadir</td>
+                        <td class="text-center">{{ $rekapAbsensi['hadir'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Izin</td>
+                        <td class="text-center">{{ $rekapAbsensi['izin'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Sakit</td>
+                        <td class="text-center">{{ $rekapAbsensi['sakit'] }}</td>
+                    </tr>
+                    <tr>
+                        <td>Alpa</td>
+                        <td class="text-center">{{ $rekapAbsensi['alpa'] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="footer">
             <div class="footer-content">

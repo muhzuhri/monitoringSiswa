@@ -69,23 +69,74 @@ document.addEventListener("DOMContentLoaded", function () {
             if (el) el.textContent = val || "-";
         };
 
-        setVal("det_name", data.nama);
-        setVal("det_nisn", data.nisn);
-        setVal("det_email", data.email);
-        setVal("det_hp", data.no_hp);
-        setVal("det_kelas_jurusan", `${data.kelas} - ${data.jurusan}`);
-        setVal("det_sekolah", data.sekolah);
-        setVal("det_perusahaan", data.perusahaan || "Belum ditugaskan");
+        setVal("s_det_nama", data.nama);
+        setVal("s_det_nisn", data.nisn);
+        setVal("s_det_jk", data.jk);
+        setVal("s_det_email", data.email);
+        setVal("s_det_hp", data.no_hp);
+        setVal("s_det_kelas_jurusan", `${data.kelas} - ${data.jurusan}`);
+        setVal("s_det_tahun_ajaran", data.tahunAjaran || data.tahun_ajaran);
+        setVal("s_det_sekolah", data.sekolah);
+        setVal("s_det_npsn", data.npsn);
+        setVal("s_det_perusahaan", data.perusahaan || "Belum ditugaskan");
+        setVal("s_det_tipe_magang", (data.tipeMagang || data.tipe_magang || "individu").toUpperCase());
+        setVal("s_det_nisn_ketua", data.nisnKetua || data.nisn_ketua);
 
         const mulai = data.mulai;
         const selesai = data.selesai;
-        setVal("det_periode", (mulai && selesai && mulai !== "-") ? `${mulai} s/d ${selesai}` : "Belum ditentukan");
+        setVal("s_det_periode", (mulai && selesai && mulai !== "-") ? `${mulai} s/d ${selesai}` : "Belum ditentukan");
 
-        setVal("det_guru_nama", data.guruNama);
-        setVal("det_guru_nip", data.guruNip);
-        setVal("det_pl_nama", data.plNama);
-        setVal("det_pl_nip", data.plNip);
-        setVal("det_pl_hp", data.plHp);
+        setVal("s_det_guru_nama", data.guruNama);
+        setVal("s_det_guru_nip", data.guruNip);
+        
+        const guruHp = data.guruHp || '';
+        const guruWaBtn = document.getElementById('s_det_guru_wa_btn');
+        const formatWa = (num) => {
+            let cleaned = num.replace(/\D/g, '');
+            if (cleaned.startsWith('0')) cleaned = '62' + cleaned.slice(1);
+            return cleaned;
+        };
+
+        if (guruWaBtn) {
+            if (guruHp && guruHp !== '-') {
+                guruWaBtn.href = `https://wa.me/${formatWa(guruHp)}`;
+                guruWaBtn.classList.remove('d-none');
+            } else {
+                guruWaBtn.classList.add('d-none');
+            }
+        }
+
+        setVal("s_det_pl_nama", data.plNama);
+        setVal("s_det_pl_nip", data.plNip);
+        
+        const plHp = data.plHp || '';
+        const plWaBtn = document.getElementById('s_det_pl_wa_btn');
+        if (plWaBtn) {
+            if (plHp && plHp !== '-') {
+                plWaBtn.href = `https://wa.me/${formatWa(plHp)}`;
+                plWaBtn.classList.remove('d-none');
+            } else {
+                plWaBtn.classList.add('d-none');
+            }
+        }
+
+        // Handle Surat Balasan Display
+        const suratPath = data.surat_balasan;
+        const detSurat = document.getElementById('s_det_surat_balasan');
+        const btnViewSurat = document.getElementById('s_btn_view_surat');
+
+        if (suratPath && suratPath !== 'null' && suratPath !== '' && detSurat && btnViewSurat) {
+            detSurat.textContent = 'File tersedia';
+            detSurat.className = 'detail-value text-success fw-bold';
+            btnViewSurat.classList.remove('d-none');
+            btnViewSurat.onclick = function() {
+                window.openPdfPreview(`/storage/${suratPath}`);
+            };
+        } else if (detSurat && btnViewSurat) {
+            detSurat.textContent = 'Belum diunggah';
+            detSurat.className = 'detail-value text-muted italic';
+            btnViewSurat.classList.add('d-none');
+        }
     });
 
     // ── Modal Group Members (Riwayat) ─────────────────────────────
@@ -94,62 +145,93 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalNameEl = document.getElementById("modalGroupName");
     const modalBodyEl = document.getElementById("modalGroupBody");
 
-    document.querySelectorAll(".btn-show-members").forEach((button) => {
-        button.addEventListener("click", function () {
-            const name = this.dataset.name;
-            const members = JSON.parse(this.dataset.members);
-            const type = this.getAttribute("data-type") || "active";
+    document.addEventListener("click", function(e) {
+        const button = e.target.closest(".btn-show-members");
+        if(!button) return;
 
-            modalNameEl.innerText = name;
+        const name = button.dataset.name;
+        const members = JSON.parse(button.dataset.members);
+        const type = button.getAttribute("data-type") || "active";
+
+        if(modalNameEl) modalNameEl.innerText = name;
+        if(modalBodyEl) {
             modalBodyEl.innerHTML = "";
 
-            // Route patterns (Admin routes since they provide reports for Pimpinan)
             const container = document.getElementById("siswa-container");
             const logDownloadBase = container ? container.dataset.jurnalUrl : "";
             const absDownloadBase = container ? container.dataset.absensiUrl : "";
 
             members.forEach((member) => {
-                const statusBadge = member.status === 'selesai' || type === 'history' ? `
-                            <span class="badge bg-secondary-light text-muted px-2 py-1 small rounded-pill" style="font-size: 0.65rem;">
-                                <i class="fas fa-flag-checkered me-1"></i> SELESAI
-                            </span>
-                        ` : `
-                            <span class="badge bg-success-light text-success px-2 py-1 small rounded-pill" style="font-size: 0.65rem;">
-                                <i class="fas fa-check-circle me-1"></i> AKTIF
-                            </span>
-                        `;
+                const statusBadge = (member.status === 'selesai' || type === 'history') ? `
+                    <span class="badge bg-secondary-soft text-muted px-2 py-1 small rounded-pill">
+                        <i class="fas fa-archive me-1"></i> SELESAI
+                    </span>
+                ` : `
+                    <span class="badge bg-success-soft text-success px-2 py-1 small rounded-pill">
+                        <i class="fas fa-check-circle me-1"></i> AKTIF
+                    </span>
+                `;
 
                 const row = `
-                            <tr>
-                                <td>
-                                    <div class="cell-name mb-0" style="font-size: 0.95rem;">${member.nama}</div>
-                                    <div class="cell-sub small text-muted">NISN: ${member.nisn}</div>
-                                </td>
-                                <td class="text-center">
-                                    ${statusBadge}
-                                </td>
-                                <td class="text-end">
-                                    <button class="btn-icon btn-detail-soft btn-detail"
-                                        data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                        data-nisn="${member.nisn}" data-nama="${member.nama}" data-email="${member.email}"
-                                        data-no_hp="${member.no_hp || '-'}" data-kelas="${member.kelas}" data-jurusan="${member.jurusan}"
-                                        data-sekolah="${member.sekolah}" data-perusahaan="${member.perusahaan || '-'}"
-                                        data-mulai="${member.mulai}" data-selesai="${member.selesai}"
-                                        data-guru-nama="${member.guru_nama}" data-guru-nip="${member.guru_nip}"
-                                        data-pl-nama="${member.pl_nama}" data-pl-nip="${member.pl_nip}"
-                                        data-pl-hp="${member.pl_hp}"
-                                        title="Lihat Detail Profil">
-                                        <i class="fas fa-id-card text-primary"></i>
+                    <tr>
+                        <td class="p-3">
+                            <div class="fw-bold text-dark">${member.nama}</div>
+                            <div class="text-muted small">NISN: ${member.nisn}</div>
+                        </td>
+                        <td class="text-center p-3">
+                            ${statusBadge}
+                        </td>
+                        <td class="text-end p-3">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn-premium-circle btn-view-p btn-detail"
+                                    data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                    data-nisn="${member.nisn}" 
+                                    data-nama="${member.nama}" 
+                                    data-email="${member.email}"
+                                    data-no_hp="${member.no_hp || '-'}" 
+                                    data-jk="${member.jk || '-'}"
+                                    data-kelas="${member.kelas}" 
+                                    data-jurusan="${member.jurusan}"
+                                    data-sekolah="${member.sekolah}" 
+                                    data-npsn="${member.npsn || '-'}"
+                                    data-perusahaan="${member.perusahaan || '-'}"
+                                    data-tipe_magang="${member.tipe_magang || 'individu'}"
+                                    data-nisn_ketua="${member.nisn_ketua || '-'}"
+                                    data-surat_balasan="${member.surat_balasan || ''}"
+                                    data-tahun_ajaran="${member.tahun_ajaran || '-'}"
+                                    data-mulai="${member.mulai}" 
+                                    data-selesai="${member.selesai}"
+                                    data-guru-nama="${member.guru_nama}" 
+                                    data-guru-nip="${member.guru_nip}"
+                                    data-guru-hp="${member.guru_hp}"
+                                    data-pl-nama="${member.pl_nama}" 
+                                    data-pl-nip="${member.pl_nip}"
+                                    data-pl-hp="${member.pl_hp}"
+                                    title="Lihat Detail Profil">
+                                    <i class="fas fa-id-card"></i>
+                                </button>
+                                ${type === 'history' ? `
+                                    <button class="btn-premium-circle btn-jurnal-p btn-preview-pdf" 
+                                        data-url="${logDownloadBase.replace(':nisn', member.nisn)}"
+                                        title="Rekap Jurnal">
+                                        <i class="fas fa-book-open"></i>
                                     </button>
-                                </td>
-                            </tr>
-                        `;
+                                    <button class="btn-premium-circle btn-absensi-p btn-preview-pdf" 
+                                        data-url="${absDownloadBase.replace(':nisn', member.nisn)}"
+                                        title="Rekap Presensi">
+                                        <i class="fas fa-calendar-check"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 modalBodyEl.innerHTML += row;
             });
+        }
 
-            initPdfPreviewListeners();
-            if (groupModal) groupModal.show();
-        });
+        initPdfPreviewListeners();
+        if (groupModal) groupModal.show();
     });
 
     // ── PDF Preview ────────────────────────────────────────────────
@@ -173,18 +255,15 @@ document.addEventListener("DOMContentLoaded", function () {
             const pdfDoc = await pdfjsLib.getDocument(url).promise;
             loadingEl.style.display = "none";
 
-            const containerWidth = container.clientWidth - 40;
-            const outputScale = window.devicePixelRatio || 2; // High-res rendering
+            const containerWidth = (container.clientWidth > 0 ? container.clientWidth : 800) - 40;
+            const outputScale = window.devicePixelRatio || 2; 
 
             for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                 const page = await pdfDoc.getPage(pageNum);
                 
-                // Calculate original display size
                 const baseViewport = page.getViewport({ scale: 1.0 });
                 const displayScale = containerWidth / baseViewport.width;
                 const displayViewport = page.getViewport({ scale: displayScale });
-
-                // Render at higher resolution
                 const renderViewport = page.getViewport({ scale: displayScale * outputScale });
 
                 const canvas = document.createElement("canvas");
@@ -193,9 +272,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 canvas.width = Math.floor(renderViewport.width);
                 canvas.height = Math.floor(renderViewport.height);
                 
-                // Scale back down via CSS for sharpness
                 canvas.style.width = Math.floor(displayViewport.width) + "px";
                 canvas.style.height = Math.floor(displayViewport.height) + "px";
+                canvas.style.marginBottom = "20px";
+                canvas.style.borderRadius = "8px";
+                canvas.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
 
                 await page.render({
                     canvasContext: context,
@@ -227,10 +308,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 if (pdfModal) {
                     pdfModal.show();
-                    renderPDF(url);
+                    // Wait for modal to be shown to get correct clientWidth
+                    const handler = () => {
+                        renderPDF(url);
+                        pdfModalEl.removeEventListener('shown.bs.modal', handler);
+                    };
+                    pdfModalEl.addEventListener('shown.bs.modal', handler);
                 }
             });
         });
     }
+
+    // Also update the onclick in detail modal
+    window.openPdfPreview = function(url) {
+        if (downloadBtn) downloadBtn.href = url + (url.includes("?") ? "&" : "?") + "download=1";
+        if (pdfModal) {
+            pdfModal.show();
+            const handler = () => {
+                renderPDF(url);
+                pdfModalEl.removeEventListener('shown.bs.modal', handler);
+            };
+            pdfModalEl.addEventListener('shown.bs.modal', handler);
+        }
+    };
     initPdfPreviewListeners();
 });

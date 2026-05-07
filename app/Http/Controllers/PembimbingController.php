@@ -109,7 +109,7 @@ class PembimbingController extends Controller
         }
 
         $allSiswas = $query->with([
-            'guru', 'tahunAjaran',
+            'guru', 'pembimbing', 'tahunAjaran',
             'absensis' => fn($q) => $q->whereDate('tanggal', $today),
             'penilaians' => fn($q) => $q->where('pemberi_nilai', 'Dosen Pembimbing')
         ])->orderBy('nama', 'asc')->get();
@@ -119,10 +119,13 @@ class PembimbingController extends Controller
             $s->absen_hari_ini = $s->absensis->first();
         }
 
-        $siswasActive = $allSiswas->where('status', '!=', 'selesai');
+        $siswasActive = $allSiswas->filter(function($s) use ($today) {
+            return $s->status !== 'selesai' && (!$s->tgl_selesai_magang || $s->tgl_selesai_magang >= $today);
+        });
         
-        $siswasHistory = $allSiswas->filter(function ($s) use ($periodeId) {
-            if ($s->status !== 'selesai') return false;
+        $siswasHistory = $allSiswas->filter(function ($s) use ($periodeId, $today) {
+            $isSelesai = $s->status === 'selesai' || ($s->tgl_selesai_magang && $s->tgl_selesai_magang < $today);
+            if (!$isSelesai) return false;
             return !$periodeId || (string)$s->id_tahun_ajaran === (string)$periodeId;
         });
 
@@ -196,24 +199,80 @@ class PembimbingController extends Controller
     public function absensiSiswa(Request $request, $nisn)
     {
         $pembimbing = Auth::user();
-        $siswa = Siswa::where('id_pembimbing', $pembimbing->id_pembimbing)->where('nisn', $nisn)->with('absensis')->firstOrFail();
+        $siswa = Siswa::where('id_pembimbing', $pembimbing->id_pembimbing)
+            ->where('nisn', $nisn)
+            ->firstOrFail();
 
         $statusVerifikasi = $request->input('status_verifikasi');
-        $query = $siswa->absensis();
 
-        if ($statusVerifikasi && in_array($statusVerifikasi, ['pending', 'verified', 'rejected'])) {
-            $query->where('verifikasi', $statusVerifikasi);
+        // Build full attendance history including dynamic Alpha for missing workdays
+        $internStart = $siswa->tgl_mulai_magang ? Carbon::parse($siswa->tgl_mulai_magang)->startOfDay() : null;
+        $internEnd   = $siswa->tgl_selesai_magang ? Carbon::parse($siswa->tgl_selesai_magang)->startOfDay() : null;
+        $today       = Carbon::now()->startOfDay();
+
+        // Date range: from internship start to today (or internship end, whichever is earlier)
+        $rangeStart = $internStart ?? Carbon::now()->startOfMonth();
+        $rangeEnd   = Carbon::now();
+        if ($internEnd && $rangeEnd->gt($internEnd)) {
+            $rangeEnd = $internEnd->copy();
         }
 
-        $absensis = $query->orderBy('tanggal', 'desc')->paginate(15);
+        // Fetch all DB attendance records within range
+        $dbRecords = $siswa->absensis()
+            ->whereBetween('tanggal', [$rangeStart->toDateString(), $rangeEnd->toDateString()])
+            ->get()
+            ->keyBy('tanggal');
 
+        // Build full list: DB records + dynamic Alpha for missing workdays
+        $fullHistory = collect();
+        $current = $rangeStart->copy();
+        while ($current <= $rangeEnd) {
+            $dateStr   = $current->toDateString();
+            $isWeekend = $current->isWeekend();
+
+            if (isset($dbRecords[$dateStr])) {
+                $fullHistory->push($dbRecords[$dateStr]);
+            } elseif (!$isWeekend && $current->lt($today) && $internStart && $current->gte($internStart)) {
+                // Missing workday → dynamic Alpha (ID using date string for identification)
+                $fullHistory->push((object)[
+                    'id_absensi'  => 'dynamic_' . $dateStr, // String ID for modal trigger
+                    'tanggal'     => $dateStr,
+                    'jam_masuk'   => null,
+                    'jam_pulang'  => null,
+                    'status'      => 'alpa',
+                    'verifikasi'  => 'pending',
+                    'foto_masuk'  => null,
+                    'foto_pulang' => null,
+                    'keterangan'  => null,
+                    'is_dynamic'  => true,
+                ]);
+            }
+            $current->addDay();
+        }
+
+        // Sort descending by date
+        $fullHistory = $fullHistory->sortByDesc('tanggal')->values();
+
+        // Apply verifikasi filter if requested (only applicable to DB records)
+        if ($statusVerifikasi && in_array($statusVerifikasi, ['pending', 'verified', 'rejected'])) {
+            $fullHistory = $fullHistory->filter(function($a) use ($statusVerifikasi) {
+                // Dynamic alphas have verifikasi=pending, include them when filtering pending
+                $v = is_object($a) ? ($a->verifikasi ?? 'pending') : ($a['verifikasi'] ?? 'pending');
+                return $v === $statusVerifikasi;
+            })->values();
+        }
+
+        // Rekap counts from full history
         $rekap = [
-            'total' => $siswa->absensis()->count(),
-            'hadir' => $siswa->absensis()->whereIn('status', ['hadir', 'terlambat'])->count(),
-            'izin' => $siswa->absensis()->where('status', 'izin')->count(),
-            'sakit' => $siswa->absensis()->where('status', 'sakit')->count(),
-            'alpa' => $siswa->absensis()->where('status', 'alpa')->count(),
+            'total' => $fullHistory->count(),
+            'hadir' => $fullHistory->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin'  => $fullHistory->where('status', 'izin')->count(),
+            'sakit' => $fullHistory->where('status', 'sakit')->count(),
+            'alpa'  => $fullHistory->where('status', 'alpa')->count(),
         ];
+
+        // Get only DB records paginated (for the "Setujui Semua" pending check)
+        $absensis = $fullHistory;
 
         return view('pembimbing.absensiSiswa', compact('pembimbing', 'siswa', 'absensis', 'rekap', 'statusVerifikasi'));
     }
@@ -254,19 +313,51 @@ class PembimbingController extends Controller
     {
         $request->validate([
             'status' => 'required|in:verified,rejected',
-            'keterangan' => 'nullable|string'
+            'keterangan' => 'nullable|string',
+            'siswa_nisn' => 'required_if:is_dynamic,1' // Required only for dynamic records
         ]);
 
-        $absensi = Absensi::findOrFail($id);
+        $pembimbing = Auth::user();
 
-        if ($absensi->siswa->id_pembimbing != Auth::user()->id_pembimbing) {
-            return redirect()->back()->with('error', 'Akses ditolak.');
+        // Handle dynamic record creation if ID starts with 'dynamic_'
+        if (strpos($id, 'dynamic_') === 0) {
+            $tanggal = str_replace('dynamic_', '', $id);
+            $nisn = $request->siswa_nisn;
+
+            // Find student to check ownership
+            $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
+            if ($siswa->id_pembimbing != $pembimbing->id_pembimbing) {
+                return redirect()->back()->with('error', 'Akses ditolak.');
+            }
+
+            // Create new Alpha record
+            $absensi = Absensi::create([
+                'nisn' => $nisn,
+                'tanggal' => $tanggal,
+                'status' => 'alpa',
+                'verifikasi' => $request->status,
+                'keterangan' => $request->keterangan ?? '-',
+            ]);
+        } else {
+            // Normal record update
+            $absensi = Absensi::findOrFail($id);
+
+            if ($absensi->siswa->id_pembimbing != $pembimbing->id_pembimbing) {
+                return redirect()->back()->with('error', 'Akses ditolak.');
+            }
+
+            $updateData = [
+                'verifikasi' => $request->status,
+                'keterangan' => $request->keterangan ?? $absensi->keterangan,
+            ];
+
+            // Jika ditolak dan status presensi adalah hadir/izin/sakit → ubah jadi alpa
+            if ($request->status === 'rejected' && in_array($absensi->status, ['hadir', 'terlambat', 'izin', 'sakit'])) {
+                $updateData['status'] = 'alpa';
+            }
+
+            $absensi->update($updateData);
         }
-
-        $absensi->update([
-            'verifikasi' => $request->status,
-            'keterangan' => $request->keterangan ?? $absensi->keterangan
-        ]);
 
         return redirect()->back()->with('success', 'Absensi berhasil divalidasi.');
     }
@@ -296,22 +387,69 @@ class PembimbingController extends Controller
     }
 
     /**
-     * Verifikasi semua absensi pending untuk siswa tertentu
+     * Verifikasi semua absensi pending untuk siswa tertentu (termasuk Alpa otomatis)
      */
     public function validasiSemuaAbsensi(Request $request, $nisn)
     {
         $pembimbing = Auth::user();
-        $siswa = Siswa::where('nisn', $nisn)->where('id_pembimbing', $pembimbing->id_pembimbing)->firstOrFail();
+        $siswa = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $pembimbing->id_pembimbing)
+            ->firstOrFail();
 
-        $updatedCount = Absensi::where('nisn', $nisn)
-            ->where('verifikasi', 'pending')
-            ->update(['verifikasi' => 'verified']);
+        // 1. Identifikasi hari kerja yang kosong (Alpa otomatis) dan buat record-nya
+        $internStart = $siswa->tgl_mulai_magang ? Carbon::parse($siswa->tgl_mulai_magang)->startOfDay() : null;
+        $internEnd   = $siswa->tgl_selesai_magang ? Carbon::parse($siswa->tgl_selesai_magang)->startOfDay() : null;
+        $today       = Carbon::now()->startOfDay();
 
-        if ($updatedCount > 0) {
-            return redirect()->back()->with('success', $updatedCount . ' absensi berhasil divalidasi sekaligus.');
+        $rangeStart = $internStart ?? Carbon::now()->startOfMonth();
+        $rangeEnd   = Carbon::now();
+        if ($internEnd && $rangeEnd->gt($internEnd)) {
+            $rangeEnd = $internEnd->copy();
         }
 
-        return redirect()->back()->with('info', 'Tidak ada absensi dengan status pending untuk divalidasi.');
+        // Ambil data yang sudah ada di DB
+        $dbRecords = $siswa->absensis()
+            ->whereBetween('tanggal', [$rangeStart->toDateString(), $rangeEnd->toDateString()])
+            ->pluck('tanggal')
+            ->toArray();
+
+        $newRecords = [];
+        $current = $rangeStart->copy();
+        while ($current <= $rangeEnd) {
+            $dateStr = $current->toDateString();
+            if (!$current->isWeekend() && $current->lt($today) && !in_array($dateStr, $dbRecords)) {
+                $newRecords[] = [
+                    'nisn' => $siswa->nisn,
+                    'tanggal' => $dateStr,
+                    'status' => 'alpa',
+                    'verifikasi' => 'verified', // Langsung set verified
+                    'keterangan' => 'Validasi Otomatis (Alpa)',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            $current->addDay();
+        }
+
+        if (!empty($newRecords)) {
+            Absensi::insert($newRecords);
+        }
+
+        // 2. Update semua record yang statusnya masih pending menjadi verified
+        $updatedCount = Absensi::where('nisn', $nisn)
+            ->where('verifikasi', 'pending')
+            ->update([
+                'verifikasi' => 'verified',
+                'updated_at' => now()
+            ]);
+
+        $totalProcessed = count($newRecords) + $updatedCount;
+
+        if ($totalProcessed > 0) {
+            return redirect()->back()->with('success', $totalProcessed . ' absensi (termasuk Alpa otomatis) berhasil disetujui sekaligus.');
+        }
+
+        return redirect()->back()->with('info', 'Tidak ada absensi baru atau pending yang perlu disetujui.');
     }
 
     /**
@@ -546,20 +684,117 @@ class PembimbingController extends Controller
      * To truly use PDF we would need Barryvdh/DomPDF which might not be installed, 
      * so we just trigger a browser print view or return a simple view.
      */
-    public function cetakLaporanSiswa($nisn)
+    public function cetakLaporanSiswa(Request $request, $nisn)
     {
         $pembimbing = Auth::user();
 
         $siswa = Siswa::where('nisn', $nisn)
             ->where('id_pembimbing', $pembimbing->id_pembimbing)
-            ->with(['penilaians.penilaianDetails.kriteria', 'absensis', 'logbooks', 'tahunAjaran'])
+            ->with(['penilaians' => function ($q) {
+                $q->where('pemberi_nilai', 'Dosen Pembimbing');
+            }, 'penilaians.penilaianDetails.kriteria', 'absensis', 'logbooks', 'tahunAjaran'])
             ->firstOrFail();
+
+        $penilaian = $siswa->penilaians->first();
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum di inputkan oleh Pembimbing.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum di inputkan oleh Pembimbing.');
+        }
 
         $fileName = "Laporan_Siswa_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
 
         $pdf = Pdf::loadView('pembimbing.cetakPenilaian', compact('pembimbing', 'siswa'));
 
-        return $pdf->download($fileName);
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Cetak Penilaian dari Guru/Dosen Pembimbing Kampus
+     */
+    public function cetakPenilaianGuru(Request $request, $nisn)
+    {
+        /** @var \App\Models\Pembimbing $user */
+        $user = Auth::user();
+        $siswa = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $user->id_pembimbing)
+            ->firstOrFail();
+        
+        $penilaian = $siswa->penilaians()
+            ->where('pemberi_nilai', 'Guru Pembimbing')
+            ->with(['penilaianDetails.kriteria'])
+            ->first();
+
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum di inputkan oleh Guru.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum di inputkan oleh Guru.');
+        }
+
+        $guru = $siswa->guru;
+        $pdf = Pdf::loadView('guru.printPenilaian', ['user' => $guru, 'siswa' => $siswa, 'penilaian' => $penilaian]);
+
+        return $pdf->stream("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
+    }
+
+    /**
+     * Cetak Laporan Akhir Siswa
+     */
+    public function cetakLaporanAkhir(Request $request, $nisn)
+    {
+        /** @var \App\Models\Pembimbing $user */
+        $user = Auth::user();
+        $siswa = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $user->id_pembimbing)
+            ->firstOrFail();
+        
+        $laporanAkhir = $siswa->laporanAkhir;
+        
+        if (!$laporanAkhir) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Laporan akhir belum di inputkan oleh siswa.'], 404);
+            }
+            return back()->with('warning', 'Laporan akhir belum di inputkan oleh siswa.');
+        }
+
+        $path = storage_path('app/public/' . $laporanAkhir->file);
+        if (!file_exists($path)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'File laporan tidak ditemukan di server.'], 404);
+            }
+            return back()->with('warning', 'File laporan tidak ditemukan di server.');
+        }
+
+        return response()->file($path);
+    }
+
+    /**
+     * Cetak Sertifikat Siswa
+     */
+    public function cetakSertifikatSiswa(Request $request, $nisn)
+    {
+        /** @var \App\Models\Pembimbing $user */
+        $user = Auth::user();
+        $siswa = Siswa::where('nisn', $nisn)
+            ->where('id_pembimbing', $user->id_pembimbing)
+            ->firstOrFail();
+        
+        if ($siswa->status !== 'selesai' && !($siswa->tgl_selesai_magang && \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->lt(\Carbon\Carbon::now()))) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Sertifikat tidak tersedia. Siswa belum menyelesaikan magang.'], 404);
+            }
+            return back()->with('info', 'Sertifikat tidak tersedia. Siswa belum menyelesaikan magang.');
+        }
+
+        $siswa->load(['pembimbing', 'tahunAjaran']);
+        $fileName = "Sertifikat_Magang_{$siswa->nisn}.pdf";
+
+        $pdf = Pdf::loadView('siswa.sertifikat', ['user' => $siswa])
+            ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream($fileName);
     }
 
     /**

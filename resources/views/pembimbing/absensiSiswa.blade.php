@@ -27,8 +27,8 @@
                     <span class="text-muted small fw-bold me-2">VERIFIKASI:</span>
                     <a href="{{ route('pembimbing.absensi', $siswa->nisn) }}" 
                        class="btn-filter-submit {{ !$statusVerifikasi ? '' : 'btn-outline' }}" style="{{ !$statusVerifikasi ? '' : 'background:transparent; color:var(--color-primary); border:1px solid var(--color-primary);' }}">Semua</a>
-                    <a href="{{ route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'pending']) }}" 
-                       class="btn-filter-submit {{ $statusVerifikasi == 'pending' ? '' : 'btn-outline' }}" style="{{ $statusVerifikasi == 'pending' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);' }}">Pending</a>
+                    <a href="{{ route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'rejected']) }}" 
+                       class="btn-filter-submit {{ $statusVerifikasi == 'rejected' ? '' : 'btn-outline' }}" style="{{ $statusVerifikasi == 'rejected' ? 'background:var(--color-warning);' : 'background:transparent; color:var(--color-warning); border:1px solid var(--color-warning);' }}">Rejected</a>
                     <a href="{{ route('pembimbing.absensi', ['nisn' => $siswa->nisn, 'status_verifikasi' => 'verified']) }}" 
                        class="btn-filter-submit {{ $statusVerifikasi == 'verified' ? '' : 'btn-outline' }}" style="{{ $statusVerifikasi == 'verified' ? 'background:var(--color-green);' : 'background:transparent; color:var(--color-green); border:1px solid var(--color-green);' }}">Verified</a>
                     
@@ -57,47 +57,7 @@
                 <div class="alert-content">{{ session('info') }}</div>
             </div>
         @endif
-
-        {{-- Statistik Rekap --}}
-        <div class="stats-grid mb-4">
-            <div class="stat-card">
-                <div class="stat-icon bg-green">
-                    <i class="fas fa-check"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value">{{ $rekap['hadir'] }}</h3>
-                    <p class="stat-label">Hadir</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-orange">
-                    <i class="fas fa-user-clock"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value">{{ $rekap['izin'] + $rekap['sakit'] }}</h3>
-                    <p class="stat-label">Izin / Sakit</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-red">
-                    <i class="fas fa-times"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value">{{ $rekap['alpa'] }}</h3>
-                    <p class="stat-label">Alpa</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon bg-purple">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="stat-details">
-                    <h3 class="stat-value">{{ $rekap['total'] }}</h3>
-                    <p class="stat-label">Total Hari</p>
-                </div>
-            </div>
-        </div>
-
+        
         {{-- Tabel Riwayat Presensi --}}
         <div class="content-card">
             <div class="card-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);">
@@ -187,15 +147,14 @@
                     </tbody>
                 </table>
             </div>
-            @if($absensis->hasPages())
-                <div class="pagination-wrapper">
-                    {{ $absensis->links() }}
-                </div>
-            @endif
+            {{-- Pagination removed since history is now a full collection --}}
         </div>
 
         {{-- Section Modal --}}
         @foreach($absensis as $a)
+            @php 
+                $isDynamic = isset($a->is_dynamic) && $a->is_dynamic;
+            @endphp
             <div class="custom-modal-overlay" id="modalVer{{ $a->id_absensi }}">
                 <div class="custom-modal modal-sm">
                     <div class="modal-header">
@@ -206,6 +165,8 @@
                     </div>
                     <form action="{{ route('pembimbing.absensi.validasi', $a->id_absensi) }}" method="POST">
                         @csrf
+                        <input type="hidden" name="is_dynamic" value="{{ $isDynamic ? 1 : 0 }}">
+                        <input type="hidden" name="siswa_nisn" value="{{ $siswa->nisn }}">
                         <div class="modal-body">
                             <div class="detail-section mb-4">
                                 <div class="detail-content" style="background:var(--color-primary-lt); border-color:var(--color-primary); display:flex; align-items:center; gap:1rem;">

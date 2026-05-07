@@ -5,7 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/guru.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/siswa-modals.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/modals.css') }}">
 @endpush
 
 @push('scripts')
@@ -15,8 +15,8 @@
 @section('body')
     <div class="management-container">
         
-        <!-- Global Navigation Tabs: Admin, Siswa, Guru, Pembimbing -->
-        <div class="tabs-wrapper">
+        <!-- Global Navigation Tabs -->
+       <div class="tabs-wrapper">
             <div class="tabs-nav">
                 <a href="{{ route('pimpinan.admin') }}" class="tab-button text-decoration-none flex-fill justify-content-center text-center {{ Route::is('pimpinan.admin') ? 'active' : '' }}">
                     <i class="fas fa-user-shield"></i>
@@ -37,25 +37,30 @@
             </div>
         </div>
 
-        <div class="admin-content-wrapper">
+        <div class="admin-content-wrapper shadow-sm" style="border-radius: 24px; background: #fff; overflow: hidden;">
             <!-- Header -->
-            <div class="management-header">
-                <div class="header-title">
-                    <h5>Daftar Guru Pembimbing</h5>
-                    <small>Total {{ $guru->total() }} guru terdaftar.</small>
+            <div class="management-header p-4" style="border-bottom: 1px solid rgba(0,0,0,0.05); background: #fdfdfd;">
+                <div class="header-title d-flex align-items-center gap-3">
+                    <div class="header-logo-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #fff; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 14px; font-size: 1.5rem;">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">Daftar Guru Pembimbing</h5>
+                        <p class="text-muted small mb-0">Total <strong>{{ $guru->total() }}</strong> pendidik yang membimbing siswa magang.</p>
+                    </div>
                 </div>                
             </div>
 
             <!-- Data Table Area -->
-            <div class="data-table-wrapper">
-                <table class="main-table">
+            <div class="data-table-wrapper px-4 pb-4">
+                <table class="main-table mt-3">
                     <thead>
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>Nama Lengkap</th>
-                            <th>Email Resmi</th>
-                            <th>NIP</th>
-                            <th>Siswa Bimbingan</th>
+                            <th>NIP / Identitas</th>
+                            <th>Email</th>
+                            <th class="text-center">Total Bimbingan</th>
                             <th style="width: 100px;" class="text-end">Aksi</th>
                         </tr>
                     </thead>
@@ -63,10 +68,10 @@
                         @forelse ($guru as $index => $item)
                             <tr>
                                 <td data-label="#">{{ $guru->firstItem() + $index }}</td>
-                                <td data-label="Nama">{{ $item->nama }}</td>
-                                <td data-label="Email">{{ $item->email }}</td>
-                                <td data-label="NIP">{{ $item->id_guru }}</td>
-                                <td data-label="Siswa Bimbingan">
+                                <td data-label="Nama" class="fw-bold text-dark">{{ $item->nama }}</td>
+                                <td data-label="NIP"><span class="badge bg-light text-dark border">{{ $item->id_guru }}</span></td>
+                                <td data-label="Email" class="text-primary">{{ $item->email }}</td>
+                                <td data-label="Siswa Bimbingan" class="text-center">
                                     <span
                                         class="badge {{ $item->siswas->count() > 0 ? 'bg-success-soft text-success' : 'bg-secondary-soft text-muted' }}"
                                         style="border-radius: 8px; padding: 0.5rem 0.75rem; font-weight: 700;">
@@ -80,7 +85,12 @@
                                             data-email="{{ $item->email }}" data-id_guru="{{ $item->id_guru }}"
                                             data-jabatan="{{ $item->jabatan }}" data-sekolah="{{ $item->sekolah }}" 
                                             data-siswas="{{ json_encode($item->siswas->map(function ($s) {
-                                                return ['nama' => $s->nama, 'nisn' => $s->nisn]; 
+                                                return [
+                                                    'nama' => $s->nama, 
+                                                    'nisn' => $s->nisn,
+                                                    'id_tahun_ajaran' => $s->id_tahun_ajaran,
+                                                    'tahun_ajaran' => $s->tahunAjaran->tahun_ajaran ?? '-'
+                                                ]; 
                                             })) }}">
                                             <i class="fas fa-eye"></i>
                                         </button>
@@ -90,8 +100,10 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
-                                    <p>Belum ada data guru pembimbing.</p>
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-slash fa-3x mb-3 opacity-25"></i>
+                                        <p>Belum ada data guru pembimbing.</p>
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -101,14 +113,12 @@
 
             <!-- Pagination -->
             @if ($guru->hasPages())
-                <div class="pagination-container">
+                <div class="pagination-container px-4 pb-4">
                     {{ $guru->links() }}
                 </div>
             @endif
         </div>
     </div>
 
-    @include('pimpinan.guru_modals')
-
-    
+    @include('pimpinan.modals')
 @endsection

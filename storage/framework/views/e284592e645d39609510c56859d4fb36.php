@@ -181,9 +181,11 @@
                                                     <a href="<?php echo e(route('guru.penilaian.input', $s->nisn)); ?>" class="btn-action btn-primary">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <a href="<?php echo e(route('guru.penilaian.export', $s->nisn)); ?>" class="btn-action btn-success">
+                                                    <button type="button" class="btn-action btn-success btn-preview-pdf" 
+                                                        data-url="<?php echo e(route('guru.penilaian.export', $s->nisn)); ?>"
+                                                        data-filename="Penilaian_<?php echo e($s->nisn); ?>_<?php echo e(str_replace(' ', '_', $s->nama)); ?>.pdf">
                                                         <i class="fas fa-print"></i> Cetak
-                                                    </a>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -457,92 +459,48 @@
         </div>
     </div>
 
+    
+    <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-hidden="true" style="z-index: 2000;">
+        <div class="modal-dialog modal-pdf-viewer modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="pdf-viewer-header">
+                    <div class="pdf-viewer-title">
+                        <div class="pdf-icon-wrapper">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h6 class="modal-title" style="color: white !important; margin: 0;">Preview Penilaian</h6>
+                    </div>
+
+                    <div class="pdf-viewer-actions">
+                        <div class="pdf-desktop-actions">
+                            <a id="downloadPdfBtn" href="#" class="btn-pdf-action" title="Unduh File" download>
+                                <i class="fas fa-download"></i> <span>Unduh Penilaian</span>
+                            </a>
+                        </div>
+                        <div class="vr opacity-10"></div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="pdf-viewer-body bg-light">
+                    <div id="pdfCanvasContainer">
+                        <div id="pdfLoadingIndicator">
+                            <div class="loader-logo-container">
+                                <i class="fas fa-circle-notch fa-spin fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php $__env->startPush('scripts'); ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Live Search Logic
-            const searchInput = document.getElementById('searchInput');
-            const searchForm = document.getElementById('searchForm');
-            const pendingRows = document.querySelectorAll('#pending table tbody tr:not(#noResultsPending)');
-            const historyRows = document.querySelectorAll('#history table tbody tr:not(#noResultsHistory)');
-            const noResultsPending = document.getElementById('noResultsPending');
-            const noResultsHistory = document.getElementById('noResultsHistory');
-
-            // Auto-buka tab riwayat jika ada param ?tab=history atau ada filter periode aktif
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('tab') === 'history' || urlParams.get('periode')) {
-                const historyTabBtn = document.getElementById('history-tab');
-                if (historyTabBtn) {
-                    const tab = new bootstrap.Tab(historyTabBtn);
-                    tab.show();
-                }
-            } else if (urlParams.get('tab') === 'kriteria') {
-                const kriteriaTabBtn = document.getElementById('kriteria-tab');
-                if (kriteriaTabBtn) {
-                    const tab = new bootstrap.Tab(kriteriaTabBtn);
-                    tab.show();
-                }
-            }
-
-            // Hide search on kriteria tab
-            document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(btn => {
-                btn.addEventListener('shown.bs.tab', function (e) {
-                    const searchSection = document.querySelector('.search-section');
-                    if (searchSection) {
-                        searchSection.style.display = e.target.id === 'kriteria-tab' ? 'none' : 'block';
-                    }
-                });
-            });
-
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase().trim();
-                    
-                    // Filter Pending Table
-                    let pendingMatchFound = false;
-                    pendingRows.forEach(row => {
-                        if (row.querySelector('strong') === null) return; // Skip empty state row
-                        
-                        const text = row.innerText.toLowerCase();
-                        const isMatch = text.includes(searchTerm);
-                        row.style.display = isMatch ? '' : 'none';
-                        if (isMatch) pendingMatchFound = true;
-                    });
-                    if (noResultsPending) {
-                        noResultsPending.style.display = (pendingMatchFound || searchTerm === '') ? 'none' : 'table-row';
-                    }
-
-                    // Filter History Table
-                    let historyMatchFound = false;
-                    historyRows.forEach(row => {
-                        if (row.querySelector('strong') === null) return; // Skip empty state row
-                        
-                        const text = row.innerText.toLowerCase();
-                        const isMatch = text.includes(searchTerm);
-                        row.style.display = isMatch ? '' : 'none';
-                        if (isMatch) historyMatchFound = true;
-                    });
-                    if (noResultsHistory) {
-                        noResultsHistory.style.display = (historyMatchFound || searchTerm === '') ? 'none' : 'table-row';
-                    }
-                });
-
-                if (searchForm) {
-                    searchForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                    });
-                }
-            }
-        });
-
-        function setupEditCriteria(el) {
-            const form = document.getElementById('formEditKriteria');
-            form.action = `/guru/kriteria/${el.dataset.id}`;
-            document.getElementById('edit_nama').value = el.dataset.nama;
-            document.getElementById('edit_tipe').value = el.dataset.tipe;
-            document.getElementById('edit_urutan').value = el.dataset.urutan;
-        }
-    </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+        <script src="<?php echo e(asset('assets/js/guru/penilaian.js')); ?>"></script>
     <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 

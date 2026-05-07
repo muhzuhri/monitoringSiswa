@@ -5,7 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/admin.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/siswa-modals.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pimpinan/modals.css') }}">
 @endpush
 
 @push('scripts')

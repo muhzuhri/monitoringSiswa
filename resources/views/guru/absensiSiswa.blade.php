@@ -21,9 +21,7 @@
                 <h4 class="page-title">Rekap Absensi: {{ $siswa->nama }}</h4>
                 <p class="page-subtitle"><i class="fas fa-building me-1"></i> {{ $siswa->perusahaan }} &nbsp;|&nbsp; <i class="fas fa-id-card me-1"></i> NISN: {{ $siswa->nisn }}</p>
             </div>
-            <a href="{{ route('guru.absensi.export', $siswa->nisn) }}" class="btn-export">
-                <i class="fas fa-file-pdf"></i> Export PDF
-            </a>
+            
         </div>
 
         {{-- Statistik Rekap --}}

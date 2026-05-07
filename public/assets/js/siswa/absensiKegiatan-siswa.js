@@ -87,8 +87,14 @@ async function fetchHistoryData() {
                         </td>
                         <td data-label="Waktu">
                             <div class="arrival-time-stack">
-                                <span class="time-in"><i class="fas fa-sign-in-alt me-1"></i> ${item.jam_masuk || '--:--'}</span>
-                                <span class="time-out"><i class="fas fa-sign-out-alt me-1"></i> ${item.jam_pulang || '--:--'}</span>
+                                <span class="time-in">
+                                    <i class="fas fa-sign-in-alt me-1"></i> ${item.jam_masuk || '--:--'}
+                                    ${item.foto_masuk ? `<a href="${config.storageUrl}/${item.foto_masuk}" target="_blank" class="ms-1 text-primary"><i class="fas fa-camera small"></i></a>` : ''}
+                                </span>
+                                <span class="time-out">
+                                    <i class="fas fa-sign-out-alt me-1"></i> ${item.jam_pulang || '--:--'}
+                                    ${item.foto_pulang ? `<a href="${config.storageUrl}/${item.foto_pulang}" target="_blank" class="ms-1 text-primary"><i class="fas fa-camera small"></i></a>` : ''}
+                                </span>
                             </div>
                         </td>
                         <td data-label="Status" class="text-center">
@@ -98,12 +104,6 @@ async function fetchHistoryData() {
                                 ? `<span class="badge-ui badge-danger"><i class="fas fa-times"></i></span>`
                                 : `<span class="badge-ui badge-warning"><i class="fas fa-clock"></i></span>`
                             }
-                        </td>
-                        <td data-label="Aksi" class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                ${item.foto_masuk ? `<a href="${config.storageUrl}/${item.foto_masuk}" target="_blank" class="img-link" title="Foto Masuk"><i class="fas fa-camera"></i></a>` : ''}
-                                ${item.foto_pulang ? `<a href="${config.storageUrl}/${item.foto_pulang}" target="_blank" class="img-link" title="Foto Pulang"><i class="fas fa-camera"></i></a>` : ''}
-                            </div>
                         </td>
                     </tr>
                 `).join('');

@@ -21,6 +21,7 @@
         </div>
     </div>
     <nav class="custom-navbar">
+        
         <div class="container">
             <a class="navbar-brand" href="<?php echo e(route('pimpinan.home')); ?>">
                 <img src="<?php echo e(asset('images/unsri-pride.png')); ?>" alt="Logo" width="40" class="me-2">
@@ -29,12 +30,14 @@
                     <div class="main-title">COMPUTER SCIENCE</div>
                 </div>
             </a>
+            
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
+                
                 <ul class="nav-list ms-auto">
                     <li class="nav-item">
                         <a class="nav-link <?php echo e(Route::is('pimpinan.home') ? 'active' : ''); ?>" href="<?php echo e(route('pimpinan.home')); ?>">Dashboard</a>

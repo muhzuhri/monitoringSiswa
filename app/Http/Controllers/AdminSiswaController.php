@@ -287,12 +287,25 @@ class AdminSiswaController extends Controller
             'jurusan' => ['required', 'string', 'max:100'],
             'sekolah' => ['required', 'string', 'max:150'],
             'perusahaan' => ['nullable', 'string', 'max:150'],
+            'npsn' => ['nullable', 'string', 'max:20'],
+            'jenis_kelamin' => ['nullable', Rule::in(['Laki-laki', 'Perempuan'])],
+            'tipe_magang' => ['required', Rule::in(['individu', 'kelompok'])],
+            'nisn_ketua' => ['nullable', 'string', 'max:20'],
+            'id_tahun_ajaran' => ['nullable', 'exists:tahun_ajaran,id_tahun_ajaran'],
+            'surat_balasan' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'id_guru' => ['nullable', 'string', 'exists:guru,id_guru'],
             'id_pembimbing' => ['nullable', 'exists:pembimbing,id_pembimbing'],
+            'tgl_mulai_magang' => ['nullable', 'date'],
+            'tgl_selesai_magang' => ['nullable', 'date'],
         ]);
 
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
+        }
+
+        if ($request->hasFile('surat_balasan')) {
+            $path = $request->file('surat_balasan')->store('surat_balasan', 'public');
+            $validated['surat_balasan'] = $path;
         }
 
         Siswa::create($validated);
@@ -317,14 +330,31 @@ class AdminSiswaController extends Controller
             'jurusan' => ['required', 'string', 'max:100'],
             'sekolah' => ['required', 'string', 'max:150'],
             'perusahaan' => ['nullable', 'string', 'max:150'],
+            'npsn' => ['nullable', 'string', 'max:20'],
+            'jenis_kelamin' => ['nullable', Rule::in(['Laki-laki', 'Perempuan'])],
+            'tipe_magang' => ['required', Rule::in(['individu', 'kelompok'])],
+            'nisn_ketua' => ['nullable', 'string', 'max:20'],
+            'id_tahun_ajaran' => ['nullable', 'exists:tahun_ajaran,id_tahun_ajaran'],
+            'surat_balasan' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'id_guru' => ['nullable', 'string', 'exists:guru,id_guru'],
             'id_pembimbing' => ['nullable', 'exists:pembimbing,id_pembimbing'],
+            'tgl_mulai_magang' => ['nullable', 'date'],
+            'tgl_selesai_magang' => ['nullable', 'date'],
         ]);
 
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        if ($request->hasFile('surat_balasan')) {
+            // Delete old file if exists
+            if ($siswa->surat_balasan) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($siswa->surat_balasan);
+            }
+            $path = $request->file('surat_balasan')->store('surat_balasan', 'public');
+            $validated['surat_balasan'] = $path;
         }
 
         $siswa->update($validated);

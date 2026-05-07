@@ -209,13 +209,13 @@
                                          <label class="form-label">NPSN Sekolah</label>
                                          <input type="text" name="npsn_guru" id="npsn_guru" class="form-control" 
                                              placeholder="Ketik NPSN..." required>
-                                         <small id="npsn_guru_msg" class="text-muted"></small>
-                                     </div>
-                                     <div class="col-md-6 mb-3">
-                                         <label class="form-label">Asal Sekolah</label>
-                                         <input type="text" name="sekolah_guru" id="sekolah_guru" class="form-control" 
-                                             placeholder="Terisi otomatis" readonly required>
-                                     </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Asal Sekolah</label>
+                                        <input type="text" name="sekolah_guru" id="sekolah_guru" class="form-control" 
+                                        placeholder="Terisi otomatis" readonly required>
+                                    </div>
+                                    <small id="npsn_guru_msg" class="text-muted"></small>
                                  </div>
                             </div>
 

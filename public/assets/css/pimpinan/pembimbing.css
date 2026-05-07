@@ -341,7 +341,7 @@ body.admin-page {
 .action-row {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
 }
 
 .btn-action {

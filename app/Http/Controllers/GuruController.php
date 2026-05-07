@@ -68,13 +68,17 @@ class GuruController extends Controller
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
         $search = $request->input('search');
-        $npsn = $request->input('npsn');
         $periodeId = $request->input('periode');
         $today = Carbon::now()->toDateString();
+        $npsn = $user->npsn; // Otomatis gunakan NPSN Guru
 
         // 1. Siswa Bimbingan (Aktif)
-        $query = $user->siswas()->where(function($q) {
-            $q->where('status', '!=', 'selesai')->orWhereNull('status');
+        $query = $user->siswas()->where(function($q) use ($today) {
+            $q->where(function($sub) {
+                $sub->where('status', '!=', 'selesai')->orWhereNull('status');
+            })->where(function($sub) use ($today) {
+                $sub->whereNull('tgl_selesai_magang')->orWhere('tgl_selesai_magang', '>=', $today);
+            });
         });
 
         if ($search) {
@@ -82,7 +86,7 @@ class GuruController extends Controller
                 $q->where('nama', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%");
             });
         }
-        $siswas = $query->with(['absensis' => fn($q) => $q->whereDate('tanggal', $today)])
+        $siswas = $query->with(['guru', 'pembimbing', 'tahunAjaran', 'absensis' => fn($q) => $q->whereDate('tanggal', $today)])
             ->orderBy('nama', 'asc')->get();
 
         // Map and Group
@@ -94,7 +98,12 @@ class GuruController extends Controller
 
         // 2. Daftar Siswa Tersedia
         $availableQuery = Siswa::whereNull('id_guru');
-        if ($npsn) $availableQuery->where('npsn', $npsn);
+
+        // Selalu filter berdasarkan NPSN sekolah yang sama dengan Guru
+        if ($npsn) {
+            $availableQuery->where('npsn', $npsn);
+        }
+
         if ($search) {
             $availableQuery->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")->orWhere('nisn', 'like', "%{$search}%");
@@ -104,7 +113,10 @@ class GuruController extends Controller
         $groupedAvailable = $this->mapGroupedSiswa($availableSiswas);
 
         // 3. Riwayat Siswa (Selesai)
-        $riwayatQuery = $user->siswas()->where('status', 'selesai');
+        $riwayatQuery = $user->siswas()->with(['guru', 'pembimbing', 'tahunAjaran'])->where(function($q) use ($today) {
+            $q->where('status', 'selesai')
+              ->orWhere('tgl_selesai_magang', '<', $today);
+        });
         if ($periodeId) $riwayatQuery->where('id_tahun_ajaran', $periodeId);
         $riwayatSiswas = $riwayatQuery->orderBy('tgl_selesai_magang', 'desc')->get();
         $groupedRiwayat = $this->mapGroupedSiswa($riwayatSiswas);
@@ -441,7 +453,7 @@ class GuruController extends Controller
     /**
      * Mengekspor hasil penilaian ke PDF.
      */
-    public function exportPenilaian($nisn)
+    public function exportPenilaian(Request $request, $nisn)
     {
         /** @var \App\Models\Guru $user */
         $user = Auth::user();
@@ -450,11 +462,18 @@ class GuruController extends Controller
         $penilaian = $siswa->penilaians()
             ->where('pemberi_nilai', 'Guru Pembimbing')
             ->with(['penilaianDetails.kriteria'])
-            ->firstOrFail();
+            ->first();
+
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum di inputkan oleh Guru.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum di inputkan oleh Guru.');
+        }
 
         $pdf = Pdf::loadView('guru.printPenilaian', compact('user', 'siswa', 'penilaian'));
 
-        return $pdf->download("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
+        return $pdf->stream("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
     }
 
     /**
@@ -526,7 +545,7 @@ class GuruController extends Controller
         }
         return $pdf->stream($fileName);
     }
-
+     
     /**
      * Download Rekap Absensi (Individu) Siswa.
      */
@@ -561,25 +580,22 @@ class GuruController extends Controller
         // Find leader and ensure they belong to this teacher
         $leader = $user->siswas()->where('nisn', $nisnKetua)->firstOrFail();
 
-        // Start Magang from Tahun Ajaran
-        $startMagang = $leader->tahunAjaran ? \Carbon\Carbon::parse($leader->tahunAjaran->tgl_mulai) : \Carbon\Carbon::now()->startOfMonth();
-        
-        // Find range end based on latest activity in the group
-        $latestAbsen = \App\Models\Absensi::whereIn('nisn', function($query) use ($nisnKetua) {
+        // Find the earliest and latest attendance record date for the group
+        $groupNisns = function($query) use ($nisnKetua) {
             $query->select('nisn')->from('siswa')
                   ->where('nisn_ketua', $nisnKetua)
                   ->orWhere('nisn', $nisnKetua);
-        })->max('tanggal');
+        };
 
-        $endRange = $latestAbsen ? \Carbon\Carbon::parse($latestAbsen) : \Carbon\Carbon::now();
-        if ($endRange->isPast() && $leader->tgl_selesai_magang) {
-             $endRange = \Carbon\Carbon::parse($leader->tgl_selesai_magang);
-        } else if ($endRange->isPast()) {
-            $endRange = \Carbon\Carbon::now();
-        }
+        $firstAbsen = \App\Models\Absensi::whereIn('nisn', $groupNisns)->min('tanggal');
+        $latestAbsen = \App\Models\Absensi::whereIn('nisn', $groupNisns)->max('tanggal');
+
+        $startRange = $firstAbsen ? \Carbon\Carbon::parse($firstAbsen)->startOfMonth() : \Carbon\Carbon::now()->startOfMonth();
+        $endRange = $latestAbsen ? \Carbon\Carbon::parse($latestAbsen)->endOfMonth() : \Carbon\Carbon::now()->endOfMonth();
         
+        // Calculate months between start of first attendance and end of latest attendance
         $months = [];
-        $current = $startMagang->copy()->startOfMonth();
+        $current = $startRange->copy();
         
         while ($current <= $endRange) {
             $month = $current->month;
@@ -679,5 +695,95 @@ class GuruController extends Controller
         $kriteria->delete();
 
         return redirect()->back()->with('success', 'Kriteria penilaian berhasil dihapus.');
+    }
+
+    /**
+     * Cetak Penilaian dari Pembimbing Lapangan
+     */
+    public function cetakPenilaianPembimbing(Request $request, $nisn)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $siswa = $user->siswas()->where('nisn', $nisn)
+            ->with(['penilaians' => function ($q) {
+                $q->where('pemberi_nilai', 'Dosen Pembimbing');
+            }, 'penilaians.penilaianDetails.kriteria', 'absensis', 'logbooks', 'tahunAjaran'])
+            ->firstOrFail();
+
+        $pembimbing = $siswa->pembimbing;
+        if (!$pembimbing) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Siswa tidak memiliki pembimbing lapangan.'], 404);
+            }
+            return back()->with('warning', 'Siswa tidak memiliki pembimbing lapangan.');
+        }
+
+        $penilaian = $siswa->penilaians->first();
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum di inputkan oleh Pembimbing Lapangan.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum di inputkan oleh Pembimbing.');
+        }
+
+        $fileName = "Laporan_Siswa_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
+
+        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', compact('pembimbing', 'siswa'));
+
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Cetak Sertifikat Magang Siswa
+     */
+    public function cetakSertifikatSiswa(Request $request, $nisn)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        
+        $siswa = $user->siswas()->where('nisn', $nisn)->firstOrFail();
+        
+        if ($siswa->status !== 'selesai' && !($siswa->tgl_selesai_magang && \Carbon\Carbon::parse($siswa->tgl_selesai_magang)->lt(\Carbon\Carbon::now()))) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Sertifikat tidak tersedia. Siswa belum menyelesaikan magang.'], 404);
+            }
+            return back()->with('info', 'Sertifikat tidak tersedia. Siswa belum menyelesaikan magang.');
+        }
+
+        $siswa->load(['pembimbing', 'tahunAjaran']);
+        
+        $fileName = "Sertifikat_Magang_{$siswa->nisn}.pdf";
+
+        // View sertifikat from siswa module is reused.
+        $pdf = Pdf::loadView('siswa.sertifikat', ['user' => $siswa])
+            ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream($fileName);
+    }
+
+    public function cetakLaporanAkhir(Request $request, $nisn)
+    {
+        /** @var \App\Models\Guru $user */
+        $user = Auth::user();
+        $siswa = $user->siswas()->where('nisn', $nisn)->firstOrFail();
+        
+        $laporanAkhir = $siswa->laporanAkhir;
+        
+        if (!$laporanAkhir) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Laporan akhir belum di inputkan oleh siswa.'], 404);
+            }
+            return back()->with('warning', 'Laporan akhir belum di inputkan oleh siswa.');
+        }
+
+        $path = storage_path('app/public/' . $laporanAkhir->file);
+        if (!file_exists($path)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'File laporan tidak ditemukan di server.'], 404);
+            }
+            return back()->with('warning', 'File laporan tidak ditemukan di server.');
+        }
+
+        return response()->file($path);
     }
 }

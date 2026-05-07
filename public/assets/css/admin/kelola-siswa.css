@@ -325,8 +325,24 @@ body.admin-page {
     font-weight: 800;
 }
 
-.status-label.hadir { background: #ecfdf5; color: #059669; }
-.status-label.belum { background: #fef2f2; color: #dc2626; }
+.status-label.hadir, .badge-status.hadir { background: #ecfdf5; color: #059669; }
+.status-label.belum, .badge-status.belum { background: #fef2f2; color: #dc2626; }
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.badge-status i {
+    font-size: 0.85rem;
+}
 
 .status-dot {
     width: 8px;
@@ -392,6 +408,240 @@ body.admin-page {
     box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
 }
 
+/* Premium Circular Action System */
+.action-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-premium-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: white;
+    transition: var(--p-transition);
+    font-size: 1.15rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-premium-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: var(--p-transition);
+}
+
+.btn-premium-circle:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.btn-premium-circle:hover::before {
+    opacity: 0.15;
+}
+
+/* Vibrant Color Variants for Icons (No Black & White) */
+.btn-view-p { color: #3b82f6; }
+.btn-edit-p { color: #10b981; }
+.btn-delete-p { color: #ef4444; }
+.btn-absensi-p { color: #8b5cf6; }
+.btn-jurnal-p { color: #f59e0b; }
+.btn-info-p { color: #64748b; }
+
+/* Status Styles */
+.status-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.status-label.hadir, .badge-status.hadir { background: #d1fae5; color: #065f46; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.1); }
+.status-label.belum, .badge-status.belum { background: #fee2e2; color: #991b1b; box-shadow: 0 2px 10px rgba(239, 68, 68, 0.1); }
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-status i {
+    font-size: 1rem;
+}
+
+/* History Period Spacing */
+.period-display {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.period-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--p-text-main);
+}
+
+.period-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Table Row Enhancements */
+.main-table tbody tr {
+    transition: var(--p-transition);
+}
+
+.main-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.04) !important;
+}
+
+.main-table tbody td {
+    padding: 1.5rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Detail Modal Sections (Mirroring Edit Modal) */
+.detail-section-block {
+    background: #ffffff;
+    border: 1px solid #e8effc;
+    border-radius: 20px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.03);
+    height: 100%;
+}
+
+.detail-section-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 1.5rem;
+}
+
+.detail-section-title i {
+    width: 36px;
+    height: 36px;
+    background: #eff6ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.detail-grid-item {
+    margin-bottom: 1.25rem;
+}
+
+.detail-grid-item:last-child {
+    margin-bottom: 0;
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+}
+
+.detail-value {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.detail-value.text-primary { color: #3b82f6 !important; }
+.detail-value.text-success { color: #10b981 !important; }
+
+/* Supervisor Panel Enhancement */
+.supervisors-container {
+    background: #f8fafc;
+    border-radius: 24px;
+    padding: 2rem;
+    border: 1px solid #eff6ff;
+}
+
+.supervisor-card-premium {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    transition: var(--p-transition);
+}
+
+.supervisor-card-premium:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.06);
+}
+
+.sup-badge {
+    display: inline-flex;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.sup-badge.guru { background: #dcfce7; color: #15803d; }
+.sup-badge.pl { background: #dbeafe; color: #1d4ed8; }
+
+.sup-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.sup-meta {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sup-meta i {
+    color: #3b82f6;
+}
+
 /* History Specific */
 .status-wrapper {
     margin-left: auto;
@@ -454,15 +704,29 @@ body.admin-page {
     padding: 1.25rem;
 }
 
+.main-table tbody tr {
+    transition: var(--p-transition);
+}
+
+.main-table tbody tr:hover {
+    background-color: rgba(59, 130, 246, 0.02);
+}
+
 .main-table tbody td {
     padding: 1.25rem;
     font-size: 0.9rem;
-    border-bottom: 1px solid #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* Search Form */
+/* Search Form & Inputs */
 .p-input-wrapper {
     position: relative;
+    width: 100%; /* Default to full width for grid compatibility */
+}
+
+/* Specific fixed-width for header search to prevent it from stretching across the top */
+.header-actions .p-input-wrapper,
+.search-form .p-input-wrapper {
     width: 350px;
 }
 

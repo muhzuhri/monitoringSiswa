@@ -78,6 +78,14 @@
                                     if (!$isWeekend) {
                                         $class = 'status-' . strtolower(substr($absen->status, 0, 1));
                                     }
+                                } elseif (!$isWeekend && $date->lte(\Carbon\Carbon::today())) {
+                                    // CHECK: Internship start date
+                                    $internStart = $sis->tgl_mulai_magang ? \Carbon\Carbon::parse($sis->tgl_mulai_magang)->startOfDay() : null;
+                                    
+                                    if ($internStart && $date->gte($internStart) && $date->lt(\Carbon\Carbon::today())) {
+                                        $statusChar = 'A';
+                                        $class = 'status-a';
+                                    }
                                 }
                             @endphp
                             <td class="day-cell {{ $class }}">{{ $statusChar }}</td>

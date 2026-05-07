@@ -158,7 +158,12 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+        const pdfModalElement  = document.getElementById('previewPdfModal');
+        const pdfModal         = pdfModalElement ? bootstrap.Modal.getOrCreateInstance(pdfModalElement) : null;
+        let currentTaskId = 0;
+
         async function renderPDF(url) {
+            const taskId = ++currentTaskId;
             const container = document.getElementById('pdfCanvasContainer');
             const loadingEl = document.getElementById('pdfLoadingIndicator');
             const errorEl = document.getElementById('pdfErrorMsg');
@@ -169,8 +174,12 @@
             container.scrollTop = 0;
 
             try {
+                // Small delay for modal readiness
+                await new Promise(resolve => setTimeout(resolve, 200));
+                if (currentTaskId !== taskId) return;
+
                 const pdfDoc = await pdfjsLib.getDocument(url).promise;
-                loadingEl.style.display = 'none';
+                if (currentTaskId !== taskId) return;
 
                 const containerWidth = container.clientWidth - 40;
                 const outputScale = window.devicePixelRatio || 1;
@@ -178,7 +187,7 @@
                 for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                     const page = await pdfDoc.getPage(pageNum);
                     const unscaledViewport = page.getViewport({ scale: 1 });
-                    const baseScale = containerWidth / unscaledViewport.width;
+                    const baseScale = (containerWidth > 0 ? containerWidth : 800) / unscaledViewport.width;
                     const viewport = page.getViewport({ scale: baseScale * outputScale });
 
                     const canvas = document.createElement('canvas');
@@ -196,10 +205,15 @@
                         viewport: viewport
                     };
                     await page.render(renderContext).promise;
+
+                    if (currentTaskId !== taskId) return;
+                    if (pageNum === 1) loadingEl.style.display = 'none';
                 }
             } catch (err) {
-                loadingEl.style.display = 'none';
-                errorEl.style.display = 'block';
+                if (currentTaskId === taskId) {
+                    loadingEl.style.display = 'none';
+                    errorEl.style.display = 'block';
+                }
                 console.error('PDF.js error:', err);
             }
         }
@@ -244,16 +258,12 @@
             const badgeEl          = document.getElementById('activeFilterBadge');
             const badgeLabelEl     = document.getElementById('activeFilterLabel');
             const previewButtons   = document.querySelectorAll('.btn-preview-pdf');
-            const pdfModalElement  = document.getElementById('previewPdfModal');
-            const pdfModal         = new bootstrap.Modal(pdfModalElement);
             const downloadBtn      = document.getElementById('downloadPdfBtn');
 
-            // ── Saat filter berubah ─────────────────────────────────────────
             filterEl.addEventListener('change', function() {
                 const periodeId    = this.value;
                 const periodeLabel = this.options[this.selectedIndex].text;
 
-                // Update badge label
                 if (periodeId) {
                     badgeLabelEl.textContent = periodeLabel;
                     badgeEl.style.display    = 'block';
@@ -264,9 +274,8 @@
                 loadStats(periodeId);
             });
 
-            // ── Tombol preview PDF (sertakan filter) ───────────────────────
             previewButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.onclick = function() {
                     const url    = this.getAttribute('data-url');
                     const periode = filterEl.value;
                     if (!url) return;
@@ -277,9 +286,9 @@
                     }
 
                     downloadBtn.href = finalUrl + (finalUrl.includes('?') ? '&' : '?') + 'download=1';
-                    pdfModal.show();
+                    if (pdfModal) pdfModal.show();
                     renderPDF(finalUrl);
-                });
+                };
             });
 
             pdfModalElement.addEventListener('hidden.bs.modal', function() {
