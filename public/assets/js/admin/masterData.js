@@ -55,13 +55,17 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addMisiField = function() {
     const container = document.getElementById('misi-container');
     if (!container) return;
-    const itemCount = container.querySelectorAll('.misi-item').length + 1;
+    const itemCount = container.querySelectorAll('.misi-item-premium').length + 1;
     
     const html = `
-        <div class="input-group mb-2 misi-item">
-            <span class="input-group-text bg-light border-end-0">${itemCount}.</span>
-            <textarea name="misi[]" class="form-control border-start-0" rows="1"></textarea>
-            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.misi-item').remove(); updateMisiNumbers();"><i class="fas fa-times"></i></button>
+        <div class="d-flex misi-item-premium mb-3">
+            <div class="misi-number">${itemCount}</div>
+            <textarea name="misi[]" class="misi-textarea" rows="2" placeholder="Tuliskan misi..."></textarea>
+            <div class="d-flex align-items-center px-2 border-start">
+                <button type="button" class="btn-remove-misi" onclick="this.closest('.misi-item-premium').remove(); updateMisiNumbers();" title="Hapus Misi">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
         </div>
     `;
     
@@ -72,8 +76,8 @@ window.addMisiField = function() {
 window.updateMisiNumbers = function() {
     const container = document.getElementById('misi-container');
     if (!container) return;
-    const items = container.querySelectorAll('.misi-item');
+    const items = container.querySelectorAll('.misi-item-premium');
     items.forEach((item, index) => {
-        item.querySelector('.input-group-text').innerText = (index + 1) + '.';
+        item.querySelector('.misi-number').innerText = (index + 1);
     });
 };

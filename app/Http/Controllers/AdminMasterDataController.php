@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\InformasiDashboard;
+use App\Models\KonfigurasiLaporan;
 use App\Models\ProgramStudi;
 use App\Models\Sekolah;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminMasterDataController extends Controller
 {
@@ -17,10 +19,11 @@ class AdminMasterDataController extends Controller
         $tahunAjarans     = TahunAjaran::all();
         $informasi        = InformasiDashboard::getInstance();
         $programStudis    = ProgramStudi::orderBy('urutan')->get();
+        $laporans         = KonfigurasiLaporan::all();
         $user             = auth()->user();
 
         return view('admin.master_data', compact(
-            'sekolahs', 'tahunAjarans', 'informasi', 'programStudis', 'user'
+            'sekolahs', 'tahunAjarans', 'informasi', 'programStudis', 'user', 'laporans'
         ));
     }
 
@@ -182,5 +185,49 @@ class AdminMasterDataController extends Controller
     {
         ProgramStudi::destroy($id);
         return back()->with('success', 'Program studi berhasil dihapus.')->with('active_tab', 'informasi');
+    }
+
+    public function updateKonfigurasiLaporan(Request $request)
+    {
+        $validated = $request->validate([
+            'konfigurasi' => 'required|array',
+            'konfigurasi.*.id' => 'required|exists:konfigurasi_laporans,id',
+            'konfigurasi.*.header_1' => 'nullable|string|max:255',
+            'konfigurasi.*.header_2' => 'nullable|string|max:255',
+            'konfigurasi.*.header_3' => 'nullable|string|max:255',
+            'konfigurasi.*.header_4' => 'nullable|string|max:255',
+            'konfigurasi.*.header_5' => 'nullable|string|max:255',
+            'konfigurasi.*.color_primary' => 'nullable|string|max:7',
+            'konfigurasi.*.color_secondary' => 'nullable|string|max:7',
+            'konfigurasi.*.background_color' => 'nullable|string|max:7',
+            'konfigurasi.*.template_isi' => 'nullable|string',
+        ]);
+
+        foreach ($validated['konfigurasi'] as $config) {
+            $model = KonfigurasiLaporan::find($config['id']);
+            if ($model) {
+                $model->update($config);
+            }
+        }
+
+        return back()->with('success', 'Konfigurasi laporan berhasil diperbarui.')->with('active_tab', 'laporan');
+    }
+
+    public function previewSertifikat()
+    {
+        // Mocking a student object for the certificate
+        $dummy = (object)[
+            'nama' => 'Nama Peserta Magang (Contoh)',
+            'nisn' => '1234567890',
+            'tgl_mulai_magang' => now()->subMonths(3)->toDateString(),
+            'tgl_selesai_magang' => now()->toDateString(),
+        ];
+        
+        $konfigurasi = KonfigurasiLaporan::where('tipe_laporan', 'sertifikat')->first();
+        
+        return Pdf::loadView('siswa.sertifikat', [
+            'user' => $dummy,
+            'konfigurasi' => $konfigurasi
+        ])->setPaper('a4', 'landscape')->stream('preview-sertifikat.pdf');
     }
 }

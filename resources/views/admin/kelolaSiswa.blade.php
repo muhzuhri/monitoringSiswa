@@ -13,6 +13,10 @@
         data-jurnal-url="{{ route('admin.rekap.jurnal', ['nisn' => ':nisn']) }}"
         data-absensi-url="{{ route('admin.rekap.absensi', ['nisn' => ':nisn']) }}"
         data-kelompok-url="{{ route('admin.rekap.kelompok', ['nisn' => ':nisn']) }}"
+        data-nilai-guru-url="{{ route('admin.rekap.nilaiGuru', ['nisn' => ':nisn']) }}"
+        data-nilai-pembimbing-url="{{ route('admin.rekap.nilaiPembimbing', ['nisn' => ':nisn']) }}"
+        data-laporan-akhir-url="{{ route('admin.rekap.laporanAkhir', ['nisn' => ':nisn']) }}"
+        data-sertifikat-url="{{ route('admin.rekap.sertifikat', ['nisn' => ':nisn']) }}"
         data-asset-loader="{{ asset('images/unsri-pride.png') }}">
 
         <!-- Global Navigation Tabs: Siswa, Guru, Pembimbing -->
@@ -357,58 +361,31 @@
                 <div class="tab-pane fade" id="pane-riwayat" role="tabpanel">
 
                     {{-- Filter Bar --}}
-                    <div class="history-filter-bar">
-                        <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <span class="filter-label">
-                                <i class="fas fa-filter"></i> Periode:
-                            </span>
+                    <div class="history-toolbar mb-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div class="view-mode-wrapper">
+                                <button class="view-mode-btn" data-view="grouped" data-target="riwayat"
+                                    title="Per Kelompok">
+                                    <i class="fas fa-th-large"></i>&nbsp; Per Kelompok
+                                </button>
+                                <button class="view-mode-btn active" data-view="flat" data-target="riwayat"
+                                    title="Tampilan List">
+                                    <i class="fas fa-list"></i>&nbsp; Seluruh Siswa
+                                </button>
+                            </div>
 
-                            <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="filter-form"
-                                id="filterPeriodeForm">
-                                <input type="hidden" name="tab" value="history">
-                                @if ($search)
-                                    <input type="hidden" name="search" value="{{ $search }}">
-                                @endif
-                                <select name="periode" class="filter-select" onchange="this.form.submit()">
-                                    <option value="">-- Semua Periode --</option>
-                                    @foreach ($periodeOptions as $opt)
-                                        <option value="{{ $opt->id_tahun_ajaran }}"
-                                            {{ $periodeId == $opt->id_tahun_ajaran ? 'selected' : '' }}>
-                                            {{ $opt->tahun_ajaran }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @if ($periodeId)
-                                    <a href="{{ route('admin.kelolaSiswa', ['tab' => 'history', 'search' => $search]) }}"
-                                        class="btn-reset-filter" title="Reset Filter">
-                                        <i class="fas fa-undo"></i>
-                                    </a>
-                                @endif
-                            </form>
-                        </div>
-                        <br>
-                        <div class="view-mode-wrapper">
-                            <button class="view-mode-btn" data-view="grouped" data-target="riwayat"
-                                title="Per Kelompok">
-                                <i class="fas fa-th-large"></i>&nbsp; Per Kelompok
-                            </button>
-
-                            <button class="view-mode-btn active" data-view="flat" data-target="riwayat"
-                                title="Tampilan List">
-                                <i class="fas fa-list"></i>&nbsp; Seluruh Siswa
-                            </button>
                             <div class="d-flex align-items-center gap-3 flex-wrap">
-                                <span class="filter-label">
+                                <span class="filter-label text-muted small fw-bold">
                                     <i class="fas fa-filter"></i> Periode:
                                 </span>
 
-                                <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="filter-form"
+                                <form action="{{ route('admin.kelolaSiswa') }}" method="GET" class="filter-form d-flex align-items-center gap-2"
                                     id="filterPeriodeForm">
                                     <input type="hidden" name="tab" value="history">
                                     @if ($search)
                                         <input type="hidden" name="search" value="{{ $search }}">
                                     @endif
-                                    <select name="periode" class="filter-select" onchange="this.form.submit()">
+                                    <select name="periode" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius: 10px; min-width: 160px; height: 38px;">
                                         <option value="">-- Semua Periode --</option>
                                         @foreach ($periodeOptions as $opt)
                                             <option value="{{ $opt->id_tahun_ajaran }}"
@@ -419,14 +396,14 @@
                                     </select>
                                     @if ($periodeId)
                                         <a href="{{ route('admin.kelolaSiswa', ['tab' => 'history', 'search' => $search]) }}"
-                                            class="btn-reset-filter" title="Reset Filter">
+                                            class="btn btn-sm btn-outline-danger rounded-circle d-flex align-items-center justify-content-center" 
+                                            title="Reset Filter" style="width: 32px; height: 32px;">
                                             <i class="fas fa-undo"></i>
                                         </a>
                                     @endif
                                 </form>
                             </div>
                         </div>
-                        <br>
                     </div>
 
                     {{-- View: Riwayat Cards (Grouped) --}}
@@ -582,44 +559,68 @@
                                                 </div>
                                             </td>
                                             <td data-label="Aksi">
-                                                <div class="action-group justify-content-end">
-                                                    <button class="btn-premium-circle btn-view-p btn-detail"
-                                                        data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
-                                                        data-nisn="{{ $rs->nisn }}"
-                                                        data-nama="{{ $rs->nama }}"
-                                                        data-email="{{ $rs->email }}"
-                                                        data-no_hp="{{ $rs->no_hp }}"
-                                                        data-jk="{{ $rs->jenis_kelamin }}"
-                                                        data-kelas="{{ $rs->kelas }}"
-                                                        data-jurusan="{{ $rs->jurusan }}"
-                                                        data-sekolah="{{ $rs->sekolah }}"
-                                                        data-npsn="{{ $rs->npsn }}"
-                                                        data-perusahaan="{{ $rs->perusahaan }}"
-                                                        data-tipe_magang="{{ $rs->tipe_magang }}"
-                                                        data-nisn_ketua="{{ $rs->nisn_ketua }}"
-                                                        data-surat_balasan="{{ $rs->surat_balasan }}"
-                                                        data-tahun_ajaran="{{ $rs->tahunAjaran->tahun_ajaran ?? '-' }}"
-                                                        data-mulai="{{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }}"
-                                                        data-selesai="{{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}"
-                                                        data-guru-nama="{{ $rs->guru->nama ?? '-' }}"
-                                                        data-guru-nip="{{ $rs->guru->id_guru ?? '-' }}"
-                                                        data-guru-hp="{{ $rs->guru->no_hp ?? '-' }}"
-                                                        data-pl-nama="{{ $rs->pembimbing->nama ?? '-' }}"
-                                                        data-pl-nip="{{ $rs->pembimbing->id_pembimbing ?? '-' }}"
-                                                        data-pl-hp="{{ $rs->pembimbing->no_telp ?? '-' }}"
-                                                        title="Profil Lengkap">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button class="btn-premium-circle btn-absensi-p btn-preview-pdf"
-                                                        data-url="{{ route('admin.rekap.absensi', $rs->nisn) }}"
-                                                        title="Rekap Absensi">
-                                                        <i class="fas fa-calendar-check"></i>
-                                                    </button>
-                                                    <button class="btn-premium-circle btn-jurnal-p btn-preview-pdf"
-                                                        data-url="{{ route('admin.rekap.jurnal', $rs->nisn) }}"
-                                                        title="Rekap Jurnal / Kegiatan">
-                                                        <i class="fas fa-book-open"></i>
-                                                    </button>
+                                                <div class="d-flex flex-column align-items-end gap-2 py-2">
+                                                    <div class="action-group justify-content-end">
+                                                        <button class="btn-premium-circle btn-view-p btn-detail"
+                                                            data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
+                                                            data-nisn="{{ $rs->nisn }}"
+                                                            data-nama="{{ $rs->nama }}"
+                                                            data-email="{{ $rs->email }}"
+                                                            data-no_hp="{{ $rs->no_hp }}"
+                                                            data-jk="{{ $rs->jenis_kelamin }}"
+                                                            data-kelas="{{ $rs->kelas }}"
+                                                            data-jurusan="{{ $rs->jurusan }}"
+                                                            data-sekolah="{{ $rs->sekolah }}"
+                                                            data-npsn="{{ $rs->npsn }}"
+                                                            data-perusahaan="{{ $rs->perusahaan }}"
+                                                            data-tipe_magang="{{ $rs->tipe_magang }}"
+                                                            data-nisn_ketua="{{ $rs->nisn_ketua }}"
+                                                            data-surat_balasan="{{ $rs->surat_balasan }}"
+                                                            data-tahun_ajaran="{{ $rs->tahunAjaran->tahun_ajaran ?? '-' }}"
+                                                            data-mulai="{{ $rs->tgl_mulai_magang ? \Carbon\Carbon::parse($rs->tgl_mulai_magang)->format('d M Y') : '-' }}"
+                                                            data-selesai="{{ $rs->tgl_selesai_magang ? \Carbon\Carbon::parse($rs->tgl_selesai_magang)->format('d M Y') : '-' }}"
+                                                            data-guru-nama="{{ $rs->guru->nama ?? '-' }}"
+                                                            data-guru-nip="{{ $rs->guru->id_guru ?? '-' }}"
+                                                            data-guru-hp="{{ $rs->guru->no_hp ?? '-' }}"
+                                                            data-pl-nama="{{ $rs->pembimbing->nama ?? '-' }}"
+                                                            data-pl-nip="{{ $rs->pembimbing->id_pembimbing ?? '-' }}"
+                                                            data-pl-hp="{{ $rs->pembimbing->no_telp ?? '-' }}"
+                                                            title="Profil Lengkap">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button class="btn-premium-circle btn-absensi-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.absensi', $rs->nisn) }}"
+                                                            title="Rekap Absensi">
+                                                            <i class="fas fa-calendar-check"></i>
+                                                        </button>
+                                                        <button class="btn-premium-circle btn-jurnal-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.jurnal', $rs->nisn) }}"
+                                                            title="Rekap Jurnal / Kegiatan">
+                                                            <i class="fas fa-book-open"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="action-group justify-content-end">
+                                                        <button class="btn-premium-circle btn-star-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.nilaiGuru', $rs->nisn) }}"
+                                                            title="Penilaian Guru">
+                                                            <i class="fas fa-star"></i>
+                                                        </button>
+                                                        <button class="btn-premium-circle btn-user-check-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.nilaiPembimbing', $rs->nisn) }}"
+                                                            title="Penilaian Pembimbing">
+                                                            <i class="fas fa-user-check"></i>
+                                                        </button>
+                                                        <button class="btn-premium-circle btn-pdf-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.laporanAkhir', $rs->nisn) }}"
+                                                            title="Laporan Akhir Siswa">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </button>
+                                                        <button class="btn-premium-circle btn-cert-p btn-preview-pdf"
+                                                            data-url="{{ route('admin.rekap.sertifikat', $rs->nisn) }}"
+                                                            title="Sertifikat Magang">
+                                                            <i class="fas fa-certificate"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -749,19 +750,21 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="pdf-viewer-body">
+                <div class="modal-body pdf-viewer-body">
                     <div id="pdfCanvasContainer">
                         <div id="pdfLoadingIndicator">
                             <div class="loader-logo-container">
-                                <img src="" id="pdfLoaderImg" alt="UNSRI">
+                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
                             </div>
+                            
                         </div>
+
                         <div id="pdfErrorMsg" class="d-none">
                             <i class="fas fa-exclamation-triangle fa-2x"></i>
                             <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
                         </div>
                     </div>
-                </div>
+                </div
             </div>
         </div>
     </div>

@@ -272,3 +272,7 @@ body {
 @media (min-width: 768px) {
     .d-md-block { display: block !important; }
 }
+
+.btn-logout-pimpinan{
+    margin-left: 30px;
+}

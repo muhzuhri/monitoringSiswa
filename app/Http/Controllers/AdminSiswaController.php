@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Models\Logbook;
 use App\Models\Absensi;
 use App\Models\TahunAjaran;
+use App\Models\KonfigurasiLaporan;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminSiswaController extends Controller
@@ -178,7 +179,8 @@ class AdminSiswaController extends Controller
         $fileName = "Jurnal_Mingguan_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.printJurnal', [
             'user' => $siswa,
-            'logbooks' => $logbooks
+            'logbooks' => $logbooks,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'kegiatan_mingguan')->first()
         ]);
 
         if ($request->has('download')) {
@@ -197,10 +199,20 @@ class AdminSiswaController extends Controller
 
         $absensis = $siswa->absensis()->orderBy('tanggal', 'asc')->get();
 
+        // Hitung ringkasan untuk PDF
+        $rekapAbsensi = [
+            'hadir' => $absensis->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin' => $absensis->where('status', 'izin')->count(),
+            'sakit' => $absensis->where('status', 'sakit')->count(),
+            'alpa' => $absensis->where('status', 'alpa')->count(),
+        ];
+
         $fileName = "Rekap_Absensi_Individu_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', [
             'user' => $siswa,
-            'absensis' => $absensis
+            'absensis' => $absensis,
+            'rekapAbsensi' => $rekapAbsensi,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_individu')->first()
         ]);
 
         if ($request->has('download')) {
@@ -264,7 +276,8 @@ class AdminSiswaController extends Controller
         $fileName = "Rekap_Absensi_Kelompok_{$leader->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.rekapAbsensiKelompok', [
             'user' => $leader,
-            'months' => $months
+            'months' => $months,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_kelompok')->first()
         ]);
         
         if ($request->has('download')) {
@@ -373,5 +386,110 @@ class AdminSiswaController extends Controller
         return redirect()
             ->route('admin.kelolaSiswa')
             ->with('success', 'Akun siswa berhasil dihapus.');
+    }
+
+    /**
+     * Cetak Penilaian dari Guru Pembimbing
+     */
+    public function cetakPenilaianGuru(Request $request, $nisn)
+    {
+        $this->authorizeReportViewer();
+        $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
+        
+        $penilaian = $siswa->penilaians()
+            ->where('pemberi_nilai', 'Guru Pembimbing')
+            ->with(['penilaianDetails.kriteria'])
+            ->first();
+
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum diinputkan oleh Guru.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum diinputkan oleh Guru.');
+        }
+
+        $guru = $siswa->guru;
+        $pdf = Pdf::loadView('guru.printPenilaian', [
+            'user' => $guru, 
+            'siswa' => $siswa, 
+            'penilaian' => $penilaian,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_guru')->first()
+        ]);
+        return $pdf->stream("Penilaian_Guru_{$siswa->nisn}.pdf");
+    }
+
+    /**
+     * Cetak Penilaian dari Pembimbing Lapangan
+     */
+    public function cetakPenilaianPembimbing(Request $request, $nisn)
+    {
+        $this->authorizeReportViewer();
+        $siswa = Siswa::where('nisn', $nisn)
+            ->with(['penilaians' => function ($q) {
+                $q->where('pemberi_nilai', 'Dosen Pembimbing');
+            }, 'penilaians.penilaianDetails.kriteria', 'absensis', 'logbooks', 'tahunAjaran'])
+            ->firstOrFail();
+
+        $penilaian = $siswa->penilaians->first();
+        if (!$penilaian) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Penilaian belum diinputkan oleh Pembimbing.'], 404);
+            }
+            return back()->with('warning', 'Penilaian belum diinputkan oleh Pembimbing.');
+        }
+
+        $pembimbing = $siswa->pembimbing;
+        $fileName = "Laporan_Penilaian_Pembimbing_{$siswa->nisn}.pdf";
+        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', [
+            'pembimbing' => $pembimbing, 
+            'siswa' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_pembimbing')->first()
+        ]);
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Cetak Laporan Akhir Siswa
+     */
+    public function cetakLaporanAkhir(Request $request, $nisn)
+    {
+        $this->authorizeReportViewer();
+        $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
+        $laporanAkhir = $siswa->laporanAkhir;
+        
+        if (!$laporanAkhir) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Laporan akhir belum diunggah oleh siswa.'], 404);
+            }
+            return back()->with('warning', 'Laporan akhir belum diunggah oleh siswa.');
+        }
+
+        $path = storage_path('app/public/' . $laporanAkhir->file);
+        if (!file_exists($path)) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'File laporan tidak ditemukan di server.'], 404);
+            }
+            return back()->with('warning', 'File laporan tidak ditemukan di server.');
+        }
+
+        return response()->file($path);
+    }
+
+    /**
+     * Cetak Sertifikat Siswa
+     */
+    public function cetakSertifikatSiswa(Request $request, $nisn)
+    {
+        $this->authorizeReportViewer();
+        $siswa = Siswa::where('nisn', $nisn)->firstOrFail();
+
+        $siswa->load(['pembimbing', 'tahunAjaran']);
+        $fileName = "Sertifikat_Magang_{$siswa->nisn}.pdf";
+        $pdf = Pdf::loadView('siswa.sertifikat', [
+            'user' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'sertifikat')->first()
+        ])->setPaper('a4', 'landscape');
+        
+        return $pdf->stream($fileName);
     }
 }

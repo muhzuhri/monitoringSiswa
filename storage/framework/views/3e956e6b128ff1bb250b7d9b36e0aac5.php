@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>REKAP ABSENSI SISWA</h2>
-            <h3>PROGRAM PRAKTIK KERJA LAPANGAN (PKL)</h3>
+            <h2><?php echo e($konfigurasi->header_1 ?? 'REKAP ABSENSI SISWA'); ?></h2>
+            <h3><?php echo e($konfigurasi->header_2 ?? 'PROGRAM PRAKTIK KERJA LAPANGAN (PKL)'); ?></h3>
         </div>
 
         <table class="info-table">
@@ -76,6 +76,34 @@
                 <?php endif; ?>
             </tbody>
         </table>
+        
+        <div style="margin-top: 20px;">
+            <table class="data-table" style="width: 50%;">
+                <thead>
+                    <tr>
+                        <th colspan="2">Ringkasan Kehadiran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hadir</td>
+                        <td class="text-center"><?php echo e($rekapAbsensi['hadir']); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Izin</td>
+                        <td class="text-center"><?php echo e($rekapAbsensi['izin']); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Sakit</td>
+                        <td class="text-center"><?php echo e($rekapAbsensi['sakit']); ?></td>
+                    </tr>
+                    <tr>
+                        <td>Alpa</td>
+                        <td class="text-center"><?php echo e($rekapAbsensi['alpa']); ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <div class="footer">
             <div class="footer-content">

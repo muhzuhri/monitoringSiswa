@@ -151,6 +151,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/siswa/{nisn}/download-jurnal', [AdminSiswaController::class, 'downloadJurnalMingguan'])->name('admin.rekap.jurnal');
     Route::get('/admin/siswa/{nisn}/download-absensi', [AdminSiswaController::class, 'downloadRekapAbsensiIndividu'])->name('admin.rekap.absensi');
     Route::get('/admin/siswa/{nisn}/download-rekap-kelompok', [AdminSiswaController::class, 'downloadRekapAbsensiKelompok'])->name('admin.rekap.kelompok');
+    
+    // Tambahan Rekap Riwayat (Guru, Pembimbing, Laporan, Sertifikat)
+    Route::get('/admin/siswa/{nisn}/cetak-penilaian-guru', [AdminSiswaController::class, 'cetakPenilaianGuru'])->name('admin.rekap.nilaiGuru');
+    Route::get('/admin/siswa/{nisn}/cetak-penilaian-pembimbing', [AdminSiswaController::class, 'cetakPenilaianPembimbing'])->name('admin.rekap.nilaiPembimbing');
+    Route::get('/admin/siswa/{nisn}/cetak-laporan-akhir', [AdminSiswaController::class, 'cetakLaporanAkhir'])->name('admin.rekap.laporanAkhir');
+    Route::get('/admin/siswa/{nisn}/cetak-sertifikat', [AdminSiswaController::class, 'cetakSertifikatSiswa'])->name('admin.rekap.sertifikat');
 
     // Manajemen guru oleh admin
     Route::get('/admin/guru', [AdminGuruController::class, 'kelolaGuru'])->name('admin.kelolaGuru');
@@ -189,6 +195,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/prodi', [AdminMasterDataController::class, 'storeProdi'])->name('admin.storeProdi');
     Route::put('/admin/prodi/{id}', [AdminMasterDataController::class, 'updateProdi'])->name('admin.updateProdi');
     Route::delete('/admin/prodi/{id}', [AdminMasterDataController::class, 'destroyProdi'])->name('admin.destroyProdi');
+    Route::put('/admin/konfigurasi-laporan', [AdminMasterDataController::class, 'updateKonfigurasiLaporan'])->name('admin.updateKonfigurasiLaporan');
+    Route::get('/admin/konfigurasi-laporan/preview-sertifikat', [AdminMasterDataController::class, 'previewSertifikat'])->name('admin.konfigurasiLaporan.previewSertifikat');
     
     // Profil Admin
     Route::get('/admin/profil', [AuthController::class, 'adminProfil'])->name('admin.profil');

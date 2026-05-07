@@ -12,6 +12,7 @@ use App\Models\KriteriaPenilaian;
 use App\Models\ProgramStudi;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Models\KonfigurasiLaporan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -471,7 +472,12 @@ class GuruController extends Controller
             return back()->with('warning', 'Penilaian belum di inputkan oleh Guru.');
         }
 
-        $pdf = Pdf::loadView('guru.printPenilaian', compact('user', 'siswa', 'penilaian'));
+        $pdf = Pdf::loadView('guru.printPenilaian', [
+            'user' => $user, 
+            'siswa' => $siswa, 
+            'penilaian' => $penilaian,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_guru')->first()
+        ]);
 
         return $pdf->stream("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
     }
@@ -537,7 +543,8 @@ class GuruController extends Controller
         $fileName = "Jurnal_Mingguan_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.printJurnal', [
             'user' => $siswa,
-            'logbooks' => $logbooks
+            'logbooks' => $logbooks,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'kegiatan_mingguan')->first()
         ]);
 
         if ($request->has('download')) {
@@ -557,10 +564,20 @@ class GuruController extends Controller
 
         $absensis = $siswa->absensis()->orderBy('tanggal', 'asc')->get();
 
+        // Hitung juga ringkasannya untuk PDF
+        $rekapAbsensi = [
+            'hadir' => $absensis->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin' => $absensis->where('status', 'izin')->count(),
+            'sakit' => $absensis->where('status', 'sakit')->count(),
+            'alpa' => $absensis->where('status', 'alpa')->count(),
+        ];
+
         $fileName = "Rekap_Absensi_Individu_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', [
             'user' => $siswa,
-            'absensis' => $absensis
+            'absensis' => $absensis,
+            'rekapAbsensi' => $rekapAbsensi,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_individu')->first()
         ]);
 
         if ($request->has('download')) {
@@ -622,7 +639,8 @@ class GuruController extends Controller
         $fileName = "Rekap_Absensi_Kelompok_{$leader->nisn}_" . date('d_M_Y') . ".pdf";
         $pdf = Pdf::loadView('siswa.rekapAbsensiKelompok', [
             'user' => $leader,
-            'months' => $months
+            'months' => $months,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_kelompok')->first()
         ]);
         
         if ($request->has('download')) {
@@ -728,7 +746,11 @@ class GuruController extends Controller
 
         $fileName = "Laporan_Siswa_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
 
-        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', compact('pembimbing', 'siswa'));
+        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', [
+            'pembimbing' => $pembimbing, 
+            'siswa' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_pembimbing')->first()
+        ]);
 
         return $pdf->stream($fileName);
     }
@@ -755,7 +777,10 @@ class GuruController extends Controller
         $fileName = "Sertifikat_Magang_{$siswa->nisn}.pdf";
 
         // View sertifikat from siswa module is reused.
-        $pdf = Pdf::loadView('siswa.sertifikat', ['user' => $siswa])
+        $pdf = Pdf::loadView('siswa.sertifikat', [
+            'user' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'sertifikat')->first()
+        ])
             ->setPaper('a4', 'landscape');
         
         return $pdf->stream($fileName);

@@ -53,7 +53,7 @@
                         <a class="nav-link <?php echo e(Route::is('admin.profil') ? 'active' : ''); ?>" href="<?php echo e(route('admin.profil')); ?>">Profil</a>
                     </li>
                 </ul>
-                <form action="<?php echo e(route('logout')); ?>" method="post">
+                <form action="<?php echo e(route('logout')); ?>" method="post" class="btn-logout-pimpinan">
                     <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-logout">LOGOUT</button>
                 </form>

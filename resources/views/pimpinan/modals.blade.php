@@ -3,6 +3,7 @@
      Consolidates: guru_modals, pembimbing_modals, siswa_modals
 ============================================================ --}}
 
+
 {{-- 1. MODAL: DETAIL GURU (READ-ONLY) --}}
 <div class="modal fade" id="modalDetailGuru" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -378,27 +379,29 @@
                 </div>
                 
                 <div class="pdf-viewer-actions">
-                    <div class="pdf-desktop-actions">
+                    <div class="pdf-desktop-actions">                        
                         <a id="downloadPdfBtn" href="#" class="btn-pdf-action text-decoration-none" title="Unduh File" target="_blank">
-                            <i class="fas fa-download"></i> <span>Unduh Laporan</span>
+                            <i class="fas fa-download"></i> <span>Unduh</span>
                         </a>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
-            <div class="pdf-viewer-body">
-                <div id="pdfCanvasContainer">
-                    <div id="pdfLoadingIndicator">
-                        <i class="fas fa-spinner fa-spin fa-3x"></i>
-                        <p class="mt-3">Sedang memuat dokumen...</p>
-                    </div>
-                    <div id="pdfErrorMsg" style="display:none;">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-                        <h5 class="text-white">Gagal memuat file PDF</h5>
-                        <p class="text-white opacity-7">Maaf, terjadi kesalahan saat memuat dokumen. Anda tetap bisa langsung mengunduh file menggunakan tombol di atas.</p>
+            <div class="modal-body pdf-viewer-body">
+                    <div id="pdfCanvasContainer">
+                        <div id="pdfLoadingIndicator">
+                            <div class="loader-logo-container">
+                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
+                            </div>
+                            
+                        </div>
+
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
+                        </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>

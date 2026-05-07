@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('konfigurasi_laporans', function (Blueprint $table) {
+            $table->string('color_secondary')->nullable()->after('color_primary');
+            $table->string('background_color')->nullable()->after('color_secondary');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('konfigurasi_laporans', function (Blueprint $table) {
+            $table->dropColumn(['color_secondary', 'background_color']);
+        });
+    }
+};

@@ -60,28 +60,48 @@ body.admin-page {
     font-size: 0.95rem;
 }
 
-/* Tabs Master */
-.nav-pills .nav-link {
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 700;
-    color: var(--p-text-muted);
-    background: #f8fafc;
+/* Global Navigation Tabs (Unified Design) */
+.tabs-wrapper {
+    margin-bottom: 2rem;
+}
+
+.tabs-nav {
+    background: rgba(241, 245, 249, 0.5);
+    padding: 8px;
+    border-radius: 16px;
+    display: flex;
+    gap: 8px;
     border: 1px solid #e2e8f0;
-    margin-right: 12px;
-    transition: all 0.3s ease;
+}
+
+.tab-button {
+    padding: 10px 24px;
+    border-radius: var(--p-radius-md);
+    border: none;
+    background: transparent;
+    color: var(--p-text-muted);
+    font-weight: 700;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--p-transition);
+    cursor: pointer;
 }
 
-.nav-pills .nav-link.active {
-    background: var(--p-primary);
-    color: #5c4848;
-    border-color: var(--p-primary);
-    box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2);
+.tab-button.active {
+    background: white;
+    color: var(--p-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-.nav-pills .nav-link i {
-    margin-right: 8px;
+.tab-button i {
+    font-size: 1rem;
+}
+
+.tab-button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--p-primary);
 }
 
 /* Data Table Wrapper */
@@ -153,3 +173,155 @@ body.admin-page {
     color: var(--p-primary) !important;
     transform: translateY(-2px);
 }
+
+/* Dashboard Information & Prodi Styles */
+.info-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--p-accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.info-section-title i {
+    width: 40px;
+    height: 40px;
+    background: #eff6ff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--p-primary);
+    font-size: 1.1rem;
+}
+
+.label-premium {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--p-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-premium {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--p-text-main);
+    transition: var(--p-transition);
+    background: #f8fafc;
+}
+
+.input-premium:focus {
+    background: #fff;
+    border-color: var(--p-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Custom List for Program Studi */
+.prodi-list-item {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 12px;
+    transition: var(--p-transition);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.prodi-list-item:hover {
+    transform: translateX(8px);
+    border-color: var(--p-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.prodi-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.prodi-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 2.5px solid white;
+    box-shadow: 0 0 0 1px #e2e8f0;
+}
+
+.prodi-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--p-accent);
+}
+
+.prodi-meta {
+    font-size: 0.75rem;
+    color: var(--p-text-muted);
+    font-weight: 600;
+}
+
+.prodi-status-badge {
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.prodi-status-badge.aktif { background: #ecfdf5; color: #10b981; }
+.prodi-status-badge.nonaktif { background: #f1f5f9; color: #64748b; }
+
+.misi-item-premium {
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 10px;
+    transition: var(--p-transition);
+}
+
+.misi-item-premium:focus-within {
+    border-color: var(--p-primary);
+    background: white;
+}
+
+.misi-number {
+    background: #f1f5f9;
+    color: var(--p-text-muted);
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    border-right: 1.5px solid #e2e8f0;
+}
+
+.misi-textarea {
+    border: none;
+    background: transparent;
+    padding: 10px 15px;
+    font-weight: 600;
+    width: 100%;
+}
+
+.misi-textarea:focus { outline: none; }
+
+.btn-remove-misi {
+    padding: 0 15px;
+    color: var(--p-danger);
+    background: transparent;
+    border: none;
+    transition: var(--p-transition);
+}
+
+.btn-remove-misi:hover { color: #dc2626; transform: scale(1.1); }

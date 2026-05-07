@@ -18,16 +18,16 @@
             width: 297mm;
             height: 209mm;
             position: relative;
-            background-color: #fdfaf2;
+            background-color: {{ $konfigurasi->background_color ?? '#fdfaf2' }};
             overflow: hidden;
         }
 
         /* Decorative Shapes */
         .shape { position: absolute; z-index: 1; }
-        .shape-tl { top: -110px; left: -110px; width: 300px; height: 300px; background-color: #1a5fb4; transform: rotate(45deg); }
-        .shape-tl-accent { top: 30px; left: -130px; width: 240px; height: 50px; background-color: #fbc02d; transform: rotate(45deg); z-index: 2; }
-        .shape-br { bottom: -110px; right: -110px; width: 300px; height: 300px; background-color: #1a5fb4; transform: rotate(45deg); }
-        .shape-br-accent { bottom: 30px; right: -130px; width: 240px; height: 50px; background-color: #fbc02d; transform: rotate(45deg); z-index: 2; }
+        .shape-tl { top: -110px; left: -110px; width: 300px; height: 300px; background-color: {{ $konfigurasi->color_primary ?? '#1a5fb4' }}; transform: rotate(45deg); }
+        .shape-tl-accent { top: 30px; left: -130px; width: 240px; height: 50px; background-color: {{ $konfigurasi->color_secondary ?? '#fbc02d' }}; transform: rotate(45deg); z-index: 2; }
+        .shape-br { bottom: -110px; right: -110px; width: 300px; height: 300px; background-color: {{ $konfigurasi->color_primary ?? '#1a5fb4' }}; transform: rotate(45deg); }
+        .shape-br-accent { bottom: 30px; right: -130px; width: 240px; height: 50px; background-color: {{ $konfigurasi->color_secondary ?? '#fbc02d' }}; transform: rotate(45deg); z-index: 2; }
 
         .frame {
             position: absolute;
@@ -35,7 +35,7 @@
             left: 20px;
             right: 20px;
             bottom: 20px;
-            border: 3px solid #1a5fb4;
+            border: 3px solid {{ $konfigurasi->color_primary ?? '#1a5fb4' }};
             z-index: 5;
         }
 
@@ -53,11 +53,11 @@
         .header-text h2 { margin: 2px 0; font-size: 24px; font-weight: 900; color: #000; }
         .header-text p { margin: 0; font-size: 14px; color: #333; }
 
-        .divider { width: 85%; height: 2px; background-color: #fbc02d; margin: 10px auto; }
+        .divider { width: 85%; height: 2px; background-color: {{ $konfigurasi->color_secondary ?? '#fbc02d' }}; margin: 10px auto; }
 
         .main-title { font-size: 54px; font-weight: 900; margin: 15px 0 5px 0; color: #000; letter-spacing: 5px; }
 
-        .cert-number { background-color: #1a5fb4; color: #fff; padding: 4px 20px; font-size: 14px; display: inline-block; margin-bottom: 20px; font-weight: bold; }
+        .cert-number { background-color: {{ $konfigurasi->color_primary ?? '#1a5fb4' }}; color: #fff; padding: 4px 20px; font-size: 14px; display: inline-block; margin-bottom: 20px; font-weight: bold; }
 
         .given-text { font-size: 19px; font-style: italic; margin-bottom: 8px; }
 
@@ -107,22 +107,32 @@
                 </tr>
             </table>
             <div class="divider"></div>
-            <h1 class="main-title">SERTIFIKAT</h1>
-            <div class="given-text">DIBERIKAN KEPADA :</div>
+            <h1 class="main-title">{{ $konfigurasi->header_1 ?? 'SERTIFIKAT' }}</h1>
+            <div class="given-text">{{ $konfigurasi->header_2 ?? 'DIBERIKAN KEPADA :' }}</div>
             <div class="student-name">{{ $user->nama }}</div>
             <div class="description">
-                Atas partisipasinya sebagai Peserta Magang di Fakultas Ilmu Komputer Universitas Sriwijaya selama periode&nbsp; 
-                <strong>{{ \Carbon\Carbon::parse($user->tgl_mulai_magang)->translatedFormat('d F Y') }}</strong> sampai dengan 
-                <strong>{{ \Carbon\Carbon::parse($user->tgl_selesai_magang)->translatedFormat('d F Y') }}</strong>, 
-                serta telah menyelesaikan kegiatan magang dengan baik dan menunjukkan kinerja yang disiplin dan bertanggung jawab.
+                @if(isset($konfigurasi->template_isi))
+                    @php
+                        $tglMulai = \Carbon\Carbon::parse($user->tgl_mulai_magang)->translatedFormat('d F Y');
+                        $tglSelesai = \Carbon\Carbon::parse($user->tgl_selesai_magang)->translatedFormat('d F Y');
+                        $desc = str_replace('{tgl_mulai}', $tglMulai, $konfigurasi->template_isi);
+                        $desc = str_replace('{tgl_selesai}', $tglSelesai, $desc);
+                        echo $desc;
+                    @endphp
+                @else
+                    Atas partisipasinya sebagai Peserta Magang di Fakultas Ilmu Komputer Universitas Sriwijaya selama periode&nbsp; 
+                    <strong>{{ \Carbon\Carbon::parse($user->tgl_mulai_magang)->translatedFormat('d F Y') }}</strong> sampai dengan 
+                    <strong>{{ \Carbon\Carbon::parse($user->tgl_selesai_magang)->translatedFormat('d F Y') }}</strong>, 
+                    serta telah menyelesaikan kegiatan magang dengan baik dan menunjukkan kinerja yang disiplin dan bertanggung jawab.
+                @endif
             </div>
             <div class="footer">
                 <div class="signature-block">
                     <div class="date-location">Palembang, {{ \Carbon\Carbon::parse($user->tgl_selesai_magang)->translatedFormat('d F Y') }}</div>
-                    <div style="font-size: 16px;">Dekan,</div>
+                    <div style="font-size: 16px;">{{ $konfigurasi->header_3 ?? 'Dekan,' }}</div>
                     <br><br><br><br><br>
-                    <div class="signer-name">Prof. Dr. Erwin, S.Si., M.Si.</div>
-                    <div class="signer-nip">NIP. 197412122000031002</div>
+                    <div class="signer-name">{{ $konfigurasi->header_4 ?? 'Prof. Dr. Erwin, S.Si., M.Si.' }}</div>
+                    <div class="signer-nip">{{ $konfigurasi->header_5 ?? 'NIP. 197412122000031002' }}</div>
                 </div>
             </div>
         </div>

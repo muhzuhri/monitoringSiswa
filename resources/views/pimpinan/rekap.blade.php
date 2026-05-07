@@ -140,13 +140,15 @@
                 <div class="modal-body pdf-viewer-body">
                     <div id="pdfCanvasContainer">
                         <div id="pdfLoadingIndicator">
-                            <i class="fas fa-spinner fa-spin fa-3x"></i>
-                            <p class="mt-3">Sedang memuat dokumen...</p>
+                            <div class="loader-logo-container">
+                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
+                            </div>
+                            
                         </div>
-                        <div id="pdfErrorMsg" style="display:none; color: #fff; text-align: center;">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-                            <h5>Gagal memuat file PDF</h5>
-                            <p>Maaf, terjadi kesalahan saat memuat dokumen. Anda tetap bisa langsung mengunduh file menggunakan tombol di atas.</p>
+
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
                         </div>
                     </div>
                 </div>

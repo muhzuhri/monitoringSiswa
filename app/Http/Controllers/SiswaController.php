@@ -9,6 +9,7 @@ use App\Models\LaporanAkhir;
 use App\Models\Logbook;
 use App\Models\PengajuanSiswa;
 use App\Models\ProgramStudi;
+use App\Models\KonfigurasiLaporan;
 use App\Models\Siswa;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -753,7 +754,11 @@ class SiswaController extends Controller
         // Jurnal Mingguan version (Table: No, Tanggal, Pembimbing Lapangan, Kegiatan, Status)
         $fileName = "Jurnal_Mingguan_{$user->nisn}_" . date('d_M_Y') . ".pdf";
 
-        $pdf = Pdf::loadView('siswa.printJurnal', compact('user', 'logbooks'));
+        $pdf = Pdf::loadView('siswa.printJurnal', [
+            'user' => $user,
+            'logbooks' => $logbooks,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'kegiatan_mingguan')->first()
+        ]);
         
         if ($request->has('download')) {
             return $pdf->download($fileName);
@@ -783,7 +788,12 @@ class SiswaController extends Controller
         ];
 
         $fileName = "Rekap_Absensi_Individu_{$user->nisn}_" . date('d_M_Y') . ".pdf";
-        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', compact('user', 'absensis', 'rekapAbsensi'));
+        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', [
+            'user' => $user,
+            'absensis' => $absensis,
+            'rekapAbsensi' => $rekapAbsensi,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_individu')->first()
+        ]);
         
         if ($request->has('download')) {
             return $pdf->download($fileName);
@@ -851,7 +861,11 @@ class SiswaController extends Controller
 
         $fileName = "Rekap_Absensi_Kelompok_{$user->nisn}.pdf";
 
-        $pdf = Pdf::loadView('siswa.rekapAbsensiKelompok', compact('user', 'months'));
+        $pdf = Pdf::loadView('siswa.rekapAbsensiKelompok', [
+            'user' => $user,
+            'months' => $months,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_kelompok')->first()
+        ]);
         
         if ($request->has('download')) {
             return $pdf->download($fileName);
@@ -890,7 +904,8 @@ class SiswaController extends Controller
             'siswa' => $siswa,
             'pembimbing' => $pembimbing,
             'penilaian' => $penilaian,
-            'user' => $siswa->guru // Pass guru if needed for guru template
+            'user' => $siswa->guru, // Pass guru if needed for guru template
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', $penilaian->pemberi_nilai == 'Guru Pembimbing' ? 'penilaian_guru' : 'penilaian_pembimbing')->first()
         ]);
         
         if ($request->has('download')) {
@@ -916,7 +931,10 @@ class SiswaController extends Controller
         
         $fileName = "Sertifikat_Magang_{$user->nisn}.pdf";
 
-        $pdf = Pdf::loadView('siswa.sertifikat', compact('user'))
+        $pdf = Pdf::loadView('siswa.sertifikat', [
+            'user' => $user,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'sertifikat')->first()
+        ])
             ->setPaper('a4', 'landscape');
         
         if ($request->has('download')) {

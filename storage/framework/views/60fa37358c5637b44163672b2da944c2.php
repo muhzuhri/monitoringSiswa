@@ -552,7 +552,7 @@
                                     </div>
                                     <div class="col-md-6 detail-grid-item">
                                         <label class="detail-label">Tipe Magang</label>
-                                        <span class="detail-value badge-status hadirs px-3" id="det_tipe_magang" style="display:inline-block;">-</span>
+                                        <span class="detail-value badge-status hadir px-3" id="det_tipe_magang" style="display:inline-block;">-</span>
                                     </div>
                                     <div class="col-md-6 detail-grid-item">
                                         <label class="detail-label">NISN Ketua (Jika Kelompok)</label>

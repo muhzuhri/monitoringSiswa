@@ -53,7 +53,7 @@
                         <a class="nav-link {{ Route::is('admin.profil') ? 'active' : '' }}" href="{{ route('admin.profil') }}">Profil</a>
                     </li>
                 </ul>
-                <form action="{{ route('logout') }}" method="post">
+                <form action="{{ route('logout') }}" method="post" class="btn-logout-pimpinan">
                     @csrf
                     <button type="submit" class="btn-logout">LOGOUT</button>
                 </form>

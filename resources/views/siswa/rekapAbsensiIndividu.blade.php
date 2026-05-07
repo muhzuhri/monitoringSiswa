@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>REKAP ABSENSI SISWA</h2>
-            <h3>PROGRAM PRAKTIK KERJA LAPANGAN (PKL)</h3>
+            <h2>{{ $konfigurasi->header_1 ?? 'REKAP ABSENSI SISWA' }}</h2>
+            <h3>{{ $konfigurasi->header_2 ?? 'PROGRAM PRAKTIK KERJA LAPANGAN (PKL)' }}</h3>
         </div>
 
         <table class="info-table">

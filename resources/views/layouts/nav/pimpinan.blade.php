@@ -59,7 +59,7 @@
                             <div class="user-role text-white-50 small">{{ $user->jabatan ?? 'Pimpinan' }}</div>
                         </div>
                     </div>
-                    <form action="{{ route('logout') }}" method="post">
+                    <form action="{{ route('logout') }}" method="post" class="btn-logout-pimpinan">
                         @csrf
                         <button type="submit" class="btn-logout">LOGOUT</button>
                     </form>

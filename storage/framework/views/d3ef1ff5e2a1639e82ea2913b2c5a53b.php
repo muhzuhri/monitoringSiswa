@@ -59,7 +59,7 @@
                             <div class="user-role text-white-50 small"><?php echo e($user->jabatan ?? 'Pimpinan'); ?></div>
                         </div>
                     </div>
-                    <form action="<?php echo e(route('logout')); ?>" method="post">
+                    <form action="<?php echo e(route('logout')); ?>" method="post" class="btn-logout-pimpinan">
                         <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-logout">LOGOUT</button>
                     </form>

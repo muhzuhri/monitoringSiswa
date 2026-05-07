@@ -7,7 +7,7 @@
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('body'); ?>
-    <div class="management-container">
+    <div class="management-container" data-active-tab="<?php echo e(session('active_tab')); ?>">
         <div class="admin-content-wrapper">
 
             <div class="management-header mb-4">
@@ -25,23 +25,32 @@
                 </div>
             <?php endif; ?>
 
-            <ul class="nav nav-pills mb-4" id="masterDataTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="sekolah-tab" data-bs-toggle="pill" data-bs-target="#pane-sekolah" type="button" role="tab">
-                        <i class="fas fa-school"></i> Master Sekolah
+            
+            <div class="tabs-wrapper mb-4">
+                <div class="tabs-nav d-flex w-100 gap-2 p-1"
+                    style="background: rgba(15, 23, 42, 0.03); border-radius: 16px;" role="tablist">
+                    <button class="tab-button active flex-fill justify-content-center" id="sekolah-tab" data-bs-toggle="pill"
+                        data-bs-target="#pane-sekolah" type="button" role="tab" style="border-radius: 12px;">
+                        <i class="fas fa-school"></i>
+                        <span>Master Sekolah</span>
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="periode-tab" data-bs-toggle="pill" data-bs-target="#pane-periode" type="button" role="tab">
-                        <i class="fas fa-calendar-alt"></i> Tahun Ajaran
+                    <button class="tab-button flex-fill justify-content-center" id="periode-tab" data-bs-toggle="pill"
+                        data-bs-target="#pane-periode" type="button" role="tab" style="border-radius: 12px;">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Tahun Ajaran</span>
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="informasi-tab" data-bs-toggle="pill" data-bs-target="#pane-informasi" type="button" role="tab">
-                        <i class="fas fa-info-circle"></i> Informasi Dashboard
+                    <button class="tab-button flex-fill justify-content-center" id="informasi-tab" data-bs-toggle="pill"
+                        data-bs-target="#pane-informasi" type="button" role="tab" style="border-radius: 12px;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Informasi Dashboard</span>
                     </button>
-                </li>
-            </ul>
+                    <button class="tab-button flex-fill justify-content-center" id="laporan-tab" data-bs-toggle="pill"
+                        data-bs-target="#pane-laporan" type="button" role="tab" style="border-radius: 12px;">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Konfigurasi Laporan</span>
+                    </button>
+                </div>
+            </div>
 
             <div class="tab-content" id="masterDataTabsContent">
                 
@@ -168,99 +177,118 @@
                         </table>
                     </div>
                 </div>
-            </div>
+            <!-- REMOVED PREMATURE CLOSING DIV HERE -->
 
                 
                 <div class="tab-pane fade" id="pane-informasi" role="tabpanel">
                     <div class="row g-4">
                         <!-- Form Informasi Dashboard -->
                         <div class="col-lg-7">
-                            <div class="card border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
-                                    <h6 class="fw-bold mb-0 text-primary"><i class="fas fa-edit me-2"></i> Edit Informasi Dashboard</h6>
-                                </div>
+                            <div class="card border-0 shadow-sm rounded-4">
                                 <div class="card-body p-4">
+                                    <h6 class="info-section-title">
+                                        <i><i class="fas fa-edit"></i></i>
+                                        Konfigurasi Dashboard Utama
+                                    </h6>
+                                    
                                     <form action="<?php echo e(route('admin.updateInformasi')); ?>" method="POST">
                                         <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                                         
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted small">Nama Fakultas / Lembaga</label>
-                                            <input type="text" name="nama_fakultas" class="form-control rounded-3" value="<?php echo e($informasi->nama_fakultas); ?>">
+                                        <div class="mb-4">
+                                            <label class="label-premium">Nama Fakultas / Lembaga</label>
+                                            <input type="text" name="nama_fakultas" class="form-control input-premium" value="<?php echo e($informasi->nama_fakultas); ?>" placeholder="Masukkan nama lembaga">
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted small">Deskripsi Banner</label>
-                                            <textarea name="deskripsi_banner" class="form-control rounded-3" rows="2"><?php echo e($informasi->deskripsi_banner); ?></textarea>
+                                        <div class="mb-4">
+                                            <label class="label-premium">Deskripsi Banner</label>
+                                            <textarea name="deskripsi_banner" class="form-control input-premium" rows="2" placeholder="Deskripsi singkat yang tampil di hero section"><?php echo e($informasi->deskripsi_banner); ?></textarea>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted small">Visi</label>
-                                            <textarea name="visi" class="form-control rounded-3" rows="2"><?php echo e($informasi->visi); ?></textarea>
+                                        <div class="mb-4">
+                                            <label class="label-premium">Visi Lembaga</label>
+                                            <textarea name="visi" class="form-control input-premium" rows="4" placeholder="Masukkan visi lembaga secara lengkap"><?php echo e($informasi->visi); ?></textarea>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted small d-flex justify-content-between">
-                                                <span>Misi</span>
-                                                <button type="button" class="btn btn-sm btn-light py-0" onclick="addMisiField()"><i class="fas fa-plus"></i></button>
+                                        <div class="mb-4">
+                                            <label class="label-premium d-flex justify-content-between align-items-center mb-3">
+                                                <span class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-list-ol text-primary"></i> Misi Lembaga
+                                                </span>
+                                                <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="addMisiField()">
+                                                    <i class="fas fa-plus me-1"></i> Tambah Misi
+                                                </button>
                                             </label>
-                                            <div id="misi-container">
+                                            <div id="misi-container" class="pe-2">
                                                 <?php $__empty_1 = true; $__currentLoopData = $informasi->misi_array; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $misi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                                    <div class="input-group mb-2 misi-item">
-                                                        <span class="input-group-text bg-light border-end-0"><?php echo e($index + 1); ?>.</span>
-                                                        <textarea name="misi[]" class="form-control border-start-0" rows="1"><?php echo e($misi); ?></textarea>
-                                                        <button type="button" class="btn btn-outline-danger" onclick="this.closest('.misi-item').remove()"><i class="fas fa-times"></i></button>
+                                                    <div class="d-flex misi-item-premium mb-3">
+                                                        <div class="misi-number"><?php echo e($index + 1); ?></div>
+                                                        <textarea name="misi[]" class="misi-textarea" rows="2" placeholder="Tuliskan misi..."><?php echo e($misi); ?></textarea>
+                                                        <div class="d-flex align-items-center px-2 border-start">
+                                                            <button type="button" class="btn-remove-misi" onclick="this.closest('.misi-item-premium').remove(); updateMisiNumbers();" title="Hapus Misi">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                                    <div class="input-group mb-2 misi-item">
-                                                        <span class="input-group-text bg-light border-end-0">1.</span>
-                                                        <textarea name="misi[]" class="form-control border-start-0" rows="1"></textarea>
-                                                        <button type="button" class="btn btn-outline-danger" onclick="this.closest('.misi-item').remove()"><i class="fas fa-times"></i></button>
+                                                    <div class="d-flex misi-item-premium mb-3">
+                                                        <div class="misi-number">1</div>
+                                                        <textarea name="misi[]" class="misi-textarea" rows="2" placeholder="Masukkan misi pertama..."></textarea>
+                                                        <div class="d-flex align-items-center px-2 border-start">
+                                                            <button type="button" class="btn-remove-misi" onclick="this.closest('.misi-item-premium').remove(); updateMisiNumbers();">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted small">Sejarah Singkat</label>
-                                            <textarea name="sejarah" class="form-control rounded-3" rows="3"><?php echo e($informasi->sejarah); ?></textarea>
+                                        <div class="mb-4">
+                                            <label class="label-premium">Sejarah Singkat</label>
+                                            <textarea name="sejarah" class="form-control input-premium" rows="5" placeholder="Sejarah singkat fakultas/lembaga"><?php echo e($informasi->sejarah); ?></textarea>
                                         </div>
 
-                                        <div class="row g-3 mb-3">
+                                        <div class="row g-3 mb-4">
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-clock me-1"></i> Jam Operasional</label>
-                                                <input type="text" name="jam_operasional" class="form-control rounded-3" value="<?php echo e($informasi->jam_operasional); ?>">
+                                                <label class="label-premium"><i class="fas fa-clock me-1"></i> Jam Operasional</label>
+                                                <input type="text" name="jam_operasional" class="form-control input-premium" value="<?php echo e($informasi->jam_operasional); ?>" placeholder="Contoh: 08:00 - 16:00">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-info-circle me-1"></i> Ket. Jam</label>
-                                                <input type="text" name="deskripsi_jam_operasional" class="form-control rounded-3" value="<?php echo e($informasi->deskripsi_jam_operasional); ?>">
+                                                <label class="label-premium"><i class="fas fa-info-circle me-1"></i> Keterangan Jam</label>
+                                                <input type="text" name="deskripsi_jam_operasional" class="form-control input-premium" value="<?php echo e($informasi->deskripsi_jam_operasional); ?>" placeholder="Contoh: Senin - Jumat">
                                             </div>
                                         </div>
 
                                         <div class="row g-3 mb-4">
                                             <div class="col-md-12">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-map-marker-alt me-1"></i> Alamat Lokasi</label>
-                                                <input type="text" name="alamat_lokasi" class="form-control rounded-3" value="<?php echo e($informasi->alamat_lokasi); ?>">
+                                                <label class="label-premium"><i class="fas fa-map-marker-alt me-1"></i> Alamat Lokasi</label>
+                                                <input type="text" name="alamat_lokasi" class="form-control input-premium" value="<?php echo e($informasi->alamat_lokasi); ?>" placeholder="Alamat lengkap">
                                             </div>
                                             <div class="col-md-12">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-link me-1"></i> Link Maps</label>
-                                                <input type="text" name="link_maps" class="form-control rounded-3" value="<?php echo e($informasi->link_maps); ?>">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-envelope me-1"></i> Email</label>
-                                                <input type="email" name="email_kontak" class="form-control rounded-3" value="<?php echo e($informasi->email_kontak); ?>">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-phone-alt me-1"></i> Telepon</label>
-                                                <input type="text" name="telp_kontak" class="form-control rounded-3" value="<?php echo e($informasi->telp_kontak); ?>">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label class="form-label fw-semibold text-muted small"><i class="fas fa-globe me-1"></i> Website</label>
-                                                <input type="text" name="website_kontak" class="form-control rounded-3" value="<?php echo e($informasi->website_kontak); ?>">
+                                                <label class="label-premium"><i class="fas fa-link me-1"></i> Link Google Maps</label>
+                                                <input type="text" name="link_maps" class="form-control input-premium" value="<?php echo e($informasi->link_maps); ?>" placeholder="https://goo.gl/maps/...">
                                             </div>
                                         </div>
 
-                                        <div class="d-flex justify-content-end">
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fas fa-save me-2"></i> Simpan Perubahan Dasar</button>
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-4">
+                                                <label class="label-premium"><i class="fas fa-envelope me-1"></i> Email</label>
+                                                <input type="email" name="email_kontak" class="form-control input-premium" value="<?php echo e($informasi->email_kontak); ?>" placeholder="email@domain.com">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="label-premium"><i class="fas fa-phone-alt me-1"></i> Telepon</label>
+                                                <input type="text" name="telp_kontak" class="form-control input-premium" value="<?php echo e($informasi->telp_kontak); ?>" placeholder="0812...">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="label-premium"><i class="fas fa-globe me-1"></i> Website</label>
+                                                <input type="text" name="website_kontak" class="form-control input-premium" value="<?php echo e($informasi->website_kontak); ?>" placeholder="www.domain.com">
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-3 border-top d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                                                <i class="fas fa-save me-2"></i> Simpan Konfigurasi
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -270,36 +298,43 @@
                         <!-- Kelola Program Studi -->
                         <div class="col-lg-5">
                             <div class="card border-0 shadow-sm rounded-4 h-100">
-                                <div class="card-header bg-white border-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
-                                    <h6 class="fw-bold mb-0 text-primary"><i class="fas fa-graduation-cap me-2"></i> Program Studi</h6>
-                                    <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalTambahProdi">
-                                        <i class="fas fa-plus"></i> Tambah
-                                    </button>
-                                </div>
                                 <div class="card-body p-4">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <tbody>
-                                                <?php $__empty_1 = true; $__currentLoopData = $programStudis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prodi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="rounded-circle d-inline-block me-3 shadow-sm flex-shrink-0" style="width: 12px; height: 12px; background-color: <?php echo e($prodi->warna_dot); ?>; border: 2px solid white; outline: 1px solid #e2e8f0;"></span>
-                                                                <div>
-                                                                    <div class="fw-bold text-dark"><?php echo e($prodi->nama); ?></div>
-                                                                    <div class="small text-muted"><?php echo e($prodi->jenjang); ?> <span class="mx-1">•</span> Urutan: <?php echo e($prodi->urutan); ?></div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <?php if($prodi->aktif): ?>
-                                                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill">Aktif</span>
-                                                            <?php else: ?>
-                                                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">Nonaktif</span>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td class="text-end" style="white-space: nowrap;">
-                                                            <button class="btn btn-sm btn-light text-primary rounded-circle me-1 border-0 btn-edit-prodi" 
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h6 class="info-section-title mb-0">
+                                            <i><i class="fas fa-graduation-cap"></i></i>
+                                            Program Studi
+                                        </h6>
+                                        <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahProdi">
+                                            <i class="fas fa-plus me-1"></i> Tambah
+                                        </button>
+                                    </div>
+
+                                    <div class="prodi-container" style="max-height: 800px; overflow-y: auto; padding-right: 5px;">
+                                        <?php $__empty_1 = true; $__currentLoopData = $programStudis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prodi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                            <div class="prodi-list-item">
+                                                <div class="prodi-info">
+                                                    <span class="prodi-dot" style="background-color: <?php echo e($prodi->warna_dot); ?>;"></span>
+                                                    <div>
+                                                        <div class="prodi-name"><?php echo e($prodi->nama); ?></div>
+                                                        <div class="prodi-meta">
+                                                            <span class="text-primary fw-bold"><?php echo e($prodi->jenjang); ?></span>
+                                                            <span class="mx-2 text-muted">|</span>
+                                                            <span>Urutan: <?php echo e($prodi->urutan); ?></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="prodi-status-badge <?php echo e($prodi->aktif ? 'aktif' : 'nonaktif'); ?>">
+                                                        <?php echo e($prodi->aktif ? 'Aktif' : 'Nonaktif'); ?>
+
+                                                    </span>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                                            <li>
+                                                                <a class="dropdown-item btn-edit-prodi" href="#"
                                                                     data-id="<?php echo e($prodi->id); ?>"
                                                                     data-nama="<?php echo e($prodi->nama); ?>"
                                                                     data-jenjang="<?php echo e($prodi->jenjang); ?>"
@@ -307,28 +342,188 @@
                                                                     data-urutan="<?php echo e($prodi->urutan); ?>"
                                                                     data-aktif="<?php echo e($prodi->aktif ? '1' : '0'); ?>"
                                                                     data-bs-toggle="modal" data-bs-target="#modalEditProdi">
-                                                                <i class="fas fa-edit"></i>
-                                                            </button>
-                                                            <form action="<?php echo e(route('admin.destroyProdi', $prodi->id)); ?>" method="POST" class="d-inline">
-                                                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
-                                                                <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle border-0" onclick="return confirm('Hapus program studi ini?')">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                                    <tr>
-                                                        <td colspan="3" class="text-center py-4 text-muted">Belum ada data program studi.</td>
-                                                    </tr>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
+                                                                    <i class="fas fa-edit me-2 text-primary"></i> Edit
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <form action="<?php echo e(route('admin.destroyProdi', $prodi->id)); ?>" method="POST" class="d-inline">
+                                                                    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
+                                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Hapus program studi ini?')">
+                                                                        <i class="fas fa-trash-alt me-2"></i> Hapus
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                            <div class="text-center py-5">
+                                                <img src="<?php echo e(asset('assets/images/empty-state.png')); ?>" class="mb-3" style="width: 120px; opacity: 0.5;">
+                                                <p class="text-muted">Data program studi tidak ditemukan.</p>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                
+                <div class="tab-pane fade" id="pane-laporan" role="tabpanel">
+                    <form action="<?php echo e(route('admin.updateKonfigurasiLaporan')); ?>" method="POST">
+                        <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
+                        
+                        <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" style="background: rgba(59, 130, 246, 0.1); color: #1e40af;">
+                            <i class="fas fa-info-circle fs-4 me-3"></i>
+                            <div>
+                                <small>Gunakan placeholder untuk data dinamis: <strong>{sekolah}</strong> untuk nama sekolah, <strong>{tahun}</strong> untuk tahun ajaran, <strong>{tgl_mulai}</strong> dan <strong>{tgl_selesai}</strong> untuk periode magang.</small>
+                            </div>
+                        </div>
+
+                        <!-- Sub Tabs Navigation (Unified Design) -->
+                        <div class="tabs-wrapper mb-4 px-lg-5">
+                            <div class="tabs-nav d-flex w-100 gap-2 p-1" style="background: rgba(15, 23, 42, 0.03); border-radius: 16px;" role="tablist">
+                                <button class="tab-button active flex-fill justify-content-center" id="sub-rekap-tab" data-bs-toggle="pill" data-bs-target="#sub-rekap" type="button" role="tab" style="border-radius: 12px;">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span>Laporan & Absensi</span>
+                                </button>
+                                <button class="tab-button flex-fill justify-content-center" id="sub-penilaian-tab" data-bs-toggle="pill" data-bs-target="#sub-penilaian" type="button" role="tab" style="border-radius: 12px;">
+                                    <i class="fas fa-star"></i>
+                                    <span>Penilaian</span>
+                                </button>
+                                <button class="tab-button flex-fill justify-content-center" id="sub-sertifikat-tab" data-bs-toggle="pill" data-bs-target="#sub-sertifikat" type="button" role="tab" style="border-radius: 12px;">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>Sertifikat Magang</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tab-content border-0" id="laporanSubTabsContent">
+                            <!-- TAB 1: LAPORAN & ABSENSI -->
+                            <div class="tab-pane fade show active" id="sub-rekap" role="tabpanel">
+                                <div class="row g-4">
+                                    <?php $__currentLoopData = $laporans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lap): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(in_array($lap->tipe_laporan, ['absensi_individu', 'absensi_kelompok', 'kegiatan_mingguan'])): ?>
+                                            <div class="col-lg-6">
+                                                <?php echo $__env->make('admin.partials.card_laporan', ['index' => $index, 'lap' => $lap], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+
+                            <!-- TAB 2: PENILAIAN -->
+                            <div class="tab-pane fade" id="sub-penilaian" role="tabpanel">
+                                <div class="row g-4">
+                                    <?php $__currentLoopData = $laporans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lap): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(in_array($lap->tipe_laporan, ['penilaian_guru', 'penilaian_pembimbing'])): ?>
+                                            <div class="col-lg-6">
+                                                <?php echo $__env->make('admin.partials.card_laporan', ['index' => $index, 'lap' => $lap], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+
+                            <!-- TAB 3: SERTIFIKAT -->
+                            <div class="tab-pane fade" id="sub-sertifikat" role="tabpanel">
+                                <?php $__currentLoopData = $laporans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lap): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($lap->tipe_laporan == 'sertifikat'): ?>
+                                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                                            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="icon-box-premium" style="background: rgba(15, 23, 42, 0.05); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: #1e40af;">
+                                                        <i class="fas fa-certificate"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="fw-bold mb-0">Konfigurasi Sertifikat Magang</h6>
+                                                        <small class="text-muted">Desain, warna, dan konten sertifikat</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-4">
+                                                <input type="hidden" name="konfigurasi[<?php echo e($index); ?>][id]" value="<?php echo e($lap->id); ?>">
+                                                
+                                                <div class="row g-4">
+                                                    <div class="col-md-7">
+                                                        <div class="mb-3">
+                                                            <label class="label-premium">Judul Sertifikat</label>
+                                                            <input type="text" name="konfigurasi[<?php echo e($index); ?>][header_1]" class="form-control input-premium" value="<?php echo e($lap->header_1); ?>" placeholder="Contoh: SERTIFIKAT">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="label-premium">Sub-judul (Diberikan Kepada)</label>
+                                                            <input type="text" name="konfigurasi[<?php echo e($index); ?>][header_2]" class="form-control input-premium" value="<?php echo e($lap->header_2); ?>" placeholder="Contoh: DIBERIKAN KEPADA :">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="label-premium">Template Kalimat Isi</label>
+                                                            <textarea name="konfigurasi[<?php echo e($index); ?>][template_isi]" class="form-control input-premium" rows="6"><?php echo e($lap->template_isi); ?></textarea>
+                                                            <small class="text-muted mt-1 d-block">
+                                                                Dapat menggunakan <strong>{tgl_mulai}</strong> dan <strong>{tgl_selesai}</strong>.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <div class="card bg-light border-0 rounded-4 p-3 mb-4">
+                                                            <h6 class="fw-bold mb-3">Tanda Tangan (Footer)</h6>
+                                                            <div class="mb-2">
+                                                                <label class="small fw-semibold text-muted">Jabatan Penyetuju</label>
+                                                                <input type="text" name="konfigurasi[<?php echo e($index); ?>][header_3]" class="form-control form-control-sm" value="<?php echo e($lap->header_3); ?>" placeholder="Contoh: Dekan,">
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <label class="small fw-semibold text-muted">Nama Penandatangan</label>
+                                                                <input type="text" name="konfigurasi[<?php echo e($index); ?>][header_4]" class="form-control form-control-sm" value="<?php echo e($lap->header_4); ?>" placeholder="Contoh: Prof. Dr. Erwin...">
+                                                            </div>
+                                                            <div class="mb-0">
+                                                                <label class="small fw-semibold text-muted">NIP Penandatangan</label>
+                                                                <input type="text" name="konfigurasi[<?php echo e($index); ?>][header_5]" class="form-control form-control-sm" value="<?php echo e($lap->header_5); ?>" placeholder="Contoh: NIP. 1974...">
+                                                            </div>
+                                                        </div>
+
+                                                        <h6 class="fw-bold mb-3">Palet Warna</h6>
+                                                        <div class="row g-2">
+                                                            <div class="col-4">
+                                                                <label class="small fw-semibold text-muted d-block mb-1">Utama</label>
+                                                                <input type="color" name="konfigurasi[<?php echo e($index); ?>][color_primary]" class="form-control form-control-color w-100 border-0 p-0 rounded-3" value="<?php echo e($lap->color_primary ?: '#1a56db'); ?>" style="height: 40px;">
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="small fw-semibold text-muted d-block mb-1">Aksen</label>
+                                                                <input type="color" name="konfigurasi[<?php echo e($index); ?>][color_secondary]" class="form-control form-control-color w-100 border-0 p-0 rounded-3" value="<?php echo e($lap->color_secondary ?: '#fbc02d'); ?>" style="height: 40px;">
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="small fw-semibold text-muted d-block mb-1">Background</label>
+                                                                <input type="color" name="konfigurasi[<?php echo e($index); ?>][background_color]" class="form-control form-control-color w-100 border-0 p-0 rounded-3" value="<?php echo e($lap->background_color ?: '#fdfaf2'); ?>" style="height: 40px;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                                <div class="mt-4 pt-4 border-top">
+                                                    <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-eye me-2"></i> Real-time Preview</h6>
+                                                    <div class="bg-light rounded-4 p-1 shadow-sm" style="height: 500px; border: 1px solid #e2e8f0; overflow: hidden;">
+                                                        <iframe src="<?php echo e(route('admin.konfigurasiLaporan.previewSertifikat')); ?>#toolbar=0" width="100%" height="100%" style="border: none; border-radius: 12px; background: #fff;"></iframe>
+                                                    </div>
+                                                    <div class="mt-2 d-flex align-items-center gap-2 text-muted small">
+                                                        <div class="spinner-grow spinner-grow-sm text-primary" role="status" style="width: 10px; height: 10px;"></div>
+                                                        <span>Preview akan diperbarui otomatis setelah Anda menekan <strong>Simpan Perubahan</strong>.</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-3 border-top d-flex justify-content-end mb-5">
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm py-2">
+                                <i class="fas fa-save me-2"></i> Simpan Perubahan Konfigurasi
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -610,84 +805,7 @@
     </div>
 
     <?php $__env->startPush('scripts'); ?>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // ... (Existing Event Listeners for Sekolah and Periode) ...
-                
-                // Edit Sekolah Modal
-                document.querySelectorAll('.btn-edit-sekolah').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
-                        document.getElementById('formEditSekolah').action = `/admin/sekolah/${id}`;
-                        document.getElementById('edit_sekolah_npsn').value = this.getAttribute('data-npsn');
-                        document.getElementById('edit_sekolah_nama').value = this.getAttribute('data-nama');
-                        document.getElementById('edit_sekolah_jenjang').value = this.getAttribute('data-jenjang');
-                        document.getElementById('edit_sekolah_status').value = this.getAttribute('data-status');
-                        document.getElementById('edit_sekolah_alamat').value = this.getAttribute('data-alamat');
-                    });
-                });
-
-                // Edit Periode Modal
-                document.querySelectorAll('.btn-edit-periode').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
-                        document.getElementById('formEditPeriode').action = `/admin/periode/${id}`;
-                        document.getElementById('edit_ta_tahun').value = this.getAttribute('data-tahun');
-                        document.getElementById('edit_ta_mulai').value = this.getAttribute('data-mulai');
-                        document.getElementById('edit_ta_selesai').value = this.getAttribute('data-selesai');
-                        document.getElementById('edit_ta_status').value = this.getAttribute('data-status');
-                    });
-                });
-
-                // Edit Prodi Modal
-                document.querySelectorAll('.btn-edit-prodi').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const id = this.getAttribute('data-id');
-                        document.getElementById('formEditProdi').action = `/admin/prodi/${id}`;
-                        document.getElementById('edit_prodi_nama').value = this.getAttribute('data-nama');
-                        document.getElementById('edit_prodi_jenjang').value = this.getAttribute('data-jenjang');
-                        document.getElementById('edit_prodi_warna').value = this.getAttribute('data-warna');
-                        document.getElementById('edit_prodi_urutan').value = this.getAttribute('data-urutan');
-                        document.getElementById('edit_prodi_aktif').value = this.getAttribute('data-aktif');
-                    });
-                });
-
-                // Handle active tab from session or local storage
-                <?php if(session('active_tab')): ?>
-                    const tabId = "<?php echo e(session('active_tab')); ?>-tab";
-                    const tabTrigger = document.getElementById(tabId);
-                    if(tabTrigger) {
-                        const tab = new bootstrap.Tab(tabTrigger);
-                        tab.show();
-                    }
-                <?php endif; ?>
-            });
-
-            // Misi Field Logic
-            function addMisiField() {
-                const container = document.getElementById('misi-container');
-                const itemCount = container.querySelectorAll('.misi-item').length + 1;
-                
-                const html = `
-                    <div class="input-group mb-2 misi-item">
-                        <span class="input-group-text bg-light border-end-0">${itemCount}.</span>
-                        <textarea name="misi[]" class="form-control border-start-0" rows="1"></textarea>
-                        <button type="button" class="btn btn-outline-danger" onclick="this.closest('.misi-item').remove()"><i class="fas fa-times"></i></button>
-                    </div>
-                `;
-                
-                container.insertAdjacentHTML('beforeend', html);
-                updateMisiNumbers();
-            }
-
-            function updateMisiNumbers() {
-                const container = document.getElementById('misi-container');
-                const items = container.querySelectorAll('.misi-item');
-                items.forEach((item, index) => {
-                    item.querySelector('.input-group-text').innerText = (index + 1) + '.';
-                });
-            }
-        </script>
+        <script src="<?php echo e(asset('assets/js/admin/masterData.js')); ?>"></script>
     <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 

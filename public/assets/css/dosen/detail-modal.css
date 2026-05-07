@@ -43,6 +43,75 @@
     border-radius: 50%;
 }
 
+/* Body & Canvas Content (PDF.js) */
+.pdf-viewer-body {
+    padding: 0 !important;
+    flex: 1 1 0% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background-color: #525659;
+}
+
+#pdfCanvasContainer {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    gap: 12px;
+    width: 100%;
+    position: relative;
+    /* Kunci untuk centering loader absolut */
+    min-height: 400px;
+    background-color: rgb(201, 200, 200);
+}
+
+#pdfCanvasContainer canvas {
+    max-width: 100%;
+    height: auto !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: #fff;
+}
+
+#pdfLoadingIndicator,
+#pdfErrorMsg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 2rem;
+    z-index: 20;
+}
+
+#pdfLoadingIndicator i,
+#pdfErrorMsg i {
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+    font-size: 2.5rem;
+}
+
+.loader-logo-container {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loader-logo-container img {
+    width: 65px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
+    animation: pdf-breathing 2.5s infinite ease-in-out;
+}
+
 .avatar-container-premium {
     width: 90px;
     height: 90px;

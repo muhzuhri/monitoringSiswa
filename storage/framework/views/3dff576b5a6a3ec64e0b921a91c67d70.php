@@ -7,7 +7,7 @@
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('body'); ?>
-    <div class="dashboard-container">
+    <div class="dashboard-container" data-stats-url="<?php echo e(route('admin.rekap.stats')); ?>">
         <div class="admin-content-wrapper">
             <div class="rekap-main-card">
                 <div class="rekap-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
@@ -138,165 +138,25 @@
                 <div class="modal-body pdf-viewer-body">
                     <div id="pdfCanvasContainer">
                         <div id="pdfLoadingIndicator">
-                            <i class="fas fa-spinner fa-spin fa-3x"></i>
-                            <p class="mt-3">Sedang memuat dokumen...</p>
+                            <div class="loader-logo-container">
+                                <img src="<?php echo e(asset('images/unsri-pride.png')); ?>" alt="UNSRI">
+                            </div>
+                            
                         </div>
-                        <div id="pdfErrorMsg" style="display:none; color: #fff; text-align: center;">
-                            <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
-                            <h5>Gagal memuat file PDF</h5>
-                            <p>Maaf, terjadi kesalahan saat memuat dokumen. Anda tetap bisa langsung mengunduh file menggunakan tombol di atas.</p>
+
+                        <div id="pdfErrorMsg" class="d-none">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
                         </div>
                     </div>
-                </div>
+                </div
             </div>
         </div>
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php $__env->startPush('scripts'); ?>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        const pdfModalElement  = document.getElementById('previewPdfModal');
-        const pdfModal         = pdfModalElement ? bootstrap.Modal.getOrCreateInstance(pdfModalElement) : null;
-        let currentTaskId = 0;
-
-        async function renderPDF(url) {
-            const taskId = ++currentTaskId;
-            const container = document.getElementById('pdfCanvasContainer');
-            const loadingEl = document.getElementById('pdfLoadingIndicator');
-            const errorEl = document.getElementById('pdfErrorMsg');
-
-            container.querySelectorAll('canvas').forEach(c => c.remove());
-            loadingEl.style.display = 'flex';
-            errorEl.style.display = 'none';
-            container.scrollTop = 0;
-
-            try {
-                // Small delay for modal readiness
-                await new Promise(resolve => setTimeout(resolve, 200));
-                if (currentTaskId !== taskId) return;
-
-                const pdfDoc = await pdfjsLib.getDocument(url).promise;
-                if (currentTaskId !== taskId) return;
-
-                const containerWidth = container.clientWidth - 40;
-                const outputScale = window.devicePixelRatio || 1;
-
-                for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                    const page = await pdfDoc.getPage(pageNum);
-                    const unscaledViewport = page.getViewport({ scale: 1 });
-                    const baseScale = (containerWidth > 0 ? containerWidth : 800) / unscaledViewport.width;
-                    const viewport = page.getViewport({ scale: baseScale * outputScale });
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    canvas.style.width = (viewport.width / outputScale) + 'px';
-                    canvas.style.height = (viewport.height / outputScale) + 'px';
-
-                    container.appendChild(canvas);
-
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport
-                    };
-                    await page.render(renderContext).promise;
-
-                    if (currentTaskId !== taskId) return;
-                    if (pageNum === 1) loadingEl.style.display = 'none';
-                }
-            } catch (err) {
-                if (currentTaskId === taskId) {
-                    loadingEl.style.display = 'none';
-                    errorEl.style.display = 'block';
-                }
-                console.error('PDF.js error:', err);
-            }
-        }
-
-        // ── Animasi counter angka ──────────────────────────────────────────────
-        function animateCounter(el, targetVal) {
-            const start   = parseInt(el.textContent) || 0;
-            const end     = parseInt(targetVal)      || 0;
-            const dur     = 500;
-            const step    = 16;
-            const steps   = Math.ceil(dur / step);
-            const inc     = (end - start) / steps;
-            let   current = start;
-            let   count   = 0;
-
-            const timer = setInterval(function() {
-                count++;
-                current += inc;
-                el.textContent = Math.round(count >= steps ? end : current);
-                if (count >= steps) clearInterval(timer);
-            }, step);
-        }
-
-        // ── Fetch stats berdasarkan filter tahun ajaran ───────────────────────
-        function loadStats(periodeId) {
-            const statsUrl = '<?php echo e(route("admin.rekap.stats")); ?>';
-            const url      = periodeId ? `${statsUrl}?periode=${periodeId}` : statsUrl;
-
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(res => res.json())
-                .then(data => {
-                    animateCounter(document.getElementById('statSiswaAktif'),   data.siswa_aktif);
-                    animateCounter(document.getElementById('statSiswaSelesai'), data.siswa_selesai);
-                    animateCounter(document.getElementById('statTotalSiswa'),   data.total_siswa);
-                    animateCounter(document.getElementById('statTotalGuru'),    data.total_guru);
-                })
-                .catch(err => console.error('Gagal memuat statistik:', err));
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterEl         = document.getElementById('filterPeriode');
-            const badgeEl          = document.getElementById('activeFilterBadge');
-            const badgeLabelEl     = document.getElementById('activeFilterLabel');
-            const previewButtons   = document.querySelectorAll('.btn-preview-pdf');
-            const downloadBtn      = document.getElementById('downloadPdfBtn');
-
-            filterEl.addEventListener('change', function() {
-                const periodeId    = this.value;
-                const periodeLabel = this.options[this.selectedIndex].text;
-
-                if (periodeId) {
-                    badgeLabelEl.textContent = periodeLabel;
-                    badgeEl.style.display    = 'block';
-                } else {
-                    badgeEl.style.display    = 'none';
-                }
-
-                loadStats(periodeId);
-            });
-
-            previewButtons.forEach(button => {
-                button.onclick = function() {
-                    const url    = this.getAttribute('data-url');
-                    const periode = filterEl.value;
-                    if (!url) return;
-
-                    let finalUrl = url;
-                    if (periode) {
-                        finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'periode=' + periode;
-                    }
-
-                    downloadBtn.href = finalUrl + (finalUrl.includes('?') ? '&' : '?') + 'download=1';
-                    if (pdfModal) pdfModal.show();
-                    renderPDF(finalUrl);
-                };
-            });
-
-            pdfModalElement.addEventListener('hidden.bs.modal', function() {
-                const container = document.getElementById('pdfCanvasContainer');
-                container.querySelectorAll('canvas').forEach(c => c.remove());
-            });
-        });
-    </script>
-<?php $__env->stopPush(); ?>
+    <?php $__env->startPush('scripts'); ?>
+        <script src="<?php echo e(asset('assets/js/admin/rekap.js')); ?>"></script>
+    <?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('layouts.nav.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\monitoringSiswa\resources\views/admin/rekap.blade.php ENDPATH**/ ?>

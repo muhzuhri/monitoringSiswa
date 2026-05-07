@@ -546,19 +546,21 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="pdf-viewer-body bg-light">
+                <div class="modal-body pdf-viewer-body">
                     <div id="pdfCanvasContainer">
                         <div id="pdfLoadingIndicator">
                             <div class="loader-logo-container">
-                                <i class="fas fa-circle-notch fa-spin fa-2x text-primary"></i>
+                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
                             </div>
+                            
                         </div>
+
                         <div id="pdfErrorMsg" class="d-none">
                             <i class="fas fa-exclamation-triangle fa-2x"></i>
                             <p>Gagal memuat file PDF.<br><small>Coba gunakan tombol Unduh.</small></p>
                         </div>
                     </div>
-                </div>
+                </div
             </div>
         </div>
     </div>

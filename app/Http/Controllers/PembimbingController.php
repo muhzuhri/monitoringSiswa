@@ -11,6 +11,7 @@ use App\Models\KriteriaPenilaian;
 use App\Models\PenilaianDetail;
 use App\Models\Penilaian;
 use App\Models\TahunAjaran;
+use App\Models\KonfigurasiLaporan;
 use App\Models\PengajuanSiswa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -152,7 +153,11 @@ class PembimbingController extends Controller
         $logbooks = $user->logbooks;
         $fileName = "Jurnal_Kegiatan_{$user->nisn}_" . date('d_M_Y') . ".pdf";
 
-        $pdf = Pdf::loadView('siswa.printJurnal', compact('user', 'logbooks'));
+        $pdf = Pdf::loadView('siswa.printJurnal', [
+            'user' => $user,
+            'logbooks' => $logbooks,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'kegiatan_mingguan')->first()
+        ]);
         return $pdf->download($fileName);
     }
 
@@ -167,9 +172,22 @@ class PembimbingController extends Controller
             ->with('absensis')->firstOrFail();
 
         $absensis = $user->absensis()->orderBy('tanggal', 'asc')->get();
-        $fileName = "Rekap_Absensi_{$user->nisn}_" . date('d_M_Y') . ".pdf";
 
-        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', compact('user', 'absensis'));
+        // Hitung juga ringkasannya untuk PDF
+        $rekapAbsensi = [
+            'hadir' => $absensis->whereIn('status', ['hadir', 'terlambat'])->count(),
+            'izin' => $absensis->where('status', 'izin')->count(),
+            'sakit' => $absensis->where('status', 'sakit')->count(),
+            'alpa' => $absensis->where('status', 'alpa')->count(),
+        ];
+
+        $fileName = "Rekap_Absensi_{$user->nisn}_" . date('d_M_Y') . ".pdf";
+        $pdf = Pdf::loadView('siswa.rekapAbsensiIndividu', [
+            'user' => $user,
+            'absensis' => $absensis,
+            'rekapAbsensi' => $rekapAbsensi,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'absensi_individu')->first()
+        ]);
         return $pdf->download($fileName);
     }
 
@@ -705,7 +723,11 @@ class PembimbingController extends Controller
 
         $fileName = "Laporan_Siswa_{$siswa->nisn}_" . date('d_M_Y') . ".pdf";
 
-        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', compact('pembimbing', 'siswa'));
+        $pdf = Pdf::loadView('pembimbing.cetakPenilaian', [
+            'pembimbing' => $pembimbing, 
+            'siswa' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_pembimbing')->first()
+        ]);
 
         return $pdf->stream($fileName);
     }
@@ -734,7 +756,12 @@ class PembimbingController extends Controller
         }
 
         $guru = $siswa->guru;
-        $pdf = Pdf::loadView('guru.printPenilaian', ['user' => $guru, 'siswa' => $siswa, 'penilaian' => $penilaian]);
+        $pdf = Pdf::loadView('guru.printPenilaian', [
+            'user' => $guru, 
+            'siswa' => $siswa, 
+            'penilaian' => $penilaian,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'penilaian_guru')->first()
+        ]);
 
         return $pdf->stream("Penilaian_Siswa_{$siswa->nisn}_{$siswa->nama}.pdf");
     }
@@ -791,7 +818,10 @@ class PembimbingController extends Controller
         $siswa->load(['pembimbing', 'tahunAjaran']);
         $fileName = "Sertifikat_Magang_{$siswa->nisn}.pdf";
 
-        $pdf = Pdf::loadView('siswa.sertifikat', ['user' => $siswa])
+        $pdf = Pdf::loadView('siswa.sertifikat', [
+            'user' => $siswa,
+            'konfigurasi' => KonfigurasiLaporan::where('tipe_laporan', 'sertifikat')->first()
+        ])
             ->setPaper('a4', 'landscape');
         
         return $pdf->stream($fileName);

@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>JURNAL KEGIATAN MINGGUAN SISWA</h2>
-            <h3>PROGRAM PRAKTIK KERJA LAPANGAN (PKL)</h3>
+            <h2><?php echo e($konfigurasi->header_1 ?? 'JURNAL KEGIATAN MINGGUAN SISWA'); ?></h2>
+            <h3><?php echo e($konfigurasi->header_2 ?? 'PROGRAM PRAKTIK KERJA LAPANGAN (PKL)'); ?></h3>
         </div>
 
         <table class="info-table">

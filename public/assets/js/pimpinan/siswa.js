@@ -239,17 +239,43 @@ document.addEventListener("DOMContentLoaded", function () {
         pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
 
+    let currentPdfUrl = null;
+    let currentTaskId = 0;
+
     async function renderPDF(url) {
+        const taskId = ++currentTaskId;
         const container = document.getElementById("pdfCanvasContainer");
         const loadingEl = document.getElementById("pdfLoadingIndicator");
         const errorEl = document.getElementById("pdfErrorMsg");
 
         if (!container || !loadingEl || !errorEl) return;
 
-        container.querySelectorAll("canvas").forEach((c) => c.remove());
+        container.querySelectorAll("canvas, img").forEach((c) => c.remove());
         loadingEl.style.display = "flex";
         errorEl.style.display = "none";
         container.scrollTop = 0;
+
+        // Check if image
+        const isImage = url.match(/\.(jpg|jpeg|png|gif)$/i);
+        if (isImage) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.borderRadius = '12px';
+            img.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+            img.onload = () => {
+                if (currentTaskId !== taskId) return;
+                loadingEl.style.display = 'none';
+                container.appendChild(img);
+            };
+            img.onerror = () => {
+                if (currentTaskId !== taskId) return;
+                loadingEl.style.display = 'none';
+                errorEl.style.display = "block";
+            };
+            return;
+        }
 
         try {
             const pdfDoc = await pdfjsLib.getDocument(url).promise;
@@ -259,8 +285,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const outputScale = window.devicePixelRatio || 2; 
 
             for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                const page = await pdfDoc.getPage(pageNum);
+                if (currentTaskId !== taskId) return;
                 
+                const page = await pdfDoc.getPage(pageNum);
                 const baseViewport = page.getViewport({ scale: 1.0 });
                 const displayScale = containerWidth / baseViewport.width;
                 const displayViewport = page.getViewport({ scale: displayScale });
@@ -285,15 +312,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 container.appendChild(canvas);
             }
         } catch (error) {
-            console.error("Error loading PDF:", error);
-            loadingEl.style.display = "none";
-            errorEl.style.display = "block";
+            if (currentTaskId === taskId) {
+                console.error("Error loading PDF:", error);
+                loadingEl.style.display = "none";
+                errorEl.style.display = "block";
+            }
         }
     }
 
     const pdfModalEl = document.getElementById("previewPdfModal");
     const pdfModal = pdfModalEl ? new bootstrap.Modal(pdfModalEl) : null;
     const downloadBtn = document.getElementById("downloadPdfBtn");
+    const printBtn = document.getElementById("printPdfBtn");
 
     function initPdfPreviewListeners() {
         document.querySelectorAll(".btn-preview-pdf").forEach((button) => {
@@ -301,6 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.addEventListener("click", function () {
                 const url = this.dataset.url;
                 if (!url) return;
+                currentPdfUrl = url;
                 
                 if (downloadBtn) {
                     downloadBtn.href = url + (url.includes("?") ? "&" : "?") + "download=1";
@@ -308,7 +339,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 if (pdfModal) {
                     pdfModal.show();
-                    // Wait for modal to be shown to get correct clientWidth
                     const handler = () => {
                         renderPDF(url);
                         pdfModalEl.removeEventListener('shown.bs.modal', handler);
@@ -319,8 +349,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            if (!currentPdfUrl) return;
+            const win = window.open(currentPdfUrl, '_blank');
+            win.addEventListener('load', () => win.print(), { once: true });
+        });
+    }
+
+    if (pdfModalEl) {
+        pdfModalEl.addEventListener('hidden.bs.modal', () => {
+            const container = document.getElementById("pdfCanvasContainer");
+            if (container) container.querySelectorAll("canvas, img").forEach(c => c.remove());
+            currentPdfUrl = null;
+        });
+    }
+
     // Also update the onclick in detail modal
     window.openPdfPreview = function(url) {
+        currentPdfUrl = url;
         if (downloadBtn) downloadBtn.href = url + (url.includes("?") ? "&" : "?") + "download=1";
         if (pdfModal) {
             pdfModal.show();

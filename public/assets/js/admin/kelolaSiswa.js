@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const jurnalUrlTemplate = containerEl.dataset.jurnalUrl;
     const absensiUrlTemplate = containerEl.dataset.absensiUrl;
     const kelompokUrlTemplate = containerEl.dataset.kelompokUrl;
+    const nilaiGuruUrlTemplate = containerEl.dataset.nilaiGuruUrl;
+    const nilaiPembimbingUrlTemplate = containerEl.dataset.nilaiPembimbingUrl;
+    const laporanAkhirUrlTemplate = containerEl.dataset.laporanAkhirUrl;
+    const sertifikatUrlTemplate = containerEl.dataset.sertifikatUrl;
     const loaderAsset = containerEl.dataset.assetLoader;
 
     // Set loader image source
@@ -252,10 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
             actionsTh.classList.remove('d-none');
 
             members.forEach((member) => {
-                const logDownload = jurnalUrlTemplate.replace(':nisn', member.nisn);
-                const absDownload = absensiUrlTemplate.replace(':nisn', member.nisn);
-                const kelDownload = kelompokUrlTemplate.replace(':nisn', member.nisn);
-
                 const statusBadge = showActions ? `
                     <span class="badge-status belum" style="font-size: 0.7rem; padding: 4px 12px;">
                         <i class="fas fa-flag-checkered"></i> SELESAI
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${statusBadge}
                         </td>
                         <td class="text-end">
-                            <div class="d-flex justify-content-end gap-3">
+                            <div class="d-flex justify-content-end gap-2 flex-wrap" style="max-width: 320px; margin-left: auto;">
                                 <button class="btn-premium-circle btn-view-p btn-detail" title="Lihat Profil Lengkap" 
                                     data-bs-toggle="modal" data-bs-target="#modalDetailSiswa"
                                     data-nisn="${member.nisn}" data-nama="${member.nama}" data-email="${member.email}"
@@ -289,27 +289,39 @@ document.addEventListener('DOMContentLoaded', function() {
                                     data-tipe_magang="${member.tipe_magang || 'individu'}"
                                     data-nisn_ketua="${member.nisn_ketua || '-'}"
                                     data-surat_balasan="${member.surat_balasan || ''}"
-                                    data-tahun_ajaran="${member.tahun_ajaran ? member.tahun_ajaran.tahun_ajaran : '-'}"
+                                    data-tahun_ajaran="${member.tahun_ajaran ? (member.tahun_ajaran.tahun_ajaran || member.tahun_ajaran) : '-'}"
                                     data-mulai="${member.tgl_mulai_magang || ''}" data-selesai="${member.tgl_selesai_magang || ''}"
                                     data-guru-nama="${member.guru ? member.guru.nama : '-'}" data-guru-nip="${member.id_guru || '-'}"
                                     data-pl-nama="${member.pembimbing ? member.pembimbing.nama : '-'}" data-pl-nip="${member.id_pembimbing || '-'}"
                                     data-pl-hp="${member.pembimbing ? member.pembimbing.no_telp : '-'}"
                                     style="width: 38px; height: 38px; font-size: 1rem;">
-                                    <i class="fas fa-user-circle"></i>
+                                    <i class="fas fa-eye"></i>
                                 </button>
 
                                 ${showActions ? `
-                                        <button class="btn-premium-circle btn-jurnal-p btn-preview-pdf" title="Cetak Jurnal" data-url="${logDownload}"
-                                            style="width: 38px; height: 38px; font-size: 1rem;">
-                                            <i class="fas fa-book-open"></i>
-                                        </button>
-                                        <button class="btn-premium-circle btn-absensi-p btn-preview-pdf" title="Cetak Absensi" data-url="${absDownload}"
+                                        <button class="btn-premium-circle btn-absensi-p btn-preview-pdf" title="Cetak Absensi" data-url="${absensiUrlTemplate.replace(':nisn', member.nisn)}"
                                             style="width: 38px; height: 38px; font-size: 1rem;">
                                             <i class="fas fa-calendar-check"></i>
                                         </button>
-                                        <button class="btn-premium-circle btn-info-p btn-preview-pdf" title="Cetak Rekap Kelompok" data-url="${kelDownload}"
+                                        <button class="btn-premium-circle btn-jurnal-p btn-preview-pdf" title="Cetak Jurnal" data-url="${jurnalUrlTemplate.replace(':nisn', member.nisn)}"
                                             style="width: 38px; height: 38px; font-size: 1rem;">
-                                            <i class="fas fa-users"></i>
+                                            <i class="fas fa-book-open"></i>
+                                        </button>
+                                        <button class="btn-premium-circle btn-star-p btn-preview-pdf" title="Penilaian Guru" data-url="${nilaiGuruUrlTemplate.replace(':nisn', member.nisn)}"
+                                            style="width: 38px; height: 38px; font-size: 1rem;">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                        <button class="btn-premium-circle btn-user-check-p btn-preview-pdf" title="Penilaian Pembimbing" data-url="${nilaiPembimbingUrlTemplate.replace(':nisn', member.nisn)}"
+                                            style="width: 38px; height: 38px; font-size: 1rem;">
+                                            <i class="fas fa-user-check"></i>
+                                        </button>
+                                        <button class="btn-premium-circle btn-pdf-p btn-preview-pdf" title="Laporan Akhir" data-url="${laporanAkhirUrlTemplate.replace(':nisn', member.nisn)}"
+                                            style="width: 38px; height: 38px; font-size: 1rem;">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button>
+                                        <button class="btn-premium-circle btn-cert-p btn-preview-pdf" title="Sertifikat Magang" data-url="${sertifikatUrlTemplate.replace(':nisn', member.nisn)}"
+                                            style="width: 38px; height: 38px; font-size: 1rem;">
+                                            <i class="fas fa-certificate"></i>
                                         </button>
                                     ` : ''}
                             </div>

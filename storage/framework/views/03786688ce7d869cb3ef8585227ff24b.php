@@ -99,9 +99,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>FAKULTAS ILMU KOMPUTER UNIVERSITAS SRIWIJAYA</h1>
-        <h2>LEMBAR PENILAIAN SISWA MAGANG</h2>
-        <h4 style="margin: 2px 0;">TAHUN PELAJARAN <?php echo e($siswa->tahunAjaran->tahun_ajaran ?? '-'); ?></h4>
+        <h1><?php echo e($konfigurasi->header_1 ?? 'FAKULTAS ILMU KOMPUTER UNIVERSITAS SRIWIJAYA'); ?></h1>
+        <h2><?php echo e($konfigurasi->header_2 ?? 'LEMBAR PENILAIAN SISWA MAGANG'); ?></h2>
+        <?php if(isset($konfigurasi->header_3)): ?>
+            <h4 style="margin: 2px 0;"><?php echo e(str_replace('{tahun}', ($siswa->tahunAjaran->tahun_ajaran ?? '-'), $konfigurasi->header_3)); ?></h4>
+        <?php endif; ?>
     </div>
     <div class="line"></div>
 

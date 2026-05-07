@@ -99,9 +99,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>FAKULTAS ILMU KOMPUTER UNIVERSITAS SRIWIJAYA</h1>
-        <h2>LEMBAR PENILAIAN SISWA MAGANG</h2>
-        <h4 style="margin: 2px 0;">TAHUN PELAJARAN {{ $siswa->tahunAjaran->tahun_ajaran ?? '-' }}</h4>
+        <h1>{{ $konfigurasi->header_1 ?? 'FAKULTAS ILMU KOMPUTER UNIVERSITAS SRIWIJAYA' }}</h1>
+        <h2>{{ $konfigurasi->header_2 ?? 'LEMBAR PENILAIAN SISWA MAGANG' }}</h2>
+        @if(isset($konfigurasi->header_3))
+            <h4 style="margin: 2px 0;">{{ str_replace('{tahun}', ($siswa->tahunAjaran->tahun_ajaran ?? '-'), $konfigurasi->header_3) }}</h4>
+        @endif
     </div>
     <div class="line"></div>
 
