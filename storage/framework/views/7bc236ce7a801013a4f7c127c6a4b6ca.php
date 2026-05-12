@@ -143,7 +143,8 @@
                                             <i class="fas fa-search"></i> Pantau Kelompok
                                         </button>
                                     <?php else: ?>
-                                        <button class="btn-action btn-detail" data-bs-toggle="modal"
+                                        <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold btn-detail" 
+                                            data-bs-toggle="modal"
                                             data-bs-target="#modalDetailSiswa" 
                                             data-nisn="<?php echo e($g['leader']->nisn); ?>"
                                             data-nama="<?php echo e($g['leader']->nama); ?>" 
@@ -167,9 +168,19 @@
                                             data-pl-nama="<?php echo e($g['leader']->pembimbing->nama ?? '-'); ?>"
                                             data-pl-nip="<?php echo e($g['leader']->id_pembimbing ?? '-'); ?>"
                                             data-pl-hp="<?php echo e($g['leader']->pembimbing->no_telp ?? '-'); ?>"
-                                            style="background: var(--primary-light); color: var(--primary); border: none;">
-                                            <i class="fas fa-id-card"></i> Detail Profil
+                                            style="flex: 1.5;">
+                                            <i class="fas fa-id-card me-1"></i> Profil
                                         </button>
+                                        <a href="<?php echo e(route('guru.logbook', $g['leader']->nisn)); ?>" 
+                                            class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" 
+                                            style="flex: 1;" title="Logbook">
+                                            <i class="fas fa-book me-1"></i> Kegiatan
+                                        </a>
+                                        <a href="<?php echo e(route('guru.absensi', $g['leader']->nisn)); ?>" 
+                                            class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold" 
+                                            style="flex: 1; color: #92400e; border-color: #f59e0b;" title="Absensi">
+                                            <i class="fas fa-calendar-check me-1"></i> Absensi
+                                        </a>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -249,15 +260,15 @@
                                                         title="Lihat Detail">
                                                         <i class="fas fa-id-card"></i>
                                                     </button>
-                                                    <a href="<?php echo e(route('guru.logbook', $s->nisn)); ?>" class="btn-small btn-preview-pdf"
-                                                        style="background: var(--primary-light); color: var(--primary);"
+                                                    <a href="<?php echo e(route('guru.logbook', $s->nisn)); ?>" class="btn btn-sm btn-light text-primary border-0 rounded-pill px-3 fw-bold"
+                                                        style="background: rgba(59, 130, 246, 0.1);"
                                                         title="Logbook">
-                                                        <i class="fas fa-book"></i>
+                                                        <i class="fas fa-book me-1"></i>
                                                     </a>
-                                                    <a href="<?php echo e(route('guru.absensi', $s->nisn)); ?>" class="btn-small btn-preview-pdf"
-                                                        style="background: var(--warning-light); color: #92400e;"
+                                                    <a href="<?php echo e(route('guru.absensi', $s->nisn)); ?>" class="btn btn-sm btn-light text-warning border-0 rounded-pill px-3 fw-bold"
+                                                        style="background: rgba(245, 158, 11, 0.1); color: #d97706 !important;"
                                                         title="Absensi">
-                                                        <i class="fas fa-calendar-check"></i>
+                                                        <i class="fas fa-calendar-check me-1"></i>
                                                     </a>
                                                 </div>
                                             </td>

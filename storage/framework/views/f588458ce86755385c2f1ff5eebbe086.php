@@ -510,7 +510,6 @@
                                                         <div class="spinner-grow spinner-grow-sm text-primary" role="status" style="width: 10px; height: 10px;"></div>
                                                         <span>Preview akan diperbarui otomatis setelah Anda menekan <strong>Simpan Perubahan</strong>.</span>
                                                     </div>
-                                                </div>
                                             </div>
                                         </div>
                                     <?php endif; ?>

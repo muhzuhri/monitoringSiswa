@@ -245,12 +245,12 @@ class SiswaController extends Controller
                     'date' => Carbon::parse($item->tanggal)->translatedFormat('d M Y'),
                     'jam_masuk' => $item->jam_masuk ? Carbon::parse($item->jam_masuk)->format('H:i') : '-',
                     'jam_pulang' => $item->jam_pulang ? Carbon::parse($item->jam_pulang)->format('H:i') : '-',
-                    'status' => ucfirst($item->status),
-                    'foto_masuk' => ($item->foto_masuk ?? null) ? asset('storage/' . $item->foto_masuk) : null,
-                    'foto_pulang' => ($item->foto_pulang ?? null) ? asset('storage/' . $item->foto_pulang) : null,
+                    'status' => ucfirst($item->status ?? 'hadir'),
+                    'foto_masuk' => ($item->foto_masuk ?? null) ? $item->foto_masuk : null,
+                    'foto_pulang' => ($item->foto_pulang ?? null) ? $item->foto_pulang : null,
                     'verifikasi' => $item->verifikasi ?? 'verified',
                 ];
-            });
+            })->values();
 
         return response()->json([
             'data' => $data,
@@ -282,10 +282,10 @@ class SiswaController extends Controller
                     'date' => Carbon::parse($item->tanggal)->translatedFormat('d M Y'),
                     'jam' => $item->created_at ? Carbon::parse($item->created_at)->format('H:i') : '-',
                     'kegiatan' => $item->kegiatan,
-                    'status' => $item->status,
+                    'status' => $item->status ?? 'pending',
                     'catatan' => $item->catatan_pembimbing ?? '-'
                 ];
-            });
+            })->values();
 
         return response()->json([
             'data' => $data,

@@ -319,8 +319,8 @@
                                                         data-tipe_magang="<?php echo e($s->tipe_magang); ?>"
                                                         data-nisn_ketua="<?php echo e($s->nisn_ketua); ?>"
                                                         data-surat_balasan="<?php echo e($s->surat_balasan); ?>"
-                                                        data-guruNip="<?php echo e($s->id_guru); ?>"
-                                                        data-plNip="<?php echo e($s->id_pembimbing); ?>"
+                                                        data-guru-nip="<?php echo e($s->id_guru); ?>"
+                                                        data-pl-nip="<?php echo e($s->id_pembimbing); ?>"
                                                         data-mulai_raw="<?php echo e($s->tgl_mulai_magang ? \Carbon\Carbon::parse($s->tgl_mulai_magang)->format('Y-m-d') : ''); ?>"
                                                         data-selesai_raw="<?php echo e($s->tgl_selesai_magang ? \Carbon\Carbon::parse($s->tgl_selesai_magang)->format('Y-m-d') : ''); ?>"
                                                         title="Edit Data">

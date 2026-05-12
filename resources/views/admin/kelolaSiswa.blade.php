@@ -328,8 +328,8 @@
                                                         data-tipe_magang="{{ $s->tipe_magang }}"
                                                         data-nisn_ketua="{{ $s->nisn_ketua }}"
                                                         data-surat_balasan="{{ $s->surat_balasan }}"
-                                                        data-guruNip="{{ $s->id_guru }}"
-                                                        data-plNip="{{ $s->id_pembimbing }}"
+                                                        data-guru-nip="{{ $s->id_guru }}"
+                                                        data-pl-nip="{{ $s->id_pembimbing }}"
                                                         data-mulai_raw="{{ $s->tgl_mulai_magang ? \Carbon\Carbon::parse($s->tgl_mulai_magang)->format('Y-m-d') : '' }}"
                                                         data-selesai_raw="{{ $s->tgl_selesai_magang ? \Carbon\Carbon::parse($s->tgl_selesai_magang)->format('Y-m-d') : '' }}"
                                                         title="Edit Data">

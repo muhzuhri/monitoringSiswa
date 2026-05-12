@@ -192,9 +192,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function initPdfPreviewListeners() {
         document.querySelectorAll('.btn-preview-pdf').forEach(button => {
             button.onclick = function(e) {
-                e.preventDefault();
                 const url = this.getAttribute('data-url');
                 if (!url) return;
+                
+                e.preventDefault();
                 
                 currentPdfUrl = url;
                 // Add download=1 to force attachment response, remove target=_blank in HTML already

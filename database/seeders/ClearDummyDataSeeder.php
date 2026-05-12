@@ -12,11 +12,16 @@ class ClearDummyDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $nisns = ['12345678', '123456782', '123456783'];
+        $nisns = [
+            '12345678', '123456782', '123456783',
+            '1234567813', '1234567814', '1234567815',
+            '123456787', '123456788', '123456789'
+        ];
 
-        echo "Membersihkan data dummy untuk NISN: " . implode(', ', $nisns) . "...\n";
+        echo "Membersihkan data dummy absensi dan kegiatan untuk NISN target...\n";
 
-        Absensi::whereIn('nisn', $nisns)->delete();
+        \App\Models\Absensi::whereIn('nisn', $nisns)->delete();
+        \App\Models\Logbook::whereIn('nisn', $nisns)->delete();
 
         echo "Data dummy berhasil dibersihkan!\n";
     }

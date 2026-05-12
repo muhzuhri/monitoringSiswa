@@ -57,7 +57,7 @@ async function fetchHistoryData() {
     const tbodyId = currentModalTab === 'absensi' ? 'historyAbsensiBody' : 'historyKegiatanBody';
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
-    const cols = 4;
+    const cols = currentModalTab === 'absensi' ? 3 : 4;
 
     try {
         const response = await fetch(`${route}?page=${page}`);

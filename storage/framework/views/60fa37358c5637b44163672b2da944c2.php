@@ -37,8 +37,8 @@
                                     <i class="fas fa-venus-mars input-icon"></i>
                                     <select name="jenis_kelamin" class="p-input with-icon" required>
                                         <option value="">-- Jenis Kelamin --</option>
-                                        <option value="Laki-laki">Laki-laki</option>
-                                        <option value="Perempuan">Perempuan</option>
+                                        <option value="L">Laki-laki</option>
+                                        <option value="P">Perempuan</option>
                                     </select>
                                 </div>
                             </div>
@@ -250,8 +250,8 @@
                                             <div class="p-input-wrapper">
                                                 <i class="fas fa-venus-mars input-icon"></i>
                                                 <select name="jenis_kelamin" id="edit_jk" class="p-input with-icon">
-                                                    <option value="Laki-laki">Laki-laki</option>
-                                                    <option value="Perempuan">Perempuan</option>
+                                                    <option value="L">Laki-laki</option>
+                                                    <option value="P">Perempuan</option>
                                                 </select>
                                             </div>
                                         </div>

@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             editForm.action = `/admin/siswa/${this.dataset.id}`;
             document.getElementById('edit_nama').value = this.dataset.nama;
             document.getElementById('edit_email').value = this.dataset.email;
-            document.getElementById('edit_jk').value = this.dataset.jk || 'Laki-laki';
+            document.getElementById('edit_jk').value = this.dataset.jk || 'L';
             document.getElementById('edit_nisn').value = this.dataset.id;
             document.getElementById('edit_kelas').value = this.dataset.kelas;
             document.getElementById('edit_jurusan').value = this.dataset.jurusan;
@@ -139,7 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
             button.onclick = function() {
                 document.getElementById('det_name').textContent = this.dataset.nama;
                 document.getElementById('det_nisn').textContent = this.dataset.nisn;
-                document.getElementById('det_jk').textContent = this.dataset.jk || '-';
+                const jkMap = { 'L': 'Laki-laki', 'P': 'Perempuan' };
+                document.getElementById('det_jk').textContent = jkMap[this.dataset.jk] || this.dataset.jk || '-';
                 document.getElementById('det_email').textContent = this.dataset.email;
                 document.getElementById('det_hp').textContent = this.dataset.no_hp || '-';
                 document.getElementById('det_kelas_jurusan').textContent = `${this.dataset.kelas} - ${this.dataset.jurusan}`;
