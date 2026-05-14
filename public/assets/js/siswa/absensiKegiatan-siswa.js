@@ -1,3 +1,81 @@
+// 0. Security & Secure Context Check (Required for Geolocation)
+function checkSecureContext() {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isHttps = window.location.protocol === 'https:';
+
+    if (!isHttps && !isLocalhost) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Koneksi Tidak Aman!',
+            html: `
+                <div class="text-start">
+                    <p>Sistem mendeteksi Anda menggunakan koneksi <b>HTTP</b> yang tidak aman.</p>
+                    <p><b>Fitur Absensi (GPS) Wajib menggunakan HTTPS</b> agar browser dapat memberikan izin akses lokasi.</p>
+                    <hr>
+                    <p class="mb-1"><b>Solusi:</b></p>
+                    <ol class="small">
+                        <li>Gunakan alamat <b>https://</b> di depan URL.</li>
+                        <li>Hubungi Admin jika SSL belum terpasang.</li>
+                        <li>Pastikan pengaturan SSL di server/Laragon sudah aktif.</li>
+                    </ol>
+                </div>
+            `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            footer: '<span class="text-danger">Akses fitur ini diblokir demi keamanan data lokasi Anda.</span>'
+        });
+        return false;
+    }
+    return true;
+}
+
+// 1. Proactive Permission Check
+async function checkLocationPermission() {
+    if (!navigator.permissions || !navigator.permissions.query) return;
+
+    try {
+        const result = await navigator.permissions.query({ name: 'geolocation' });
+        if (result.state === 'denied') {
+            showLocationBlockedAlert();
+        }
+        
+        result.onchange = () => {
+            if (result.state === 'denied') {
+                showLocationBlockedAlert();
+            } else if (result.state === 'granted') {
+                Swal.close();
+            }
+        };
+    } catch (e) {
+        console.warn('Permissions API not fully supported');
+    }
+}
+
+function showLocationBlockedAlert() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Akses Lokasi Diblokir!',
+        html: `
+            <div class="text-start border-start border-4 border-warning ps-3 mb-3">
+                Anda sebelumnya menolak akses lokasi. Sistem membutuhkan izin ini untuk memvalidasi kehadiran Anda.
+            </div>
+            <div class="small">
+                <p class="mb-2"><b>Panduan Membuka Blokir:</b></p>
+                <p class="mb-1"><i class="fas fa-mobile-alt me-2"></i><b>Android/iOS:</b></p>
+                <p class="ms-4 mb-2">Ketuk <b>"Koneksi Tidak Aman"</b> atau <b>Ikon Gembok 🔒</b> di URL Bar &rarr; Pilih <b>Izin (Permissions)</b> &rarr; Aktifkan <b>Lokasi</b>.</p>
+                <p class="mb-1"><i class="fas fa-desktop me-2"></i><b>Laptop/PC:</b></p>
+                <p class="ms-4 mb-0">Klik <b>Ikon Gembok 🔒</b> di ujung kiri URL bar &rarr; Pilih <b>Allow (Izinkan)</b> pada Location.</p>
+            </div>
+        `,
+        confirmButtonText: '<i class="fas fa-sync-alt me-2"></i>Saya Sudah Izinkan, Refresh Halaman',
+        allowOutsideClick: false,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.reload();
+        }
+    });
+}
+
 function togglePhotoLabel(val) {
     const label = document.getElementById('photoLabel');
     const help = document.getElementById('photoHelp');
@@ -180,35 +258,26 @@ function getLogStatusClass(status) {
     return 'badge-ui badge-warning';
 }
 
-// Perhitungan dan validasi jarak kini ditangani sepenuhnya oleh Server Tertutup (Backend).
-// Hal ini memungkinkan sistem mendukung banyak lokasi ganda (multi-lokasi) yang diatur dinamis via Database Admin.
-
+// Geolocation Processing
 async function prosesAbsensi(type) {
+    if (!checkSecureContext()) return;
+
     const config = window.absensiConfig || {};
     const form = type === 'masuk' ? document.getElementById('formAbsensiMasuk') : document.getElementById('formAbsensiPulang');
     if (!form) return;
-    const statusPilihan = form.querySelector('[name="status_pilihan"]')?.value || 'hadir';
 
     if (!navigator.geolocation) {
         Swal.fire('Error', 'Browser Anda tidak mendukung fitur lokasi.', 'error');
         return;
     }
 
-    // Mengecek apakah izin sudah ditolak (block) sebelumnya agar bisa langsung memberikan instruksi yang tepat
     try {
         const permission = await navigator.permissions.query({ name: 'geolocation' });
         if (permission.state === 'denied') {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Akses Lokasi Diblokir!',
-                html: 'Anda sebelumnya menolak akses lokasi.<br><br><b>Di HP (Android/iOS):</b> Ketuk tulisan "Koneksi Tidak Aman" atau "Ikon Gembok" 🔒 di sebelah kiri alamat web (atas layar) -> Pilih <b>Izin (Permissions)</b> -> Izinkan <b>Lokasi</b>.<br><br><b>Di Laptop/PC:</b> Klik ikon gembok 🔒 di ujung URL bar -> allow (izinkan) Location.<br><br>Setelah itu muat ulang (refresh) halamannya.',
-                confirmButtonText: 'Tutup'
-            });
+            showLocationBlockedAlert();
             return;
         }
-    } catch (e) {
-         // Fallback
-    }
+    } catch (e) { }
 
     Swal.fire({
         title: 'Meminta Akses Lokasi',
@@ -222,7 +291,6 @@ async function prosesAbsensi(type) {
     });
 
     navigator.geolocation.getCurrentPosition(async (position) => {
-        // Jika diizinkan, kita perbarui Swal menjadi status memproses pengiriman data
         Swal.fire({
             title: 'Lokasi Ditemukan!',
             text: 'Sedang mengirim data absensi ke server...',
@@ -293,7 +361,9 @@ async function prosesAbsensi(type) {
         let msg = 'Gagal mengambil lokasi karena galat tidak dikenal.';
         
         if (error.code === error.PERMISSION_DENIED) {
-            msg = 'Akses ditolak! Di HP: Ketuk tulisan peringatan kiri atas dekat URL -> Izin Situs -> Izinkan Lokasi. Di Laptop: Klik ikon 🔒. Lalu muat ulang halaman.';
+            msg = 'Akses ditolak! Mohon izinkan akses lokasi di pengaturan browser Anda.';
+            showLocationBlockedAlert();
+            return;
         } else if (error.code === error.POSITION_UNAVAILABLE) {
             msg = 'Informasi sinyal GPS / Lokasi tidak tersedia saat ini di perangkat Anda.';
         } else if (error.code === error.TIMEOUT) {
@@ -311,12 +381,17 @@ async function prosesAbsensi(type) {
         }, 100);
     }, {
         enableHighAccuracy: true,
-        timeout: 30000, // Timeout diubah ke 30 detik agar user tidak ditolak hanya karena membacanya lambat
+        timeout: 30000,
         maximumAge: 0
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initial checks
+    if (checkSecureContext()) {
+        checkLocationPermission();
+    }
+
     const btnMasuk = document.querySelector('#formAbsensiMasuk .btn-checkin');
     const btnPulang = document.querySelector('#formAbsensiPulang .btn-checkout');
 
@@ -345,3 +420,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+

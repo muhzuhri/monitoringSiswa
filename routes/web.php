@@ -4,10 +4,31 @@ use App\Http\Controllers\AdminPembimbingController;
 use App\Http\Controllers\AdminSiswaController;
 use App\Http\Controllers\AdminGuruController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\SiswaDashboardController;
+use App\Http\Controllers\SiswaKegiatanController;
+use App\Http\Controllers\SiswaPengajuanController;
+use App\Http\Controllers\SiswaProfilController;
+use App\Http\Controllers\SiswaLaporanController;
+use App\Http\Controllers\PembimbingSiswaController;
+use App\Http\Controllers\PembimbingEvaluasiController;
+use App\Http\Controllers\PembimbingPengajuanController;
+use App\Http\Controllers\PembimbingLaporanController;
+use App\Http\Controllers\PembimbingProfilController;
+use App\Http\Controllers\GuruDashboardController;
+use App\Http\Controllers\GuruSiswaController;
+use App\Http\Controllers\GuruVerifikasiController;
+use App\Http\Controllers\GuruPenilaianController;
+use App\Http\Controllers\GuruLaporanController;
+use App\Http\Controllers\GuruProfilController;
+use App\Http\Controllers\PimpinanDashboardController;
+
+
+use App\Http\Controllers\PimpinanAdminController;
+use App\Http\Controllers\PimpinanMonitoringController;
+use App\Http\Controllers\PimpinanRekapController;
+use App\Http\Controllers\PimpinanProfilController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\PembimbingController;
-use App\Http\Controllers\PimpinanController;
 use App\Http\Controllers\AdminMasterDataController;
 use App\Http\Controllers\Api\SchoolApiController;
 use Illuminate\Support\Facades\Route;
@@ -31,106 +52,111 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 // Halaman peran (siswa, guru, pembimbing, admin)
 Route::middleware('auth')->group(function () {
-    Route::get('/siswa/siswa', [SiswaController::class, 'dashboard'])->name('siswa.siswa');
-    Route::get('/siswa/absensi', [SiswaController::class, 'absensiKegiatan'])->name('siswa.absensi');
-    Route::get('/siswa/absensi/detail', [SiswaController::class, 'getAbsensiDetail'])->name('siswa.absensi.detail');
-    Route::get('/siswa/logbook/detail', [SiswaController::class, 'getLogbookDetail'])->name('siswa.logbook.detail');
-    Route::post('/siswa/absensi', [SiswaController::class, 'storeAbsensi'])->name('siswa.absensi.store');
-    Route::post('/siswa/logbook', [SiswaController::class, 'storeLogbook'])->name('siswa.logbook.store');
+    Route::get('/siswa/siswa', [SiswaDashboardController::class, 'dashboard'])->name('siswa.siswa');
+    Route::get('/siswa/absensi', [SiswaKegiatanController::class, 'absensiKegiatan'])->name('siswa.absensi');
+    Route::get('/siswa/absensi/detail', [SiswaKegiatanController::class, 'getAbsensiDetail'])->name('siswa.absensi.detail');
+    Route::get('/siswa/logbook/detail', [SiswaKegiatanController::class, 'getLogbookDetail'])->name('siswa.logbook.detail');
+    Route::post('/siswa/absensi', [SiswaKegiatanController::class, 'storeAbsensi'])->name('siswa.absensi.store');
+    Route::post('/siswa/logbook', [SiswaKegiatanController::class, 'storeLogbook'])->name('siswa.logbook.store');
 
     // Pengajuan Lupa Absensi / Kegiatan
-    Route::get('/siswa/pengajuan', [SiswaController::class, 'pengajuan'])->name('siswa.pengajuan');
-    Route::post('/siswa/pengajuan', [SiswaController::class, 'storePengajuan'])->name('siswa.pengajuan.store');
+    Route::get('/siswa/pengajuan', [SiswaPengajuanController::class, 'pengajuan'])->name('siswa.pengajuan');
+    Route::post('/siswa/pengajuan', [SiswaPengajuanController::class, 'storePengajuan'])->name('siswa.pengajuan.store');
 
     // Profil Siswa
-    Route::get('/siswa/profil', [SiswaController::class, 'showProfile'])->name('siswa.profil');
-    Route::put('/siswa/profil', [SiswaController::class, 'updateProfile'])->name('siswa.profil.update');
-    Route::put('/siswa/profil/password', [SiswaController::class, 'updatePassword'])->name('siswa.profil.password');
+    Route::get('/siswa/profil', [SiswaProfilController::class, 'showProfile'])->name('siswa.profil');
+    Route::put('/siswa/profil', [SiswaProfilController::class, 'updateProfile'])->name('siswa.profil.update');
+    Route::put('/siswa/profil/password', [SiswaProfilController::class, 'updatePassword'])->name('siswa.profil.password');
 
     // Laporan
-    Route::get('/siswa/laporan', [SiswaController::class, 'laporan'])->name('siswa.laporan');
-    Route::post('/siswa/laporan/upload', [SiswaController::class, 'uploadLaporanAkhir'])->name('siswa.laporan.upload');
-    Route::get('/siswa/laporan/download-akhir', [SiswaController::class, 'previewLaporanAkhir'])->name('siswa.laporan.downloadAkhir');
-    Route::get('/siswa/laporan/download/jurnal-mingguan', [SiswaController::class, 'downloadJurnalMingguan'])->name('siswa.rekap.jurnal');
-    Route::get('/siswa/laporan/download/rekap-individu', [SiswaController::class, 'downloadRekapAbsensiIndividu'])->name('siswa.rekap.individu');
-    Route::get('/siswa/laporan/download/rekap-kelompok', [SiswaController::class, 'downloadRekapAbsensiKelompok'])->name('siswa.rekap.kelompok');
-    Route::get('/siswa/penilaian/cetak', [SiswaController::class, 'cetakPenilaian'])->name('siswa.penilaian.cetak');
-    Route::get('/siswa/laporan/sertifikat', [SiswaController::class, 'cetakSertifikat'])->name('siswa.sertifikat.cetak');
+    Route::get('/siswa/laporan', [SiswaLaporanController::class, 'laporan'])->name('siswa.laporan');
+    Route::post('/siswa/laporan/upload', [SiswaLaporanController::class, 'uploadLaporanAkhir'])->name('siswa.laporan.upload');
+    Route::get('/siswa/laporan/download-akhir', [SiswaLaporanController::class, 'previewLaporanAkhir'])->name('siswa.laporan.downloadAkhir');
+    Route::get('/siswa/laporan/download/jurnal-mingguan', [SiswaLaporanController::class, 'downloadJurnalMingguan'])->name('siswa.rekap.jurnal');
+    Route::get('/siswa/laporan/download/rekap-individu', [SiswaLaporanController::class, 'downloadRekapAbsensiIndividu'])->name('siswa.rekap.individu');
+    Route::get('/siswa/laporan/download/rekap-kelompok', [SiswaLaporanController::class, 'downloadRekapAbsensiKelompok'])->name('siswa.rekap.kelompok');
+    Route::get('/siswa/penilaian/cetak', [SiswaLaporanController::class, 'cetakPenilaian'])->name('siswa.penilaian.cetak');
+    Route::get('/siswa/laporan/sertifikat', [SiswaLaporanController::class, 'cetakSertifikat'])->name('siswa.sertifikat.cetak');
 
 
 
-    Route::get('/guru/guru', [GuruController::class, 'dashboard'])->name('guru.guru');
-    Route::get('/guru/siswa', [GuruController::class, 'daftarSiswa'])->name('guru.siswa');
-    Route::get('/guru/siswa/{nisn}/logbook', [GuruController::class, 'logbookSiswa'])->name('guru.logbook');
-    Route::post('/guru/logbook/{id}/verifikasi', [GuruController::class, 'verifikasiLogbook'])->name('guru.logbook.verifikasi');
-    Route::get('/guru/siswa/{nisn}/absensi', [GuruController::class, 'absensiSiswa'])->name('guru.absensi');
-    Route::get('/guru/siswa/{nisn}/absensi/export', [GuruController::class, 'exportAbsensiSiswa'])->name('guru.absensi.export');
-    Route::get('/guru/verifikasi', [GuruController::class, 'verifikasiLaporan'])->name('guru.verifikasi');
-    Route::get('/guru/verifikasi/{id}', [GuruController::class, 'showVerifikasiLaporan'])->name('guru.verifikasi.show');
-    Route::post('/guru/verifikasi/{id}', [GuruController::class, 'updateVerifikasiLaporan'])->name('guru.verifikasi.update');
 
-    Route::get('/guru/penilaian', [GuruController::class, 'daftarPenilaian'])->name('guru.penilaian');
-    Route::get('/guru/penilaian/{nisn}', [GuruController::class, 'inputPenilaian'])->name('guru.penilaian.input');
-    Route::post('/guru/penilaian/{nisn}', [GuruController::class, 'storePenilaian'])->name('guru.penilaian.store');
-    Route::get('/guru/penilaian/{nisn}/export', [GuruController::class, 'exportPenilaian'])->name('guru.penilaian.export');
+    Route::get('/guru/guru', [GuruDashboardController::class, 'dashboard'])->name('guru.guru');
+    Route::get('/guru/siswa', [GuruSiswaController::class, 'daftarSiswa'])->name('guru.siswa');
+    Route::get('/guru/siswa/{nisn}/logbook', [GuruSiswaController::class, 'logbookSiswa'])->name('guru.logbook');
+    Route::post('/guru/logbook/{id}/verifikasi', [GuruSiswaController::class, 'verifikasiLogbook'])->name('guru.logbook.verifikasi');
+    Route::get('/guru/siswa/{nisn}/absensi', [GuruSiswaController::class, 'absensiSiswa'])->name('guru.absensi');
+    
+    Route::get('/guru/verifikasi', [GuruVerifikasiController::class, 'verifikasiLaporan'])->name('guru.verifikasi');
+    Route::get('/guru/verifikasi/{id}', [GuruVerifikasiController::class, 'showVerifikasiLaporan'])->name('guru.verifikasi.show');
+    Route::post('/guru/verifikasi/{id}', [GuruVerifikasiController::class, 'updateVerifikasiLaporan'])->name('guru.verifikasi.update');
+
+    Route::get('/guru/penilaian', [GuruPenilaianController::class, 'daftarPenilaian'])->name('guru.penilaian');
+    Route::get('/guru/penilaian/{nisn}', [GuruPenilaianController::class, 'inputPenilaian'])->name('guru.penilaian.input');
+    Route::post('/guru/penilaian/{nisn}', [GuruPenilaianController::class, 'storePenilaian'])->name('guru.penilaian.store');
+    Route::get('/guru/penilaian/{nisn}/export', [GuruLaporanController::class, 'exportPenilaian'])->name('guru.penilaian.export');
 
     // Manajemen Kriteria Penilaian Guru (Dynamic)
-    Route::post('/guru/kriteria', [GuruController::class, 'storeKriteria'])->name('guru.kriteria.store');
-    Route::put('/guru/kriteria/{id}', [GuruController::class, 'updateKriteria'])->name('guru.kriteria.update');
-    Route::delete('/guru/kriteria/{id}', [GuruController::class, 'destroyKriteria'])->name('guru.kriteria.destroy');
+    Route::post('/guru/kriteria', [GuruPenilaianController::class, 'storeKriteria'])->name('guru.kriteria.store');
+    Route::put('/guru/kriteria/{id}', [GuruPenilaianController::class, 'updateKriteria'])->name('guru.kriteria.update');
+    Route::delete('/guru/kriteria/{id}', [GuruPenilaianController::class, 'destroyKriteria'])->name('guru.kriteria.destroy');
 
     // Claim Siswa (Teacher side)
-    Route::post('/guru/siswa/{nisn}/claim', [GuruController::class, 'claimSiswa'])->name('guru.siswa.claim');
+    Route::post('/guru/siswa/{nisn}/claim', [GuruSiswaController::class, 'claimSiswa'])->name('guru.siswa.claim');
 
     // Profil Guru
-    Route::get('/guru/profil', [GuruController::class, 'profil'])->name('guru.profil');
-    Route::post('/guru/profil', [GuruController::class, 'updateProfil'])->name('guru.profil.update');
+    Route::get('/guru/profil', [GuruProfilController::class, 'profil'])->name('guru.profil');
+    Route::post('/guru/profil', [GuruProfilController::class, 'updateProfil'])->name('guru.profil.update');
 
-    Route::get('/guru/siswa/{nisn}/download-jurnal', [GuruController::class, 'downloadJurnalMingguan'])->name('guru.rekap.jurnal');
-    Route::get('/guru/siswa/{nisn}/download-absensi', [GuruController::class, 'downloadRekapAbsensiIndividu'])->name('guru.rekap.absensi');
-    Route::get('/guru/siswa/{nisn}/download-rekap-kelompok', [GuruController::class, 'downloadRekapAbsensiKelompok'])->name('guru.rekap.kelompok');
+    Route::get('/guru/siswa/{nisn}/download-jurnal', [GuruLaporanController::class, 'downloadJurnalMingguan'])->name('guru.rekap.jurnal');
+    Route::get('/guru/siswa/{nisn}/download-absensi', [GuruLaporanController::class, 'downloadRekapAbsensiIndividu'])->name('guru.rekap.absensi');
+    Route::get('/guru/siswa/{nisn}/download-rekap-kelompok', [GuruLaporanController::class, 'downloadRekapAbsensiKelompok'])->name('guru.rekap.kelompok');
 
     // Tambahan Aksi Riwayat Siswa (Guru)
-    Route::get('/guru/siswa/{nisn}/cetak-penilaian-pembimbing', [GuruController::class, 'cetakPenilaianPembimbing'])->name('guru.siswa.cetakPenilaianPembimbing');
-    Route::get('/guru/siswa/{nisn}/cetak-sertifikat', [GuruController::class, 'cetakSertifikatSiswa'])->name('guru.siswa.cetakSertifikat');
-    Route::get('/guru/siswa/{nisn}/cetak-laporan-akhir', [GuruController::class, 'cetakLaporanAkhir'])->name('guru.siswa.cetakLaporan');
+    Route::get('/guru/siswa/{nisn}/cetak-penilaian-pembimbing', [GuruLaporanController::class, 'cetakPenilaianPembimbing'])->name('guru.siswa.cetakPenilaianPembimbing');
+    Route::get('/guru/siswa/{nisn}/cetak-sertifikat', [GuruLaporanController::class, 'cetakSertifikatSiswa'])->name('guru.siswa.cetakSertifikat');
+    Route::get('/guru/siswa/{nisn}/cetak-laporan-akhir', [GuruLaporanController::class, 'cetakLaporanAkhir'])->name('guru.siswa.cetakLaporan');
+
 
 
 
     Route::get('/pembimbing/pembimbing', [AuthController::class, 'pembimbing'])->name('pembimbing.pembimbing');
-    Route::get('/pembimbing/siswa', [PembimbingController::class, 'daftarSiswa'])->name('pembimbing.siswa');
-    Route::get('/pembimbing/siswa/{nisn}/absensi', [PembimbingController::class, 'absensiSiswa'])->name('pembimbing.absensi');
-    Route::post('/pembimbing/absensi/{id}/validasi', [PembimbingController::class, 'validasiAbsensi'])->name('pembimbing.absensi.validasi');
-    Route::get('/pembimbing/siswa/{nisn}/logbook', [PembimbingController::class, 'logbookSiswa'])->name('pembimbing.logbook');
-    Route::post('/pembimbing/logbook/{id}/validasi', [PembimbingController::class, 'validasiLogbook'])->name('pembimbing.logbook.validasi');
+    Route::get('/pembimbing/siswa', [PembimbingSiswaController::class, 'daftarSiswa'])->name('pembimbing.siswa');
+    Route::get('/pembimbing/siswa/{nisn}/absensi', [PembimbingSiswaController::class, 'absensiSiswa'])->name('pembimbing.absensi');
+    Route::post('/pembimbing/absensi/{id}/validasi', [PembimbingSiswaController::class, 'validasiAbsensi'])->name('pembimbing.absensi.validasi');
+    Route::get('/pembimbing/siswa/{nisn}/logbook', [PembimbingSiswaController::class, 'logbookSiswa'])->name('pembimbing.logbook');
+    Route::post('/pembimbing/logbook/{id}/validasi', [PembimbingSiswaController::class, 'validasiLogbook'])->name('pembimbing.logbook.validasi');
     
     // Bulk Validation
-    Route::post('/pembimbing/logbook/siswa/{nisn}/validasi-semua', [PembimbingController::class, 'validasiSemuaLogbook'])->name('pembimbing.logbook.validasi-semua');
-    Route::post('/pembimbing/absensi/siswa/{nisn}/validasi-semua', [PembimbingController::class, 'validasiSemuaAbsensi'])->name('pembimbing.absensi.validasi-semua');
-    Route::get('/pembimbing/evaluasi', [PembimbingController::class, 'evaluasiSiswa'])->name('pembimbing.evaluasi');
-    Route::get('/pembimbing/evaluasi/input/{nisn}', [PembimbingController::class, 'inputEvaluasi'])->name('pembimbing.evaluasi.input');
-    Route::post('/pembimbing/evaluasi', [PembimbingController::class, 'storeEvaluasi'])->name('pembimbing.evaluasi.store');
+    Route::post('/pembimbing/logbook/siswa/{nisn}/validasi-semua', [PembimbingSiswaController::class, 'validasiSemuaLogbook'])->name('pembimbing.logbook.validasi-semua');
+    Route::post('/pembimbing/absensi/siswa/{nisn}/validasi-semua', [PembimbingSiswaController::class, 'validasiSemuaAbsensi'])->name('pembimbing.absensi.validasi-semua');
+    
+    Route::get('/pembimbing/evaluasi', [PembimbingEvaluasiController::class, 'evaluasiSiswa'])->name('pembimbing.evaluasi');
+    Route::get('/pembimbing/evaluasi/input/{nisn}', [PembimbingEvaluasiController::class, 'inputEvaluasi'])->name('pembimbing.evaluasi.input');
+    Route::post('/pembimbing/evaluasi', [PembimbingEvaluasiController::class, 'storeEvaluasi'])->name('pembimbing.evaluasi.store');
     
     // Pengajuan Siswa
-    Route::get('/pembimbing/pengajuan', [PembimbingController::class, 'pengajuanSiswa'])->name('pembimbing.pengajuan');
-    Route::post('/pembimbing/pengajuan/{id}', [PembimbingController::class, 'updatePengajuan'])->name('pembimbing.pengajuan.update');
+    Route::get('/pembimbing/pengajuan', [PembimbingPengajuanController::class, 'pengajuanSiswa'])->name('pembimbing.pengajuan');
+    Route::post('/pembimbing/pengajuan/{id}', [PembimbingPengajuanController::class, 'updatePengajuan'])->name('pembimbing.pengajuan.update');
 
     // Reporting
-    Route::get('/pembimbing/siswa/{nisn}/cetak-jurnal', [PembimbingController::class, 'cetakJurnalSiswa'])->name('pembimbing.siswa.cetakJurnal');
-    Route::get('/pembimbing/siswa/{nisn}/cetak-absensi', [PembimbingController::class, 'cetakAbsensiSiswa'])->name('pembimbing.siswa.cetakAbsensi');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-jurnal', [PembimbingLaporanController::class, 'cetakJurnalSiswa'])->name('pembimbing.siswa.cetakJurnal');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-absensi', [PembimbingLaporanController::class, 'cetakAbsensiSiswa'])->name('pembimbing.siswa.cetakAbsensi');
     
-    Route::get('/pembimbing/laporan/{nisn}/cetak', [PembimbingController::class, 'cetakLaporanSiswa'])->name('pembimbing.laporan.cetak');
-    Route::get('/pembimbing/siswa/{nisn}/cetak-penilaian-guru', [PembimbingController::class, 'cetakPenilaianGuru'])->name('pembimbing.siswa.cetakPenilaianGuru');
-    Route::get('/pembimbing/siswa/{nisn}/cetak-laporan-akhir', [PembimbingController::class, 'cetakLaporanAkhir'])->name('pembimbing.siswa.cetakLaporan');
-    Route::get('/pembimbing/siswa/{nisn}/cetak-sertifikat', [PembimbingController::class, 'cetakSertifikatSiswa'])->name('pembimbing.siswa.cetakSertifikat');
-    Route::get('/pembimbing/profil', [PembimbingController::class, 'profil'])->name('pembimbing.profil');
-    Route::post('/pembimbing/profil', [PembimbingController::class, 'updateProfil'])->name('pembimbing.profil.update');
+    Route::get('/pembimbing/laporan/{nisn}/cetak', [PembimbingLaporanController::class, 'cetakLaporanSiswa'])->name('pembimbing.laporan.cetak');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-penilaian-guru', [PembimbingLaporanController::class, 'cetakPenilaianGuru'])->name('pembimbing.siswa.cetakPenilaianGuru');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-laporan-akhir', [PembimbingLaporanController::class, 'cetakLaporanAkhir'])->name('pembimbing.siswa.cetakLaporan');
+    Route::get('/pembimbing/siswa/{nisn}/cetak-sertifikat', [PembimbingLaporanController::class, 'cetakSertifikatSiswa'])->name('pembimbing.siswa.cetakSertifikat');
+
+    Route::get('/pembimbing/profil', [PembimbingProfilController::class, 'profil'])->name('pembimbing.profil');
+    Route::post('/pembimbing/profil', [PembimbingProfilController::class, 'updateProfil'])->name('pembimbing.profil.update');
 
     // Manajemen Kriteria Penilaian (Dynamic)
-    Route::get('/pembimbing/kriteria', [PembimbingController::class, 'kriteriaPenilaian'])->name('pembimbing.kriteria');
-    Route::post('/pembimbing/kriteria', [PembimbingController::class, 'storeKriteria'])->name('pembimbing.kriteria.store');
-    Route::put('/pembimbing/kriteria/{id}', [PembimbingController::class, 'updateKriteria'])->name('pembimbing.kriteria.update');
-    Route::delete('/pembimbing/kriteria/{id}', [PembimbingController::class, 'destroyKriteria'])->name('pembimbing.kriteria.destroy');
+    Route::get('/pembimbing/kriteria', [PembimbingEvaluasiController::class, 'kriteriaPenilaian'])->name('pembimbing.kriteria');
+    Route::post('/pembimbing/kriteria', [PembimbingEvaluasiController::class, 'storeKriteria'])->name('pembimbing.kriteria.store');
+    Route::put('/pembimbing/kriteria/{id}', [PembimbingEvaluasiController::class, 'updateKriteria'])->name('pembimbing.kriteria.update');
+    Route::delete('/pembimbing/kriteria/{id}', [PembimbingEvaluasiController::class, 'destroyKriteria'])->name('pembimbing.kriteria.destroy');
+
 
     Route::get('/admin/admin', [AuthController::class, 'admin'])->name('admin.admin');
 
@@ -208,23 +234,23 @@ Route::middleware('auth')->group(function () {
 // RUTE PIMPINAN
 // ─────────────────────────────────────────────────────────────────────────
 Route::middleware(['auth'])->prefix('pimpinan')->name('pimpinan.')->group(function () {
-    Route::get('/home', [PimpinanController::class, 'index'])->name('home');
+    Route::get('/home', [PimpinanDashboardController::class, 'index'])->name('home');
     
     // Kelola Akun (Admin, Siswa, Guru, Pembimbing)
-    Route::get('/admin', [PimpinanController::class, 'kelolaAdmin'])->name('admin');
-    Route::post('/admin', [PimpinanController::class, 'storeAdmin'])->name('storeAdmin');
-    Route::put('/admin/{id}', [PimpinanController::class, 'updateAdmin'])->name('updateAdmin');
-    Route::delete('/admin/{id}', [PimpinanController::class, 'destroyAdmin'])->name('destroyAdmin');
+    Route::get('/admin', [PimpinanAdminController::class, 'kelolaAdmin'])->name('admin');
+    Route::post('/admin', [PimpinanAdminController::class, 'storeAdmin'])->name('storeAdmin');
+    Route::put('/admin/{id}', [PimpinanAdminController::class, 'updateAdmin'])->name('updateAdmin');
+    Route::delete('/admin/{id}', [PimpinanAdminController::class, 'destroyAdmin'])->name('destroyAdmin');
 
-    Route::get('/siswa', [PimpinanController::class, 'siswa'])->name('siswa');
-    Route::get('/guru', [PimpinanController::class, 'guru'])->name('guru');
-    Route::get('/pembimbing', [PimpinanController::class, 'pembimbing'])->name('pembimbing');
+    Route::get('/siswa', [PimpinanMonitoringController::class, 'siswa'])->name('siswa');
+    Route::get('/guru', [PimpinanMonitoringController::class, 'guru'])->name('guru');
+    Route::get('/pembimbing', [PimpinanMonitoringController::class, 'pembimbing'])->name('pembimbing');
     
-    Route::get('/rekap', [PimpinanController::class, 'rekap'])->name('rekap');
-    Route::get('/rekap/stats', [PimpinanController::class, 'rekapStats'])->name('rekap.stats');
+    Route::get('/rekap', [PimpinanRekapController::class, 'rekap'])->name('rekap');
+    Route::get('/rekap/stats', [PimpinanRekapController::class, 'rekapStats'])->name('rekap.stats');
     
     // Profil Pimpinan
-    Route::get('/profil', [PimpinanController::class, 'profil'])->name('profil');
-    Route::put('/profil/update', [PimpinanController::class, 'updateProfil'])->name('profil.update');
-    Route::put('/profil/password', [PimpinanController::class, 'updatePassword'])->name('profil.password');
+    Route::get('/profil', [PimpinanProfilController::class, 'profil'])->name('profil');
+    Route::put('/profil/update', [PimpinanProfilController::class, 'updateProfil'])->name('profil.update');
+    Route::put('/profil/password', [PimpinanProfilController::class, 'updatePassword'])->name('profil.password');
 });

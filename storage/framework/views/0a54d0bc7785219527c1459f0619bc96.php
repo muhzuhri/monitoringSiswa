@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>{{ $title }}</title>
+    <title><?php echo e($title); ?></title>
     <style>
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -53,15 +53,6 @@
             border: 1px solid #e2e8f0;
             vertical-align: top;
         }
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 9px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-aktif { background-color: #dcfce7; color: #166534; }
-        .status-selesai { background-color: #f1f5f9; color: #475569; }
         .footer {
             margin-top: 50px;
             text-align: right;
@@ -71,27 +62,26 @@
             width: 200px;
             text-align: center;
         }
-        .page-number:after { content: counter(page); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>{{ $title }}</h2>
-        <p>Program Magang Mahasiswa</p>
+        <h2><?php echo e($title); ?></h2>
+        <p>Monitoring Sistem - Guru Pembimbing Magang</p>
     </div>
 
     <div class="meta">
         <table>
             <tr>
                 <td style="border:none; padding:0;">
-                    Tanggal Cetak: <strong>{{ $date }}</strong><br>
-                    @if($tahun_ajaran)
-                        Tahun Ajaran: <strong>{{ $tahun_ajaran }}</strong>
-                    @else
+                    Tanggal Cetak: <strong><?php echo e($date); ?></strong><br>
+                    <?php if($tahun_ajaran): ?>
+                        Tahun Ajaran: <strong><?php echo e($tahun_ajaran); ?></strong>
+                    <?php else: ?>
                         Tahun Ajaran: <strong>Semua Periode</strong>
-                    @endif
+                    <?php endif; ?>
                 </td>
-                <td style="border:none; padding:0; text-align:right;">Jumlah Data: <strong>{{ count($items) }}</strong></td>
+                <td style="border:none; padding:0; text-align:right;">Total Guru: <strong><?php echo e(count($items)); ?></strong></td>
             </tr>
         </table>
     </div>
@@ -100,44 +90,32 @@
         <thead>
             <tr>
                 <th width="30">No</th>
-                <th width="80">NISN</th>
+                <th width="100">NIP / ID</th>
                 <th>Nama Lengkap</th>
-                <th>Asal Sekolah / Instansi</th>
-                <th>Periode Magang</th>
-                <th width="70">Status</th>
+                <th>Jabatan</th>
+                <th>Unit Kerja / Sekolah</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($items as $index => $s)
+            <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $g): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td align="center">{{ $index + 1 }}</td>
-                    <td>{{ $s->nisn }}</td>
-                    <td style="font-weight: bold;">{{ $s->nama }}</td>
-                    <td>{{ $s->sekolah }}</td>
-                    <td>
-                        @if($s->tgl_mulai_magang && $s->tgl_selesai_magang)
-                            {{ \Carbon\Carbon::parse($s->tgl_mulai_magang)->translatedFormat('M Y') }} - 
-                            {{ \Carbon\Carbon::parse($s->tgl_selesai_magang)->translatedFormat('M Y') }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td align="center">
-                        <span class="status-badge {{ $s->status == 'selesai' ? 'status-selesai' : 'status-aktif' }}">
-                            {{ $s->status ?? 'Aktif' }}
-                        </span>
-                    </td>
+                    <td align="center"><?php echo e($index + 1); ?></td>
+                    <td><?php echo e($g->id_guru); ?></td>
+                    <td style="font-weight: bold;"><?php echo e($g->nama); ?></td>
+                    <td><?php echo e($g->jabatan ?? '-'); ?></td>
+                    <td><?php echo e($g->sekolah); ?></td>
                 </tr>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
     </table>
 
     <div class="footer">
         <div class="signature-box">
-            <p>Palembang, {{ $date }}</p>
+            <p>Palembang, <?php echo e($date); ?></p>
             <p style="margin-bottom: 60px;">Administrator Sistem,</p>
             <p><strong>( ____________________ )</strong></p>
         </div>
     </div>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\monitoringSiswa\resources\views\admin\pdf\rekapGuru.blade.php ENDPATH**/ ?>
