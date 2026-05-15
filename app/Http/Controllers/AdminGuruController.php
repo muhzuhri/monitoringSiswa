@@ -24,7 +24,7 @@ class AdminGuruController extends Controller
     public function kelolaGuru()
     {
         $admin = $this->authorizeAdmin();
-        $guru = Guru::with('siswas.tahunAjaran')->orderBy('nama')->paginate(10);
+        $guru = Guru::where('status', 'aktif')->with('siswas.tahunAjaran')->orderBy('nama')->paginate(10);
         $periods = TahunAjaran::orderBy('tahun_ajaran', 'desc')->get();
 
         return view('admin.kelolaGuru', [
@@ -49,6 +49,7 @@ class AdminGuruController extends Controller
             'no_hp' => ['nullable', 'string', 'max:20'],
         ]);
 
+        $validated['status'] = 'aktif';
         Guru::create($validated);
 
         return redirect()

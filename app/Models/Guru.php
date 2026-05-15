@@ -26,6 +26,8 @@ class Guru extends Authenticatable implements HasRole
         'sekolah',
         'npsn',
         'id_tahun_ajaran',
+        'tanda_pengenal',
+        'status',
     ];
 
     public function tahunAjaran()

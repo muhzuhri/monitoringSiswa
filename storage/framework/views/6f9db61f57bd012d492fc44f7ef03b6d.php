@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <!-- CSS Khusus Halaman Register -->
-    <link href="{{ asset('assets/css/auth/register.css') }}" rel="stylesheet">
+    <link href="<?php echo e(asset('assets/css/auth/register.css')); ?>" rel="stylesheet">
 </head>
 
 <body class="bg-light register-page">
@@ -29,18 +29,18 @@
                     </div>
 
                     <div class="card-body">
-                        @if ($errors->any())
+                        <?php if($errors->any()): ?>
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        <form method="post" action="{{ route('register') }}" enctype="multipart/form-data">
-                            @csrf
+                        <form method="post" action="<?php echo e(route('register')); ?>" enctype="multipart/form-data">
+                            <?php echo csrf_field(); ?>
 
                             <!-- Data Umum -->
                             <div class="mb-3">
@@ -93,9 +93,9 @@
                                 <label class="form-label">Tahun Ajaran</label>
                                 <select name="id_tahun_ajaran" class="form-select" required>
                                     <option value="">-- Pilih Tahun Ajaran --</option>
-                                    @foreach($tahunAjarans as $ta)
-                                        <option value="{{ $ta->id_tahun_ajaran }}">{{ $ta->tahun_ajaran }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $tahunAjarans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($ta->id_tahun_ajaran); ?>"><?php echo e($ta->tahun_ajaran); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
 
@@ -147,9 +147,9 @@
                                      <label class="form-label">Lokasi Magang</label>
                                      <select name="perusahaan" class="form-select" required>
                                          <option value="">-- Pilih Lokasi Magang --</option>
-                                         @foreach($lokasis as $lok)
-                                             <option value="{{ $lok->nama_lokasi }}">{{ $lok->nama_lokasi }}</option>
-                                         @endforeach
+                                         <?php $__currentLoopData = $lokasis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lok): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                             <option value="<?php echo e($lok->nama_lokasi); ?>"><?php echo e($lok->nama_lokasi); ?></option>
+                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                      </select>
                                  </div>
 
@@ -269,7 +269,7 @@
 
 
                              <div class="d-flex justify-content-between mt-3">
-                                 <a href="{{ route('login') }}" class="btn btn-link px-0">Sudah punya akun? Login</a>
+                                 <a href="<?php echo e(route('login')); ?>" class="btn btn-link px-0">Sudah punya akun? Login</a>
                                  <button type="submit" class="btn btn-primary px-4" id="btn-daftar">Daftar</button>
                              </div>
 
@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('assets/js/register.js') }}"></script>
+    <script src="<?php echo e(asset('assets/js/register.js')); ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButtons = document.querySelectorAll('.toggle-password');
@@ -349,4 +349,4 @@
     </script>
 </body>
 
-</html>
+</html><?php /**PATH C:\laragon\www\monitoringSiswa\resources\views/auth/register.blade.php ENDPATH**/ ?>

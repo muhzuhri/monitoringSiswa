@@ -1,0 +1,2 @@
+nisn,nama,email,no_hp,email_verified_at,password,remember_token,kelas,jurusan,sekolah,npsn,surat_balasan,tipe_magang,nisn_ketua,perusahaan,id_tahun_ajaran,jenis_kelamin,tgl_mulai_magang,tgl_selesai_magang,id_guru,id_pembimbing,status,foto_profil,created_at,updated_at
+id_guru,nama,email,id_tahun_ajaran,no_hp,email_verified_at,password,remember_token,jabatan,sekolah,npsn,created_at,updated_at

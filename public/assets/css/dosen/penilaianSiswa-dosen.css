@@ -130,7 +130,7 @@
 }
 
 .ui-alert-success {
-    background-color: var(--success-bg);
+    background-color: var(--card-bg);
     color: var(--success-text);
     border: 1px solid rgba(16, 185, 129, 0.2);
 }

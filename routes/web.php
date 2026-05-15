@@ -159,6 +159,13 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/admin/admin', [AuthController::class, 'admin'])->name('admin.admin');
+    
+    // Verifikasi Registrasi Siswa & Guru
+    Route::get('/admin/verifikasi-registrasi', [App\Http\Controllers\AdminVerifikasiController::class, 'index'])->name('admin.verifikasiRegistrasi');
+    Route::post('/admin/verifikasi-siswa/{nisn}', [App\Http\Controllers\AdminVerifikasiController::class, 'verifikasiSiswa'])->name('admin.verifikasiSiswa');
+    Route::post('/admin/verifikasi-guru/{id_guru}', [App\Http\Controllers\AdminVerifikasiController::class, 'verifikasiGuru'])->name('admin.verifikasiGuru');
+    Route::post('/admin/verifikasi-semua-siswa', [App\Http\Controllers\AdminVerifikasiController::class, 'verifikasiSemuaSiswa'])->name('admin.verifikasiSemuaSiswa');
+    Route::post('/admin/verifikasi-semua-guru', [App\Http\Controllers\AdminVerifikasiController::class, 'verifikasiSemuaGuru'])->name('admin.verifikasiSemuaGuru');
 
     Route::get('/admin/pembimbing', [AdminPembimbingController::class, 'kelolaPembimbing'])->name('admin.kelolaPembimbing');
     Route::post('/admin/pembimbing', [AdminPembimbingController::class, 'store'])->name('admin.storePembimbing');

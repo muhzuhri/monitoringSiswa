@@ -277,9 +277,12 @@ class SiswaLaporanController extends SiswaBaseController
         /** @var \App\Models\Siswa $user */
         $user = Auth::user();
         
-        // Status 'selesai' otomatis di model Siswa jika tgl_selesai sudah lewat
-        if ($user->status !== 'selesai') {
-            return back()->with('info', 'Sertifikat akan tersedia setelah masa magang Anda berakhir.');
+        // Sertifikat hanya tersedia jika status 'selesai' DAN sudah ada penilaian dari Guru & Pembimbing
+        $hasGuruPenilaian = $user->penilaians()->where('pemberi_nilai', 'Guru Pembimbing')->exists();
+        $hasPembimbingPenilaian = $user->penilaians()->where('pemberi_nilai', 'Dosen Pembimbing')->exists();
+
+        if ($user->status !== 'selesai' || !$hasGuruPenilaian || !$hasPembimbingPenilaian) {
+            return back()->with('info', 'Sertifikat akan tersedia setelah Anda menyelesaikan magang dan mendapatkan penilaian lengkap dari Guru Pembimbing dan Pembimbing Lapangan.');
         }
 
         $user->load(['pembimbing', 'tahunAjaran']);

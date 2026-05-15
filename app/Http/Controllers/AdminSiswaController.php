@@ -57,7 +57,7 @@ class AdminSiswaController extends Controller
         // Filter Hanya Siswa Aktif
         $query->where(function($q) {
             $q->where(function($sq) {
-                $sq->where('status', '!=', 'selesai')
+                $sq->where('status', 'aktif')
                    ->orWhereNull('status');
             })->where(function($subQ) {
                 $subQ->where('tgl_selesai_magang', '>=', now())
@@ -321,6 +321,7 @@ class AdminSiswaController extends Controller
             $validated['surat_balasan'] = $path;
         }
 
+        $validated['status'] = 'aktif';
         Siswa::create($validated);
 
         return redirect()

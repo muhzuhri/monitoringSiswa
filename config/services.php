@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'wa' => [
+        'url' => env('WA_API_URL', 'https://api.fonnte.com/send'),
+        'key' => env('WA_API_KEY'),
+    ],
+
 ];

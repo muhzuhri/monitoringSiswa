@@ -29,17 +29,22 @@ class SendWhatsAppNotification implements ShouldQueue
      */
     public function handle(): void
     {
-        $url = env('WA_API_URL', 'https://api.fonnte.com/send');
-        $token = env('WA_API_KEY', 'TOKEN_ANDA_DISINI');
+        $url = config('services.wa.url');
+        $token = config('services.wa.key');
+
+        // Format nomor HP ke format internasional (62...)
+        $phone = preg_replace('/\D/', '', $this->phone);
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        }
 
         try {
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Authorization' => $token,
             ])->post($url, [
-                'target' => $this->phone,
+                'target' => $phone,
                 'message' => $this->message,
                 'delay' => '2',
-                'countryCode' => '62',
             ]);
             
             // Selalu log respon untuk debugging pengiriman

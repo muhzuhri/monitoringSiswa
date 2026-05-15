@@ -1,13 +1,13 @@
-@extends('layouts.nav.siswa')
 
-@section('title', 'Laporan & Penilaian - SIM Magang')
-@section('body-class', 'laporan-page')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/siswa/laporan-siswa.css') }}?v={{ time() }}">
-@endpush
+<?php $__env->startSection('title', 'Laporan & Penilaian - SIM Magang'); ?>
+<?php $__env->startSection('body-class', 'laporan-page'); ?>
 
-@section('body')
+<?php $__env->startPush('styles'); ?>
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/siswa/laporan-siswa.css')); ?>?v=<?php echo e(time()); ?>">
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('body'); ?>
     <div class="page-wrapper">
         <div class="page-header">
             <div>
@@ -16,19 +16,19 @@
             </div>
         </div>
 
-        @if(session('success'))
+        <?php if(session('success')): ?>
             <div class="ui-alert ui-alert-success">
                 <i class="fas fa-check-circle"></i>
-                <span>{{ session('success') }}</span>
+                <span><?php echo e(session('success')); ?></span>
             </div>
-        @endif
+        <?php endif; ?>
 
-        @if(session('info'))
+        <?php if(session('info')): ?>
             <div class="ui-alert ui-alert-info">
                 <i class="fas fa-info-circle"></i>
-                <span>{{ session('info') }}</span>
+                <span><?php echo e(session('info')); ?></span>
             </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Custom Tabs Navigation -->
         <div class="tabs-wrapper">
@@ -62,50 +62,50 @@
                     <div class="ui-card">
                         <h5 class="page-title mb-1-5">Pengumpulan Laporan Akhir Magang</h5>
 
-                        @if($laporanAkhir)
+                        <?php if($laporanAkhir): ?>
                             <div class="file-status-bar">
                                 <div
-                                    class="status-icon {{ $laporanAkhir->status == 'approved' ? 'status-approved' : ($laporanAkhir->status == 'rejected' ? 'status-rejected' : 'status-pending') }}">
+                                    class="status-icon <?php echo e($laporanAkhir->status == 'approved' ? 'status-approved' : ($laporanAkhir->status == 'rejected' ? 'status-rejected' : 'status-pending')); ?>">
                                     <i
-                                        class="fas {{ $laporanAkhir->status == 'approved' ? 'fa-check' : ($laporanAkhir->status == 'rejected' ? 'fa-times' : 'fa-clock') }}"></i>
+                                        class="fas <?php echo e($laporanAkhir->status == 'approved' ? 'fa-check' : ($laporanAkhir->status == 'rejected' ? 'fa-times' : 'fa-clock')); ?>"></i>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="m-0 fw-700">File: {{ basename($laporanAkhir->file) }}</h6>
+                                    <h6 class="m-0 fw-700">File: <?php echo e(basename($laporanAkhir->file)); ?></h6>
                                     <small class="page-subtitle">Status: <span
-                                            class="text-capitalize fw-700">{{ $laporanAkhir->status }}</span></small>
+                                            class="text-capitalize fw-700"><?php echo e($laporanAkhir->status); ?></span></small>
                                 </div>
-                                <a href="javascript:void(0)" data-url="{{ route('siswa.laporan.downloadAkhir') }}" class="tab-button btn-preview-pdf btn-preview-inline">
+                                <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.laporan.downloadAkhir')); ?>" class="tab-button btn-preview-pdf btn-preview-inline">
                                     Lihat File
                                 </a>
                             </div>
 
-                            @if($laporanAkhir->catatan)
-                                <div class="ui-alert {{ $laporanAkhir->status == 'rejected' ? 'ui-alert-danger' : 'ui-alert-info' }} alert-compact">
+                            <?php if($laporanAkhir->catatan): ?>
+                                <div class="ui-alert <?php echo e($laporanAkhir->status == 'rejected' ? 'ui-alert-danger' : 'ui-alert-info'); ?> alert-compact">
                                     <div>
                                         <h6 class="m-0 mb-4 fs-0-8 fw-700">Catatan Pembimbing:</h6>
-                                        <p class="m-0 fs-0-85">{{ $laporanAkhir->catatan }}</p>
+                                        <p class="m-0 fs-0-85"><?php echo e($laporanAkhir->catatan); ?></p>
                                     </div>
                                 </div>
-                            @endif
+                            <?php endif; ?>
 
-                            @if($laporanAkhir->status != 'approved')
+                            <?php if($laporanAkhir->status != 'approved'): ?>
                                 <div class="text-center mb-1-5">
                                     <p class="page-subtitle fs-0-85">Ingin mengganti file? Silakan upload
                                         kembali di bawah ini.</p>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="ui-alert ui-alert-success flex-col text-center p-5">
                                     <i class="fas fa-award fa-3x mb-1"></i>
                                     <h5 class="fw-800 mb-1">Laporan Sudah Disetujui!</h5>
                                     <p class="m-0 fs-0-9 opacity-75">Selamat! Laporan akhir magang Anda telah
                                         diverifikasi oleh pembimbing.</p>
                                 </div>
-                            @endif
-                        @endif
+                            <?php endif; ?>
+                        <?php endif; ?>
 
-                        @if(!$laporanAkhir || $laporanAkhir->status != 'approved')
-                            <form action="{{ route('siswa.laporan.upload') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
+                        <?php if(!$laporanAkhir || $laporanAkhir->status != 'approved'): ?>
+                            <form action="<?php echo e(route('siswa.laporan.upload')); ?>" method="POST" enctype="multipart/form-data">
+                                <?php echo csrf_field(); ?>
                                 <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
                                     <i class="fas fa-cloud-upload-alt"></i>
                                     <h6>Klik untuk pilih file laporan</h6>
@@ -117,7 +117,7 @@
                                     <i class="fas fa-upload mr-2"></i> Upload Laporan Sekarang
                                 </button>
                             </form>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -130,19 +130,19 @@
                         <h5 class="page-title mb-1-5">Rekap Absensi (Keseluruhan)</h5>
                         <div class="rekap-grid">
                             <div class="rekap-box rekap-hadir">
-                                <span class="rekap-value">{{ $rekapAbsensi['hadir'] }}</span>
+                                <span class="rekap-value"><?php echo e($rekapAbsensi['hadir']); ?></span>
                                 <span class="rekap-label">Hadir</span>
                             </div>
                             <div class="rekap-box rekap-izin">
-                                <span class="rekap-value">{{ $rekapAbsensi['izin'] }}</span>
+                                <span class="rekap-value"><?php echo e($rekapAbsensi['izin']); ?></span>
                                 <span class="rekap-label">Izin</span>
                             </div>
                             <div class="rekap-box rekap-sakit">
-                                <span class="rekap-value">{{ $rekapAbsensi['sakit'] }}</span>
+                                <span class="rekap-value"><?php echo e($rekapAbsensi['sakit']); ?></span>
                                 <span class="rekap-label">Sakit</span>
                             </div>
                             <div class="rekap-box rekap-alpa">
-                                <span class="rekap-value">{{ $rekapAbsensi['alpa'] }}</span>
+                                <span class="rekap-value"><?php echo e($rekapAbsensi['alpa']); ?></span>
                                 <span class="rekap-label">Alpa</span>
                             </div>
                         </div>
@@ -152,7 +152,7 @@
                     <div class="ui-card">
                         <h5 class="page-title mb-1-5">Lihat & Cetak Laporan Kegiatan</h5>
                         <div class="d-flex flex-col gap-1-5">
-                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.jurnal') }}" class="btn-download-premium btn-preview-pdf mb-1">
+                            <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.rekap.jurnal')); ?>" class="btn-download-premium btn-preview-pdf mb-1">
                                 <div class="icon-box-white">
                                     <i class="fas fa-book"></i>
                                 </div>
@@ -162,7 +162,7 @@
                                 </div>
                             </a>
 
-                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.individu') }}" class="btn-download-premium btn-preview-pdf mb-1">
+                            <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.rekap.individu')); ?>" class="btn-download-premium btn-preview-pdf mb-1">
                                 <div class="icon-box-white">
                                     <i class="fas fa-user-check"></i>
                                 </div>
@@ -172,7 +172,7 @@
                                 </div>
                             </a>
 
-                            <a href="javascript:void(0)" data-url="{{ route('siswa.rekap.kelompok') }}" class="btn-download-premium btn-preview-pdf">
+                            <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.rekap.kelompok')); ?>" class="btn-download-premium btn-preview-pdf">
                                 <div class="icon-box-white">
                                     <i class="fas fa-users"></i>
                                 </div>
@@ -192,12 +192,12 @@
                     <div class="ui-card">
                         <h5 class="page-title mb-1-5">Rekap Penilaian Siswa</h5>
                         
-                        @php
+                        <?php
                             $hasGuruPenilaian = $penilaians->contains('pemberi_nilai', 'Guru Pembimbing');
                             $hasPembimbingPenilaian = $penilaians->contains('pemberi_nilai', 'Dosen Pembimbing');
-                        @endphp
+                        ?>
 
-                        @if($user->status == 'selesai' && $hasGuruPenilaian && $hasPembimbingPenilaian)
+                        <?php if($user->status == 'selesai' && $hasGuruPenilaian && $hasPembimbingPenilaian): ?>
                             <div class="ui-alert ui-alert-success mb-4 alert-premium">
                                 <div class="d-flex align-center gap-1-5">
                                     <div class="icon-box-primary">
@@ -207,53 +207,54 @@
                                         <h5 class="m-0 fw-800">Selamat, Magang Telah Selesai!</h5>
                                         <p class="m-0 opacity-75">Kamu telah menyelesaikan seluruh rangkaian kegiatan magang. Silakan unduh sertifikat kamu di bawah ini.</p>
                                     </div>
-                                    <a href="javascript:void(0)" data-url="{{ route('siswa.sertifikat.cetak') }}" class="btn-unduh-sm btn-preview-pdf text-white bg-primary p-3">
+                                    <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.sertifikat.cetak')); ?>" class="btn-unduh-sm btn-preview-pdf text-white bg-primary p-3">
                                         <i class="fas fa-award"></i>
                                         <span>Cetak Sertifikat</span>
                                     </a>
 
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <p class="page-subtitle mb-4">Berikut adalah daftar penilaian yang telah diberikan oleh Pembimbing Lapangan dan Guru Pembimbing.</p>
 
 
                         <div class="assessment-list">
-                            @forelse($penilaians as $penilaian)
+                            <?php $__empty_1 = true; $__currentLoopData = $penilaians; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $penilaian): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="assessment-item">
                                     <div class="assessment-info">
                                         <div class="assessment-icon">
                                             <i class="fas fa-file-invoice"></i>
                                         </div>
                                         <div class="assessment-details">
-                                            <h6>{{ $penilaian->kategori }}</h6>
-                                            <p>{{ \Carbon\Carbon::parse($penilaian->created_at)->translatedFormat('d F Y') }}</p>
+                                            <h6><?php echo e($penilaian->kategori); ?></h6>
+                                            <p><?php echo e(\Carbon\Carbon::parse($penilaian->created_at)->translatedFormat('d F Y')); ?></p>
                                         </div>
                                     </div>
 
                                     <div class="assessment-meta">
                                         <div class="meta-item">
                                             <span class="meta-label">Pemberi Nilai</span>
-                                            <span class="badge {{ $penilaian->pemberi_nilai == 'Dosen Pembimbing' ? 'bg-purple-light text-purple' : 'bg-purple-light text-purple' }} badge-meta">
-                                                {{ $penilaian->pemberi_nilai }}
+                                            <span class="badge <?php echo e($penilaian->pemberi_nilai == 'Dosen Pembimbing' ? 'bg-purple-light text-purple' : 'bg-purple-light text-purple'); ?> badge-meta">
+                                                <?php echo e($penilaian->pemberi_nilai); ?>
+
                                             </span>
                                         </div>
                                         <div class="meta-item">
                                             <span class="meta-label">Rata-rata</span>
-                                            <span class="meta-value h5 mb-0 text-primary">{{ number_format($penilaian->rata_rata, 1) }}</span>
+                                            <span class="meta-value h5 mb-0 text-primary"><?php echo e(number_format($penilaian->rata_rata, 1)); ?></span>
                                         </div>
                                     </div>
 
                                     <div class="assessment-action">
-                                        <a href="javascript:void(0)" data-url="{{ route('siswa.penilaian.cetak', ['id_penilaian' => $penilaian->id_penilaian]) }}" 
+                                        <a href="javascript:void(0)" data-url="<?php echo e(route('siswa.penilaian.cetak', ['id_penilaian' => $penilaian->id_penilaian])); ?>" 
                                            class="btn-unduh-sm btn-preview-pdf">
                                             <i class="fas fa-eye"></i>
                                             <span>Lihat PDF</span>
                                         </a>
                                     </div>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-5">
                                     <div class="opacity-50 mb-3">
                                         <i class="fas fa-inbox fa-3x text-primary"></i>
@@ -261,16 +262,16 @@
                                     <h6 class="text-muted">Belum ada hasil penilaian yang tersedia.</h6>
                                     <p class="page-subtitle">Penilaian akan muncul di sini setelah divalidasi pembimbing.</p>
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <!--  Preview PDF -->
     <div class="modal fade preview-pdf-modal" id="previewPdfModal" tabindex="-1" aria-labelledby="previewPdfModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-pdf-viewer">
@@ -301,7 +302,7 @@
                     <div id="pdfCanvasContainer">
                         <div id="pdfLoadingIndicator">
                             <div class="loader-logo-container">
-                                <img src="{{ asset('images/unsri-pride.png') }}" alt="UNSRI">
+                                <img src="<?php echo e(asset('images/unsri-pride.png')); ?>" alt="UNSRI">
                             </div>
                             
                         </div>
@@ -317,5 +318,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="{{ asset('assets/js/siswa/laporan-siswa.js') }}?v={{ time() }}"></script>
-@endpush
+    <script src="<?php echo e(asset('assets/js/siswa/laporan-siswa.js')); ?>?v=<?php echo e(time()); ?>"></script>
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.nav.siswa', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\monitoringSiswa\resources\views/siswa/laporan.blade.php ENDPATH**/ ?>

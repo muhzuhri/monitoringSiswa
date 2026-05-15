@@ -38,6 +38,7 @@ class Siswa extends Authenticatable implements HasRole
         'id_tahun_ajaran',
         'tgl_mulai_magang',
         'tgl_selesai_magang',
+        'tanda_pengenal',
     ];
 
     public function ketua()
@@ -92,7 +93,7 @@ class Siswa extends Authenticatable implements HasRole
 
     public function getStatusAttribute($value)
     {
-        if ($this->tgl_selesai_magang && \Carbon\Carbon::now()->greaterThan($this->tgl_selesai_magang)) {
+        if ($value === 'aktif' && $this->tgl_selesai_magang && \Carbon\Carbon::now()->greaterThan($this->tgl_selesai_magang)) {
             return 'selesai';
         }
         return $value;

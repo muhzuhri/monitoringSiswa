@@ -68,6 +68,7 @@ class AuthController extends Controller
             'jabatan' => ['nullable', 'string', 'max:100'],
             'sekolah_guru' => ['required_if:role,guru', 'nullable', 'string', 'max:150'],
             'npsn_guru' => ['required_if:role,guru', 'nullable', 'string', 'exists:sekolah,npsn'],
+            'tanda_pengenal' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
         ]);
 
         $role = $validated['role'];
@@ -127,7 +128,10 @@ class AuthController extends Controller
                     : $request->input('nisn_ketua'),
                 'tgl_mulai_magang' => $request->input('tgl_mulai_magang'),
                 'tgl_selesai_magang' => $request->input('tgl_selesai_magang'),
-                'status' => 'aktif',
+                'tanda_pengenal' => $request->hasFile('tanda_pengenal')
+                    ? $request->file('tanda_pengenal')->store('tanda_pengenal', 'public')
+                    : null,
+                'status' => 'pending',
             ])),
             'guru' => Guru::create(array_merge($common, [
                 'id_guru' => $request->input('id_guru'),
@@ -135,22 +139,20 @@ class AuthController extends Controller
                 'sekolah' => \App\Models\Sekolah::where('npsn', $request->input('npsn_guru'))->first()->nama_sekolah,
                 'npsn' => $request->input('npsn_guru'),
                 'id_tahun_ajaran' => $request->input('id_tahun_ajaran'),
+                'tanda_pengenal' => $request->hasFile('tanda_pengenal')
+                    ? $request->file('tanda_pengenal')->store('tanda_pengenal', 'public')
+                    : null,
+                'status' => 'pending',
             ])),
         };
 
-        try {
-            Mail::to($user->email)->send(new AccountCreatedMail(
-                $user->nama,
-                $user->email,
-                $roleLabels[$role]
-            ));
-        } catch (\Throwable $e) {
-            Log::warning('Gagal mengirim email notifikasi registrasi: ' . $e->getMessage(), [
-                'email' => $user->email,
-            ]);
-        }
+        // Mail::to($user->email)->send(new AccountCreatedMail(
+        //     $user->nama,
+        //     $user->email,
+        //     $roleLabels[$role]
+        // ));
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil. Silakan login. Cek email untuk konfirmasi.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil. Akun Anda sedang menunggu verifikasi oleh Admin.');
     }
 
     public function showLoginForm()
@@ -166,8 +168,22 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
             $user = Auth::user();
+            
+            // Check if user is verified (aktif)
+            // Admins, Pimpinan, or Pembimbing might have different status names or no status column
+            // We only check for Siswa and Guru according to request
+            if (method_exists($user, 'getRole')) {
+                $role = $user->getRole();
+                if (in_array($role, ['siswa', 'guru'])) {
+                    if (!in_array($user->status, ['aktif', 'selesai'])) {
+                        Auth::logout();
+                        return back()->withErrors(['email' => 'Akun Anda belum diverifikasi atau dinonaktifkan.']);
+                    }
+                }
+            }
+
+            $request->session()->regenerate();
             $role = $user instanceof HasRole ? $user->getRole() : null;
 
             return match ($role) {

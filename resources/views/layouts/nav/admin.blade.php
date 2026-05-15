@@ -44,6 +44,9 @@
                         <a class="nav-link {{ Route::is('admin.kelolaSiswa') || Route::is('admin.kelolaGuru') || Route::is('admin.kelolaPembimbing') ? 'active' : '' }}" href="{{ route('admin.kelolaSiswa') }}">Kelola Akun</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ Route::is('admin.verifikasiRegistrasi') ? 'active' : '' }}" href="{{ route('admin.verifikasiRegistrasi') }}">Verifikasi</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ Route::is('admin.rekap') ? 'active' : '' }}" href="{{ route('admin.rekap') }}">Rekap</a>
                     </li>
                     <li class="nav-item">
